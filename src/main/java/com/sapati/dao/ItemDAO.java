@@ -31,7 +31,7 @@ public class ItemDAO {
 
     public List<Item> getAllAvailableItems() {
         List<Item> items = new ArrayList<>();
-        String sql = "SELECT * FROM items WHERE status = 'Available'";
+        String sql = "SELECT * FROM items WHERE status = 'Available' OR status = 'Listed'";
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -45,17 +45,31 @@ public class ItemDAO {
         return items;
     }
 
-    public List<Item> searchItems(String query) {
+    public List<Item> searchItems(String query, Integer categoryId) {
         List<Item> items = new ArrayList<>();
-        String sql = "SELECT * FROM items WHERE status = 'Available' AND (name LIKE ? OR description LIKE ?)";
+        StringBuilder sql = new StringBuilder("SELECT * FROM items WHERE (status = 'Available' OR status = 'Listed')");
+        
+        if (query != null && !query.trim().isEmpty()) {
+            sql.append(" AND (name LIKE ? OR description LIKE ?)");
+        }
+        if (categoryId != null && categoryId > 0) {
+            sql.append(" AND category_id = ?");
+        }
+
         try (Connection conn = DBConnection.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+             PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
             
-            String searchPattern = "%" + query + "%";
-            pstmt.setString(1, searchPattern);
-            pstmt.setString(2, searchPattern);
+            int paramIndex = 1;
+            if (query != null && !query.trim().isEmpty()) {
+                String searchPattern = "%" + query + "%";
+                pstmt.setString(paramIndex++, searchPattern);
+                pstmt.setString(paramIndex++, searchPattern);
+            }
+            if (categoryId != null && categoryId > 0) {
+                pstmt.setInt(paramIndex++, categoryId);
+            }
+
             ResultSet rs = pstmt.executeQuery();
-            
             while (rs.next()) {
                 items.add(mapItem(rs));
             }
@@ -83,6 +97,36 @@ public class ItemDAO {
         return items;
     }
 
+    public Item getItemById(int itemId) {
+        String sql = "SELECT * FROM items WHERE item_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, itemId);
+            ResultSet rs = pstmt.executeQuery();
+            if (rs.next()) {
+                return mapItem(rs);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean updateItemStatus(int itemId, String status) {
+        String sql = "UPDATE items SET status = ? WHERE item_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, status);
+            pstmt.setInt(2, itemId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     private Item mapItem(ResultSet rs) throws SQLException {
         Item item = new Item();
         item.setItemId(rs.getInt("item_id"));
@@ -95,5 +139,32 @@ public class ItemDAO {
         item.setStatus(rs.getString("status"));
         item.setCreatedAt(rs.getTimestamp("created_at"));
         return item;
+    }
+
+    public List<Item> getAllItemsAdmin() {
+        List<Item> items = new ArrayList<>();
+        String sql = "SELECT * FROM items ORDER BY created_at DESC";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            while (rs.next()) {
+                items.add(mapItem(rs));
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return items;
+    }
+
+    public int getTotalItemCount() {
+        String sql = "SELECT COUNT(*) FROM items";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) return rs.getInt(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0;
     }
 }

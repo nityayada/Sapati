@@ -5,6 +5,7 @@ import com.sapati.dao.ItemDAO;
 import com.sapati.model.BorrowRequest;
 import com.sapati.model.BorrowRecord;
 import com.sapati.model.User;
+import com.sapati.model.Item;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -14,20 +15,32 @@ import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
 import java.sql.Date;
 import java.time.LocalDate;
+import java.util.List;
 
 @WebServlet("/borrow")
 public class BorrowController extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private BorrowDAO borrowDAO;
+    private ItemDAO itemDAO;
 
     public void init() {
         borrowDAO = new BorrowDAO();
+        itemDAO = new ItemDAO();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String action = request.getParameter("action");
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/user?action=login");
+            return;
+        }
+
         if ("view_requests".equals(action)) {
-            // Forward to a page to view incoming requests
+            List<BorrowRequest> requests = borrowDAO.getRequestsForOwner(user.getUserId());
+            request.setAttribute("incomingRequests", requests);
             request.getRequestDispatcher("/WEB-INF/Pages/manageRequests.jsp").forward(request, response);
         }
     }
@@ -39,6 +52,8 @@ public class BorrowController extends HttpServlet {
             handleBorrowRequest(request, response);
         } else if ("approve".equals(action)) {
             handleApproveRequest(request, response);
+        } else if ("reject".equals(action)) {
+            handleRejectRequest(request, response);
         }
     }
 
@@ -47,12 +62,24 @@ public class BorrowController extends HttpServlet {
         User user = (User) session.getAttribute("user");
 
         if (user == null) {
-            response.sendRedirect(request.getContextPath() + "/WEB-INF/Pages/login.jsp");
+            response.sendRedirect(request.getContextPath() + "/user?action=login");
             return;
         }
 
         int itemId = Integer.parseInt(request.getParameter("item_id"));
         String returnDateStr = request.getParameter("return_date");
+        
+        // Basic validation
+        if (returnDateStr == null || returnDateStr.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/item?action=view&id=" + itemId + "&error=missing_date");
+            return;
+        }
+
+        Item item = itemDAO.getItemById(itemId);
+        if (item != null && item.getOwnerId() == user.getUserId()) {
+            response.sendRedirect(request.getContextPath() + "/item?action=view&id=" + itemId + "&error=own_item");
+            return;
+        }
 
         BorrowRequest req = new BorrowRequest();
         req.setItemId(itemId);
@@ -62,14 +89,13 @@ public class BorrowController extends HttpServlet {
         req.setRequestStatus("Pending");
 
         if (borrowDAO.createBorrowRequest(req)) {
-            response.sendRedirect(request.getContextPath() + "/WEB-INF/Pages/myBorrows.jsp?msg=request_sent");
+            response.sendRedirect(request.getContextPath() + "/item?action=myBorrowings&msg=request_sent");
         } else {
-            response.sendRedirect(request.getContextPath() + "/WEB-INF/Pages/itemDetail.jsp?id=" + itemId + "&error=failed_request");
+            response.sendRedirect(request.getContextPath() + "/item?action=view&id=" + itemId + "&error=failed_request");
         }
     }
 
     private void handleApproveRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        // Approval logic to transition from Request to Record
         int requestId = Integer.parseInt(request.getParameter("request_id"));
         int itemId = Integer.parseInt(request.getParameter("item_id"));
         int requesterId = Integer.parseInt(request.getParameter("requester_id"));
@@ -85,11 +111,20 @@ public class BorrowController extends HttpServlet {
             record.setStatus("Active");
 
             if (borrowDAO.createBorrowRecord(record)) {
-                // Update item status to Borrowed (Need ItemDAO update here or in record trigger)
-                response.sendRedirect(request.getContextPath() + "/WEB-INF/Pages/memberHome.jsp?msg=approved");
+                itemDAO.updateItemStatus(itemId, "Borrowed");
+                response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&msg=approved");
             } else {
-                response.sendRedirect(request.getContextPath() + "/WEB-INF/Pages/memberHome.jsp?error=record_creation_failed");
+                response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=record_failed");
             }
+        }
+    }
+
+    private void handleRejectRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int requestId = Integer.parseInt(request.getParameter("request_id"));
+        if (borrowDAO.updateRequestStatus(requestId, "Rejected")) {
+            response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&msg=rejected");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=update_failed");
         }
     }
 }

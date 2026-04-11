@@ -5,6 +5,7 @@ import jakarta.servlet.annotation.WebFilter;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
+import com.sapati.model.User;
 import java.io.IOException;
 
 @WebFilter("/*")
@@ -34,6 +35,14 @@ public class AuthFilter implements Filter {
         boolean isLoggedIn = (session != null && session.getAttribute("user") != null);
 
         if (isLoggedIn || isPublicPath) {
+            // Role-based security for /admin
+            if (path.startsWith("/admin")) {
+                User user = (User) session.getAttribute("user");
+                if (user == null || !"Admin".equals(user.getRole())) {
+                    httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: Administrative Authority Required");
+                    return;
+                }
+            }
             chain.doFilter(request, response);
         } else {
             // Forward (instead of redirect) because WEB-INF is private

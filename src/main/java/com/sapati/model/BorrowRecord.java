@@ -11,8 +11,16 @@ public class BorrowRecord {
     private Date dueDate;
     private Date returnDate;
     private String status; // 'Active', 'Overdue', 'Returned'
+    private String itemName; // Added for convenience in views
+    private String ownerName; // Added for convenience in views
 
     public BorrowRecord() {}
+
+    public String getItemName() { return itemName; }
+    public void setItemName(String itemName) { this.itemName = itemName; }
+
+    public String getOwnerName() { return ownerName; }
+    public void setOwnerName(String ownerName) { this.ownerName = ownerName; }
 
     public int getRecordId() { return recordId; }
     public void setRecordId(int recordId) { this.recordId = recordId; }

@@ -64,4 +64,16 @@ public class FineDAO {
         }
         return false;
     }
+
+    public double getTotalUnpaidFines() {
+        String sql = "SELECT SUM(amount) FROM fines WHERE payment_status = 'Unpaid'";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            if (rs.next()) return rs.getDouble(1);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return 0.0;
+    }
 }

@@ -1,41 +1,48 @@
 package com.sapati.controllers;
 
+import com.sapati.dao.UserDAO;
+import com.sapati.dao.ItemDAO;
+import com.sapati.model.User;
+import com.sapati.model.Item;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.List;
 
-/**
- * Servlet implementation class AdminController
- */
-@WebServlet("/AdminController")
+@WebServlet("/admin")
 public class AdminController extends HttpServlet {
-	private static final long serialVersionUID = 1L;
-       
-    /**
-     * @see HttpServlet#HttpServlet()
-     */
-    public AdminController() {
-        super();
-        // TODO Auto-generated constructor stub
+    private static final long serialVersionUID = 1L;
+    private UserDAO userDAO;
+    private ItemDAO itemDAO;
+
+    public void init() {
+        userDAO = new UserDAO();
+        itemDAO = new ItemDAO();
     }
 
-	/**
-	 * @see HttpServlet#doGet(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		response.getWriter().append("Served at: ").append(request.getContextPath());
-	}
+    protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+        
+        if ("manage_items".equals(action)) {
+            List<Item> items = itemDAO.getAllAvailableItems();
+            request.setAttribute("items", items);
+            request.getRequestDispatcher("/WEB-INF/Pages/manageItems.jsp").forward(request, response);
+        } else {
+            // Default to dashboard
+            request.getRequestDispatcher("/WEB-INF/Pages/adminDashboard.jsp").forward(request, response);
+        }
+    }
 
-	/**
-	 * @see HttpServlet#doPost(HttpServletRequest request, HttpServletResponse response)
-	 */
-	protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-		// TODO Auto-generated method stub
-		doGet(request, response);
-	}
-
+    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String action = request.getParameter("action");
+        
+        if ("approve_item".equals(action)) {
+            int itemId = Integer.parseInt(request.getParameter("item_id"));
+            // itemDAO.updateStatus(itemId, "Available"); // Need to implement this DAO method
+            response.sendRedirect(request.getContextPath() + "/admin?action=manage_items");
+        }
+    }
 }

@@ -13,11 +13,15 @@ public class BorrowRecord {
     private String status; // 'Active', 'Overdue', 'Returned'
     private String itemName; // Added for convenience in views
     private String ownerName; // Added for convenience in views
+    private String borrowerName; // Added for convenience in views
 
     public BorrowRecord() {}
 
     public String getItemName() { return itemName; }
     public void setItemName(String itemName) { this.itemName = itemName; }
+
+    public String getBorrowerName() { return borrowerName; }
+    public void setBorrowerName(String borrowerName) { this.borrowerName = borrowerName; }
 
     public String getOwnerName() { return ownerName; }
     public void setOwnerName(String ownerName) { this.ownerName = ownerName; }

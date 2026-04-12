@@ -94,7 +94,7 @@
                                 <span class="material-symbols-outlined" style="font-size: 1.25rem; color: var(--error);">warning</span>
                                 <div>
                                     <div style="font-weight: 800; font-size: 0.75rem; text-transform: uppercase;">Late Fee</div>
-                                    <div style="font-size: 0.875rem; color: var(--on-surface-variant);">NPR 100/day fine applies if not returned by due date.</div>
+                                    <div style="font-size: 0.875rem; color: var(--on-surface-variant);">NPR 50/day fine applies if not returned by due date.</div>
                                 </div>
                             </li>
                             <li>

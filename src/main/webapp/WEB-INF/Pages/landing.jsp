@@ -29,7 +29,7 @@
                     Borrow from your community. <span>Return with trust.</span>
                 </h1>
                 <p>
-                    Free borrowing within your neighborhood ledger. <span class="price-accent">NPR 100/day</span> late fine applies to ensure fairness for everyone.
+                    Free borrowing within your neighborhood ledger. <span class="price-accent">NPR 50/day</span> late fine applies to ensure fairness for everyone.
                 </p>
                 <div class="hero-actions">
                     <a href="${pageContext.request.contextPath}/user?action=register" class="btn btn-primary">Register Free</a>

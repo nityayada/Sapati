@@ -10,8 +10,16 @@ public class Fine {
     private String paymentStatus; // 'Unpaid', 'Paid'
     private Timestamp createdAt;
     private Timestamp paidAt;
+    private String memberName;
+    private String itemName;
 
     public Fine() {}
+
+    public String getMemberName() { return memberName; }
+    public void setMemberName(String memberName) { this.memberName = memberName; }
+
+    public String getItemName() { return itemName; }
+    public void setItemName(String itemName) { this.itemName = itemName; }
 
     public int getFineId() { return fineId; }
     public void setFineId(int fineId) { this.fineId = fineId; }

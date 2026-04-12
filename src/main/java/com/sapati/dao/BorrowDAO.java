@@ -162,6 +162,40 @@ public class BorrowDAO {
         return 0;
     }
 
+    public List<BorrowRecord> getAllBorrowRecordsAdmin() {
+        List<BorrowRecord> records = new ArrayList<>();
+        String sql = "SELECT br.*, i.name as item_name, u_owner.full_name as owner_name, u_borrower.full_name as borrower_name " +
+                     "FROM borrow_records br " +
+                     "JOIN items i ON br.item_id = i.item_id " +
+                     "JOIN users u_owner ON i.owner_id = u_owner.user_id " +
+                     "JOIN users u_borrower ON br.borrower_id = u_borrower.user_id " +
+                     "ORDER BY br.borrow_date DESC";
+                     
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            
+            while (rs.next()) {
+                BorrowRecord record = new BorrowRecord();
+                record.setRecordId(rs.getInt("record_id"));
+                record.setItemId(rs.getInt("item_id"));
+                record.setBorrowerId(rs.getInt("borrower_id"));
+                record.setRequestId(rs.getInt("request_id"));
+                record.setBorrowDate(rs.getDate("borrow_date"));
+                record.setDueDate(rs.getDate("due_date"));
+                record.setReturnDate(rs.getDate("return_date"));
+                record.setStatus(rs.getString("status"));
+                record.setItemName(rs.getString("item_name"));
+                record.setOwnerName(rs.getString("owner_name"));
+                record.setBorrowerName(rs.getString("borrower_name"));
+                records.add(record);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return records;
+    }
+
     public int getActiveBorrowCount() {
         String sql = "SELECT COUNT(*) FROM borrow_records WHERE status = 'Active' OR status = 'Overdue'";
         try (Connection conn = DBConnection.getConnection();
@@ -172,5 +206,20 @@ public class BorrowDAO {
             e.printStackTrace();
         }
         return 0;
+    }
+
+    public boolean updateRecordStatus(int recordId, String status) {
+        String sql = "UPDATE borrow_records SET status = ? WHERE record_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, status);
+            pstmt.setInt(2, recordId);
+            
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 }

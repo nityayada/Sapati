@@ -76,4 +76,74 @@ public class FineDAO {
         }
         return 0.0;
     }
+
+    public List<Fine> getAllFinesWithDetails() {
+        List<Fine> fines = new ArrayList<>();
+        String sql = "SELECT f.*, u.full_name as member_name, i.name as item_name " +
+                     "FROM fines f " +
+                     "JOIN borrow_records br ON f.record_id = br.record_id " +
+                     "JOIN users u ON br.borrower_id = u.user_id " +
+                     "JOIN items i ON br.item_id = i.item_id " +
+                     "ORDER BY f.created_at DESC";
+        try (Connection conn = DBConnection.getConnection();
+             Statement stmt = conn.createStatement();
+             ResultSet rs = stmt.executeQuery(sql)) {
+            
+            while (rs.next()) {
+                Fine fine = new Fine();
+                fine.setFineId(rs.getInt("fine_id"));
+                fine.setRecordId(rs.getInt("record_id"));
+                fine.setDaysLate(rs.getInt("days_late"));
+                fine.setAmount(rs.getDouble("amount"));
+                fine.setPaymentStatus(rs.getString("payment_status"));
+                fine.setCreatedAt(rs.getTimestamp("created_at"));
+                fine.setPaidAt(rs.getTimestamp("paid_at"));
+                fine.setMemberName(rs.getString("member_name"));
+                fine.setItemName(rs.getString("item_name"));
+                fines.add(fine);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return fines;
+    }
+
+    public Fine getFineByRecordId(int recordId) {
+        String sql = "SELECT * FROM fines WHERE record_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, recordId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                Fine fine = new Fine();
+                fine.setFineId(rs.getInt("fine_id"));
+                fine.setRecordId(rs.getInt("record_id"));
+                fine.setDaysLate(rs.getInt("days_late"));
+                fine.setAmount(rs.getDouble("amount"));
+                fine.setPaymentStatus(rs.getString("payment_status"));
+                fine.setCreatedAt(rs.getTimestamp("created_at"));
+                fine.setPaidAt(rs.getTimestamp("paid_at"));
+                return fine;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public boolean updateFineAmount(int fineId, int daysLate, double amount) {
+        String sql = "UPDATE fines SET days_late = ?, amount = ? WHERE fine_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, daysLate);
+            pstmt.setDouble(2, amount);
+            pstmt.setInt(3, fineId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
 }

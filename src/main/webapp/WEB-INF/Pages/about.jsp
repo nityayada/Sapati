@@ -67,7 +67,7 @@
         <section class="cta-section" style="margin-top: 4rem;">
             <div class="hero-card" style="border-style: solid; border-width: 1px;">
                 <h2 class="mb-4">Ready to start sharing?</h2>
-                <p class="mb-8">Join hundreds of neighbors already participating in the Sapati trust network.</p>
+                <p class="mb-8" style="margin: 10px;">Join hundreds of neighbors already participating in the Sapati trust network.</p>
                 <div class="hero-actions">
                     <a href="${pageContext.request.contextPath}/user?action=register" class="btn btn-primary">Create Your Account</a>
                     <a href="${pageContext.request.contextPath}/contact" class="btn btn-secondary">Talk to Us</a>

@@ -34,7 +34,7 @@
                 
                 <div class="branding-notice">
                     <h4>Security Protocol</h4>
-                    <p>Registration requires a valid address to ensure neighborhood-specific ledger integrity and accountability.</p>
+                    <p>Registration requires a valid address to ensure neighborhood specific ledger integrity and accountability.</p>
                 </div>
             </div>
 
@@ -42,7 +42,7 @@
             <div class="split-form">
                 <div class="mb-8">
                     <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--primary);">Create Account</h2>
-                    <p style="font-size: 0.875rem; color: var(--outline); margin-top: 0.5rem;">
+                    <p style="font-size: 0.875rem; color: var(--outline); margin-top: 0.5rem;margin-bottom:0.7rem">
                         Already a member? <a href="${pageContext.request.contextPath}/user?action=login" style="color: var(--primary); font-weight: 800; text-decoration: underline;">Login Here</a>
                     </p>
                 </div>
@@ -87,14 +87,14 @@
                     <div class="mt-8 pt-8" style="border-top: 1px dashed var(--outline-variant);">
                         <label style="display: flex; gap: 1rem; cursor: pointer;">
                             <input type="checkbox" required style="margin-top: 0.25rem;">
-                            <span style="font-size: 0.75rem; line-height: 1.6; color: var(--outline);">
-                                I agree to the <strong style="color: var(--primary);">Terms of Service</strong> and acknowledge the community late fine policy of NPR 100/day. I understand trust is our foundation.
+                            <span style="font-size: 0.75rem; line-height: 1.6; color: var(--outline);margin-top:0.5rem">
+                                I agree to the <strong style="color: var(--primary);">Terms of Service</strong> and acknowledge the community late fine policy of NPR 50/day. I understand trust is our foundation.
                             </span>
                         </label>
                     </div>
 
                     <div class="mt-8">
-                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1.25rem; font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;">
+                        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1.25rem; font-size: 0.75rem; letter-spacing: 0.2em; text-transform: uppercase;margin-top:0.5rem">
                             Initiate Registration
                             <span class="material-symbols-outlined" style="font-size: 1rem; vertical-align: middle; margin-left: 1rem;">arrow_forward</span>
                         </button>

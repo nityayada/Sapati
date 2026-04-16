@@ -59,7 +59,6 @@
 <div class="text-lg font-black uppercase tracking-tighter text-black">Sapati.com</div>
 <nav class="hidden md:flex space-x-6">
 </nav>
-
 <div class="flex items-center gap-4">
     <% if (sessionUser != null) { %>
         <span class="font-bold text-xs"><%= sessionUser.getFullName() %></span>

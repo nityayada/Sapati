@@ -11,48 +11,9 @@
 <meta charset="utf-8">
 <meta content="width=device-width, initial-scale=1.0" name="viewport">
 <title>Admin Dashboard | Sapati.com</title>
-<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&display=swap" rel="stylesheet">
-<script id="tailwind-config">
-    tailwind.config = {
-        darkMode: "class",
-        theme: {
-            extend: {
-                "colors": {
-                    "primary": "#000000",
-                    "on-primary": "#ffffff",
-                    "primary-container": "#343b4c",
-                    "on-primary-container": "#ffffff",
-                    "surface": "#f8f9fa",
-                    "on-surface": "#191c1d",
-                    "surface-variant": "#e1e3e4",
-                    "on-surface-variant": "#474747",
-                    "outline": "#777777",
-                    "outline-variant": "#c6c6c6",
-                    "surface-container-low": "#f3f4f5",
-                    "surface-container": "#edeeef",
-                    "surface-container-high": "#e7e8e9",
-                    "surface-container-highest": "#e1e3e4",
-                    "surface-container-lowest": "#ffffff",
-                    "error": "#ba1a1a",
-                    "on-error": "#ffffff",
-                    "error-container": "#ffdad6",
-                    "on-error-container": "#410002"
-                },
-                "fontFamily": {
-                    "headline": ["Inter"],
-                    "body": ["Inter"],
-                    "label": ["Inter"]
-                }
-            }
-        }
-    }
-</script>
-<style>
-    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
-    body { font-family: 'Inter', sans-serif; }
-</style>
+<link rel="stylesheet" href="${pageContext.request.contextPath}/CSS/admin.css">
 </head>
 <body class="bg-surface text-on-surface antialiased">
 <header class="flex justify-between items-center px-6 py-3 w-full sticky top-0 z-50 bg-slate-50 border-b border-gray-300 font-sans text-sm tracking-tight">

@@ -13,6 +13,12 @@
         <span class="font-sans uppercase text-[10px] font-bold tracking-widest text-primary mb-1 block">ADMINISTRATION // SEC. 05</span>
         <h1 class="text-4xl font-extrabold tracking-tight text-primary uppercase">Global Inventory</h1>
     </div>
+    <% if ("item_approved".equals(request.getParameter("msg"))) { %>
+        <div class="bg-primary/10 text-primary text-[10px] font-bold px-4 py-2 border border-primary/20">ITEM_APPROVED_SUCCESSFULLY</div>
+    <% } %>
+    <% if ("item_rejected".equals(request.getParameter("msg"))) { %>
+        <div class="bg-error/10 text-error text-[10px] font-bold px-4 py-2 border border-error/20">ITEM_REJECTED_SUCCESSFULLY</div>
+    <% } %>
 </div>
 
 <div class="bg-surface-container-lowest border border-outline-variant/30 overflow-hidden">
@@ -29,7 +35,19 @@
         <tbody class="divide-y divide-outline-variant/20">
             <% if (items != null && !items.isEmpty()) {
                 for (Item item : items) {
-                    String statusClass = "Available".equalsIgnoreCase(item.getStatus()) || "Listed".equalsIgnoreCase(item.getStatus()) ? "bg-surface-container-high text-on-surface" : "border border-outline text-outline";
+                    String statusClass = "";
+                    String statusText = item.getStatus();
+                    
+                    if ("Available".equalsIgnoreCase(item.getStatus())) {
+                        statusClass = "bg-primary/10 text-primary border border-primary/20";
+                    } else if ("Listed".equalsIgnoreCase(item.getStatus())) {
+                        statusClass = "bg-secondary/10 text-secondary border border-secondary/20";
+                        statusText = "PENDING REVIEW";
+                    } else if ("Rejected".equalsIgnoreCase(item.getStatus())) {
+                        statusClass = "bg-error/10 text-error border border-error/20";
+                    } else {
+                        statusClass = "border border-outline text-outline";
+                    }
             %>
             <tr class="transition-colors hover:bg-surface-container-lowest/50">
                 <td class="px-6 py-4 font-bold font-mono text-xs text-on-surface-variant">RES_<%= item.getItemId() %></td>
@@ -43,18 +61,25 @@
                 </td>
                 <td class="px-6 py-4 text-on-surface-variant text-xs font-mono">USR_<%= item.getOwnerId() %></td>
                 <td class="px-6 py-4 text-center">
-                    <span class="px-2 py-1 text-[10px] font-bold rounded-full <%= statusClass %>"><%= item.getStatus() %></span>
+                    <span class="px-2 py-0.5 text-[9px] font-black rounded-sm uppercase <%= statusClass %>"><%= statusText %></span>
                 </td>
                 <td class="px-6 py-4 text-right">
                     <div class="flex items-center justify-end gap-4">
                         <a href="${pageContext.request.contextPath}/item?action=view&id=<%= item.getItemId() %>" class="text-xs font-bold underline hover:text-primary transition-colors">VIEW</a>
                         
                         <% if ("Listed".equalsIgnoreCase(item.getStatus())) { %>
-                            <form action="${pageContext.request.contextPath}/admin" method="POST" class="inline">
-                                <input type="hidden" name="action" value="approve_item">
-                                <input type="hidden" name="item_id" value="<%= item.getItemId() %>">
-                                <button type="submit" class="bg-primary text-on-primary text-[10px] px-3 py-1 font-bold rounded hover:opacity-80">APPROVE</button>
-                            </form>
+                            <div class="flex gap-2">
+                                <form action="${pageContext.request.contextPath}/admin" method="POST" class="inline">
+                                    <input type="hidden" name="action" value="approve_item">
+                                    <input type="hidden" name="item_id" value="<%= item.getItemId() %>">
+                                    <button type="submit" class="bg-primary text-on-primary text-[9px] px-2 py-1 font-bold rounded hover:opacity-80">APPROVE</button>
+                                </form>
+                                <form action="${pageContext.request.contextPath}/admin" method="POST" class="inline">
+                                    <input type="hidden" name="action" value="reject_item">
+                                    <input type="hidden" name="item_id" value="<%= item.getItemId() %>">
+                                    <button type="submit" class="bg-error text-on-error text-[9px] px-2 py-1 font-bold rounded hover:opacity-80">REJECT</button>
+                                </form>
+                            </div>
                         <% } %>
                     </div>
                 </td>

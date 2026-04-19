@@ -82,7 +82,19 @@
                         <div style="display: flex; align-items: center; gap: 2rem;">
                             <div>
                                 <div class="label-sm" style="color: var(--outline); font-size: 0.625rem;">STATUS</div>
-                                <div style="font-weight: 800; text-transform: uppercase; font-size: 0.875rem;"><%= newestItem.getStatus() %></div>
+                                <% 
+                                    String displayedStatus = newestItem.getStatus();
+                                    String statusColor = "inherit";
+                                    if ("Listed".equalsIgnoreCase(displayedStatus)) {
+                                        displayedStatus = "PENDING REVIEW";
+                                        statusColor = "var(--secondary)";
+                                    } else if ("Available".equalsIgnoreCase(displayedStatus)) {
+                                        statusColor = "var(--primary)";
+                                    } else if ("Rejected".equalsIgnoreCase(displayedStatus)) {
+                                        statusColor = "var(--error)";
+                                    }
+                                %>
+                                <div style="font-weight: 800; text-transform: uppercase; font-size: 0.875rem; color: <%= statusColor %>;"><%= displayedStatus %></div>
                             </div>
                             <div style="width: 1px; height: 30px; background-color: var(--outline-variant);"></div>
                             <div>
@@ -125,7 +137,18 @@
                 for (Item item : items) { %>
                 <div class="col-span-4 inventory-card" style="border: 1px solid var(--outline-variant); margin-bottom: 2rem;">
                     <div class="image-box">
-                        <div class="status-pill"><%= item.getStatus().toUpperCase() %></div>
+                        <% 
+                           String cardStatus = item.getStatus();
+                           String cardStatusPill = cardStatus.toUpperCase();
+                           String pillStyle = "background-color: var(--primary);";
+                           if ("Listed".equalsIgnoreCase(cardStatus)) {
+                               cardStatusPill = "PENDING REVIEW";
+                               pillStyle = "background-color: var(--secondary);";
+                           } else if ("Rejected".equalsIgnoreCase(cardStatus)) {
+                               pillStyle = "background-color: var(--error);";
+                           }
+                        %>
+                        <div class="status-pill" style="<%= pillStyle %>"><%= cardStatusPill %></div>
                         <% if (item.getImagePath() != null && !item.getImagePath().isEmpty()) { %>
                                 <img src="<%= item.getImagePath() %>" alt="<%= item.getName() %>" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); mix-blend-mode: multiply;">
                         <% } else { %>

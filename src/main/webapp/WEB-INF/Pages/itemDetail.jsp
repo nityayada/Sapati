@@ -69,8 +69,21 @@
 
                     <div style="display: flex; align-items: center; gap: 2rem; margin-bottom: 3rem;">
                         <div style="display: flex; align-items: center; gap: 0.5rem;">
-                            <span class="material-symbols-outlined" style="color: #22c55e; font-size: 1.25rem;">check_circle</span>
-                            <span style="font-weight: 800; text-transform: uppercase; font-size: 0.75rem;"><%= item.getStatus() %></span>
+                            <% 
+                                String detStatus = item.getStatus();
+                                String detColor = "#22c55e";
+                                String detIcon = "check_circle";
+                                if ("Listed".equalsIgnoreCase(detStatus)) {
+                                    detStatus = "PENDING REVIEW";
+                                    detColor = "var(--secondary)";
+                                    detIcon = "panding";
+                                } else if ("Rejected".equalsIgnoreCase(detStatus)) {
+                                    detColor = "var(--error)";
+                                    detIcon = "cancel";
+                                }
+                            %>
+                            <span class="material-symbols-outlined" style="color: <%= detColor %>; font-size: 1.25rem;"><%= detIcon %></span>
+                            <span style="font-weight: 800; text-transform: uppercase; font-size: 0.75rem; color: <%= detColor %>;"><%= detStatus %></span>
                         </div>
                         <div style="width: 1px; height: 16px; background-color: var(--outline-variant);"></div>
                         <span class="label-sm" style="color: var(--outline);"><%= owner != null ? owner.getAddress() : "Location Unknown" %></span>
@@ -131,8 +144,8 @@
 
                     <div style="margin-top: 3rem;">
                         <% if (isOwner) { %>
-                            <a href="${pageContext.request.contextPath}/item?action=edit&id=<%= item.getItemId() %>" class="btn btn-primary" style="width: 100%; padding: 1.5rem; text-align: center; font-size: 0.75rem; letter-spacing: 0.3em; background-color: var(--surface-container-high); color: var(--primary); border: 1px solid var(--primary);">EDIT LISTING</a>
-                        <% } else if ("Available".equalsIgnoreCase(item.getStatus()) || "Listed".equalsIgnoreCase(item.getStatus())) { %>
+                            <a href="${pageContext.request.contextPath}/item?action=edit&id=<%= item.getItemId() %>" class="btn btn-primary" style="width: 100%; padding: 1.5rem; text-align: center; font-size: 0.75rem; letter-spacing: 0.3em; background-color: var(--surface-container-high); color: var(--primary); border: 1px solid var(--primary); text-decoration: none; display: block;">EDIT LISTING</a>
+                        <% } else if ("Available".equalsIgnoreCase(item.getStatus())) { %>
                             <% if (request.getParameter("error") != null) { %>
                                 <div class="auth-msg auth-msg-error" style="margin-bottom: 2rem;"><%= request.getParameter("error") %></div>
                             <% } %>
@@ -155,6 +168,18 @@
                                     REQUEST TO BORROW
                                 </button>
                             </form>
+                        <% } else if ("Listed".equalsIgnoreCase(item.getStatus())) { %>
+                            <div style="border: 1px solid var(--secondary); padding: 2rem; text-align: center; background-color: var(--secondary); color: white;">
+                                <span class="material-symbols-outlined" style="font-size: 2rem; margin-bottom: 1rem;">policy</span>
+                                <div style="font-weight: 900; text-transform: uppercase; font-size: 0.8125rem; letter-spacing: 0.1em;">Under Administrative Review</div>
+                                <div style="font-size: 0.65rem; opacity: 0.8; margin-top: 0.5rem;">THIS RESOURCE IS AWAITING VERIFICATION BEFORE IT BECOMES PUBLICLY BORROWABLE.</div>
+                            </div>
+                        <% } else if ("Rejected".equalsIgnoreCase(item.getStatus())) { %>
+                            <div style="border: 1px solid var(--error); padding: 2rem; text-align: center; background-color: var(--error); color: white;">
+                                <span class="material-symbols-outlined" style="font-size: 2rem; margin-bottom: 1rem;">cancel</span>
+                                <div style="font-weight: 900; text-transform: uppercase; font-size: 0.8125rem; letter-spacing: 0.1em;">Listing Decertified</div>
+                                <div style="font-size: 0.65rem; opacity: 0.8; margin-top: 0.5rem;">THIS ENTRY DOES NOT MEET COMMUNITY STANDARDS AND IS FLAGED BY MODERATORS.</div>
+                            </div>
                         <% } else { %>
                             <button disabled class="btn btn-primary" style="width: 100%; padding: 1.5rem; font-size: 0.75rem; letter-spacing: 0.3em; opacity: 0.5; background-color: var(--outline-variant); cursor: not-allowed;">RESOURCE CURRENTLY LOANED</button>
                         <% } %>

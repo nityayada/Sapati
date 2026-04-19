@@ -126,6 +126,10 @@ public class AdminController extends HttpServlet {
             int itemId = Integer.parseInt(request.getParameter("item_id"));
             itemDAO.updateItemStatus(itemId, "Available");
             response.sendRedirect(request.getContextPath() + "/admin?action=manage_items&msg=item_approved");
+        } else if ("reject_item".equals(action)) {
+            int itemId = Integer.parseInt(request.getParameter("item_id"));
+            itemDAO.updateItemStatus(itemId, "Rejected");
+            response.sendRedirect(request.getContextPath() + "/admin?action=manage_items&msg=item_rejected");
         } else if ("update_user_status".equals(action)) {
             int userId = Integer.parseInt(request.getParameter("user_id"));
             String status = request.getParameter("status");

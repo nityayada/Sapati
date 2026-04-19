@@ -31,7 +31,7 @@ public class ItemDAO {
 
     public List<Item> getAllAvailableItems() {
         List<Item> items = new ArrayList<>();
-        String sql = "SELECT * FROM items WHERE status = 'Available' OR status = 'Listed'";
+        String sql = "SELECT * FROM items WHERE status = 'Available'";
         try (Connection conn = DBConnection.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
@@ -47,7 +47,7 @@ public class ItemDAO {
 
     public List<Item> searchItems(String query, Integer categoryId) {
         List<Item> items = new ArrayList<>();
-        StringBuilder sql = new StringBuilder("SELECT * FROM items WHERE (status = 'Available' OR status = 'Listed')");
+        StringBuilder sql = new StringBuilder("SELECT * FROM items WHERE status = 'Available'");
         
         if (query != null && !query.trim().isEmpty()) {
             sql.append(" AND (name LIKE ? OR description LIKE ?)");

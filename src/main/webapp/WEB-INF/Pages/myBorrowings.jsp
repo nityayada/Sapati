@@ -1,7 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.List, java.util.Map, com.sapati.model.BorrowRecord, com.sapati.model.User" %>
+<%@ page import="java.util.List, java.util.Map, com.sapati.model.BorrowRecord, com.sapati.model.BorrowRequest, com.sapati.model.User" %>
 <%
     List<BorrowRecord> records = (List<BorrowRecord>) request.getAttribute("borrowRecords");
+    List<BorrowRequest> pendingRequests = (List<BorrowRequest>) request.getAttribute("borrowRequests");
     Map<String, Integer> stats = (Map<String, Integer>) request.getAttribute("borrowStats");
     Double totalFine = (Double) request.getAttribute("totalFine");
     User user = (User) session.getAttribute("user");
@@ -22,6 +23,36 @@
     <jsp:include page="components/member_header.jsp" />
 
     <main class="container">
+        <% 
+            String msg = request.getParameter("msg");
+            String error = request.getParameter("error");
+            if (msg != null || error != null) {
+        %>
+            <div style="margin: 2rem 0;">
+                <% if ("request_sent".equalsIgnoreCase(msg)) { %>
+                    <div class="auth-msg auth-msg-success">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span class="material-symbols-outlined">check_circle</span>
+                            <span>BORROW REQUEST TRANSMITTED SUCCESSFULLY. AWAITING OWNER OVERSIGHT.</span>
+                        </div>
+                    </div>
+                <% } else if (msg != null) { %>
+                    <div class="auth-msg auth-msg-success">
+                        <%= msg %>
+                    </div>
+                <% } %>
+
+                <% if (error != null) { %>
+                    <div class="auth-msg auth-msg-error">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span class="material-symbols-outlined">error</span>
+                            <span><%= error.replace("_", " ").toUpperCase() %></span>
+                        </div>
+                    </div>
+                <% } %>
+            </div>
+        <% } %>
+
         
         <!-- Editorial Header Section -->
         <section style="margin-bottom: 4rem;">

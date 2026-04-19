@@ -141,6 +141,26 @@ public class ItemDAO {
         return item;
     }
 
+    public boolean updateItem(Item item) {
+        String sql = "UPDATE items SET name = ?, category_id = ?, item_condition = ?, description = ?, image_path = ? WHERE item_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, item.getName());
+            pstmt.setInt(2, item.getCategoryId());
+            pstmt.setString(3, item.getItemCondition());
+            pstmt.setString(4, item.getDescription());
+            pstmt.setString(5, item.getImagePath());
+            pstmt.setInt(6, item.getItemId());
+            
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+
     public List<Item> getAllItemsAdmin() {
         List<Item> items = new ArrayList<>();
         String sql = "SELECT * FROM items ORDER BY created_at DESC";

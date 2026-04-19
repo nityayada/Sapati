@@ -78,12 +78,17 @@ public class ItemController extends HttpServlet {
                 List<BorrowRecord> records = borrowDAO.getBorrowRecordsByUser(user.getUserId());
                 Map<String, Integer> stats = borrowDAO.getBorrowStats(user.getUserId());
                 
+                // [NEW] Fetch pending requests
+                List<com.sapati.model.BorrowRequest> pendingRequests = borrowDAO.getRequestsByRequester(user.getUserId());
+                
                 List<Fine> fines = fineDAO.getFinesByUser(user.getUserId());
                 double totalFine = fines.stream().filter(f -> "Unpaid".equalsIgnoreCase(f.getPaymentStatus())).mapToDouble(Fine::getAmount).sum();
                 
+                request.setAttribute("borrowRequests", pendingRequests);
                 request.setAttribute("borrowRecords", records);
                 request.setAttribute("borrowStats", stats);
                 request.setAttribute("totalFine", totalFine);
+
                 request.getRequestDispatcher("/WEB-INF/Pages/myBorrowings.jsp").forward(request, response);
             } else {
                 response.sendRedirect("user?action=login");
@@ -121,6 +126,26 @@ public class ItemController extends HttpServlet {
             } else {
                 response.sendRedirect("user?action=login");
             }
+        } else if ("edit".equals(action)) {
+            HttpSession session = request.getSession();
+            User user = (User) session.getAttribute("user");
+            String idStr = request.getParameter("id");
+            
+            if (user != null && idStr != null) {
+                int itemId = Integer.parseInt(idStr);
+                Item item = itemDAO.getItemById(itemId);
+                
+                // Security check: Only owner can edit
+                if (item != null && item.getOwnerId() == user.getUserId()) {
+                    request.setAttribute("item", item);
+                    request.setAttribute("categories", categoryDAO.getAllCategories());
+                    request.getRequestDispatcher("/WEB-INF/Pages/editItem.jsp").forward(request, response);
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/item?action=myListings&error=unauthorized_access");
+                }
+            } else {
+                response.sendRedirect(request.getContextPath() + (user == null ? "/user?action=login" : "/item?action=myListings"));
+            }
         } else {
             // Default to member house
             HttpSession session = request.getSession();
@@ -138,6 +163,63 @@ public class ItemController extends HttpServlet {
 
         if ("add".equals(action)) {
             addItem(request, response);
+        } else if ("edit".equals(action)) {
+            editItem(request, response);
+        }
+    }
+
+    private void editItem(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/user?action=login");
+            return;
+        }
+
+        int itemId = Integer.parseInt(request.getParameter("item_id"));
+        Item existingItem = itemDAO.getItemById(itemId);
+
+        // Security check
+        if (existingItem == null || existingItem.getOwnerId() != user.getUserId()) {
+            response.sendRedirect(request.getContextPath() + "/item?action=myListings&error=unauthorized");
+            return;
+        }
+
+        String name = request.getParameter("name");
+        int categoryId = Integer.parseInt(request.getParameter("category_id"));
+        String condition = request.getParameter("condition");
+        String description = request.getParameter("description");
+        
+        // Handle Image
+        String imagePath = existingItem.getImagePath(); // Keep existing by default
+        Part filePart = request.getPart("image");
+        String imageUrl = request.getParameter("image_url");
+
+        if (filePart != null && filePart.getSize() > 0) {
+            String fileName = UUID.randomUUID().toString() + "_" + Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+            String uploadPath = getServletContext().getRealPath("/Images");
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) uploadDir.mkdir();
+            filePart.write(uploadPath + File.separator + fileName);
+            imagePath = "Images/" + fileName;
+        } else if (imageUrl != null && !imageUrl.trim().isEmpty()) {
+            imagePath = imageUrl;
+        }
+
+        existingItem.setName(name);
+        existingItem.setCategoryId(categoryId);
+        existingItem.setItemCondition(condition);
+        existingItem.setDescription(description);
+        existingItem.setImagePath(imagePath);
+
+        if (itemDAO.updateItem(existingItem)) {
+            response.sendRedirect(request.getContextPath() + "/item?action=myListings&msg=item_updated");
+        } else {
+            request.setAttribute("error", "Failed to update item.");
+            request.setAttribute("item", existingItem);
+            request.setAttribute("categories", categoryDAO.getAllCategories());
+            request.getRequestDispatcher("/WEB-INF/Pages/editItem.jsp").forward(request, response);
         }
     }
 

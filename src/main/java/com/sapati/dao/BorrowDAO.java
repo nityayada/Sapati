@@ -59,6 +59,40 @@ public class BorrowDAO {
         return requests;
     }
 
+    public List<BorrowRequest> getRequestsByRequester(int requesterId) {
+
+        List<BorrowRequest> requests = new ArrayList<>();
+        String sql = "SELECT br.*, i.name as item_name, u.full_name as owner_name " +
+                     "FROM borrow_requests br " +
+                     "JOIN items i ON br.item_id = i.item_id " +
+                     "JOIN users u ON i.owner_id = u.user_id " +
+                     "WHERE br.requester_id = ? " +
+                     "ORDER BY br.requested_date DESC";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, requesterId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                BorrowRequest req = new BorrowRequest();
+                req.setRequestId(rs.getInt("request_id"));
+                req.setItemId(rs.getInt("item_id"));
+                req.setRequesterId(rs.getInt("requester_id"));
+                req.setRequestedDate(rs.getDate("requested_date"));
+                req.setProposedDueDate(rs.getDate("proposed_due_date"));
+                req.setRequestStatus(rs.getString("request_status"));
+                req.setItemName(rs.getString("item_name"));
+                req.setRequesterName(rs.getString("owner_name")); // Reusing this field to store owner name for display
+                requests.add(req);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return requests;
+    }
+
+
     public boolean updateRequestStatus(int requestId, String status) {
         String sql = "UPDATE borrow_requests SET request_status = ? WHERE request_id = ?";
         try (Connection conn = DBConnection.getConnection();

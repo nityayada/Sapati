@@ -29,6 +29,18 @@
                 RESOURCE REGISTERED SUCCESSFULLY IN COMMUNITY LEDGER
             </div>
         <% } %>
+        <% if ("item_updated".equals(request.getParameter("msg"))) { %>
+            <div class="auth-msg auth-msg-success" style="margin: 2rem 0; border: 1px solid var(--primary);">
+                <span class="material-symbols-outlined">edit_note</span>
+                METADATA REVISED SUCCESSFULLY. LEDGER UPDATED.
+            </div>
+        <% } %>
+        <% if (request.getParameter("error") != null) { %>
+            <div class="auth-msg auth-msg-error" style="margin: 2rem 0;">
+                <span class="material-symbols-outlined">error</span>
+                <%= request.getParameter("error").replace("_", " ").toUpperCase() %>
+            </div>
+        <% } %>
 
         <!-- Editorial Header Section -->
         <section style="margin-bottom: 4rem;">
@@ -80,7 +92,7 @@
                         </div>
                     </div>
                     <div style="display: flex; gap: 1rem; margin-top: 2rem;">
-                        <button class="btn btn-ghost" style="flex: 1; border: 1px solid var(--outline); font-size: 0.75rem; letter-spacing: 0.1em; font-weight: 900;">EDIT RECORD</button>
+                        <a href="${pageContext.request.contextPath}/item?action=edit&id=<%= newestItem.getItemId() %>" class="btn btn-ghost" style="flex: 1; border: 1px solid var(--outline); font-size: 0.75rem; letter-spacing: 0.1em; font-weight: 900; display: flex; align-items: center; justify-content: center; text-decoration: none; color: inherit;">EDIT RECORD</a>
                         <button class="btn btn-ghost" style="flex: 1; border: 1px solid var(--error); color: var(--error); font-size: 0.75rem; letter-spacing: 0.1em; font-weight: 900;">REMOVE</button>
                     </div>
                 </div>
@@ -124,7 +136,7 @@
                         <span class="category-tag">REF_<%= item.getItemId() %></span>
                         <h3 class="item-title" style="font-size: 1.25rem;"><%= item.getName() %></h3>
                         <div style="display: flex; gap: 0.5rem; margin-top: auto;">
-                            <button class="btn btn-ghost" style="flex: 1; border: 1px solid var(--outline); font-size: 0.625rem; font-weight: 900; letter-spacing: 0.1em; padding: 0.75rem;">EDIT</button>
+                            <a href="${pageContext.request.contextPath}/item?action=edit&id=<%= item.getItemId() %>" class="btn btn-ghost" style="flex: 1; border: 1px solid var(--outline); font-size: 0.625rem; font-weight: 900; letter-spacing: 0.1em; padding: 0.75rem; display: flex; align-items: center; justify-content: center; text-decoration: none; color: inherit;">EDIT</a>
                             <button class="btn btn-ghost" style="flex: 1; border: 1px solid var(--outline-variant); font-size: 0.625rem; font-weight: 900; letter-spacing: 0.1em; padding: 0.75rem;">ARCHIVE</button>
                         </div>
                     </div>

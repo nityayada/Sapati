@@ -99,7 +99,9 @@ button:focus {
 .gap-6 { gap: 1.5rem; }
 .gap-8 { gap: 2rem; }
 
-.space-x-2 > * + * { margin-left: 0.5rem; }
+.space-x-2 > * + * { 
+	margin-left: 0.5rem; 
+}
 .space-x-3 > * + * { margin-left: 0.75rem; }
 .space-x-4 > * + * { margin-left: 1rem; }
 .space-x-6 > * + * { margin-left: 1.5rem; }

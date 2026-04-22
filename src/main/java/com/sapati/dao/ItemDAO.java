@@ -160,6 +160,18 @@ public class ItemDAO {
         return false;
     }
 
+    public boolean deleteItem(int itemId) {
+        String sql = "DELETE FROM items WHERE item_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, itemId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
 
     public List<Item> getAllItemsAdmin() {
         List<Item> items = new ArrayList<>();

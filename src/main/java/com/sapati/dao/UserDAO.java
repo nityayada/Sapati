@@ -130,6 +130,34 @@ public class UserDAO {
         return false;
     }
 
+    public boolean updateUser(User user) {
+        String sql = "UPDATE users SET full_name = ?, phone_number = ?, address = ? WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, user.getFullName());
+            pstmt.setString(2, user.getPhoneNumber());
+            pstmt.setString(3, user.getAddress());
+            pstmt.setInt(4, user.getUserId());
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updatePassword(int userId, String newPassword) {
+        String sql = "UPDATE users SET password_hash = ? WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, PasswordUtil.hashPassword(newPassword));
+            pstmt.setInt(2, userId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public int getTotalUserCount() {
         String sql = "SELECT COUNT(*) FROM users";
         try (Connection conn = DBConnection.getConnection();

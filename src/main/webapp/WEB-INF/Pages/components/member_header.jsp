@@ -24,7 +24,7 @@
                     <span style="font-weight: 800; font-size: 0.875rem;"><%= sessionUser.getFullName() %></span>
                 </div>
                 <div style="display: flex; gap: 0.5rem;">
-                    <a href="#" class="material-symbols-outlined nav-link" style="font-size: 1.5rem;">account_circle</a>
+                    <a href="${pageContext.request.contextPath}/user?action=profile" class="material-symbols-outlined nav-link" style="font-size: 1.5rem;">account_circle</a>
                     <a href="${pageContext.request.contextPath}/user?action=logout" class="material-symbols-outlined nav-link" style="font-size: 1.5rem; color: var(--error);">logout</a>
                 </div>
             <% } %>

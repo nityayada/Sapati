@@ -242,6 +242,21 @@ public class BorrowDAO {
         return 0;
     }
 
+    public boolean returnResource(int recordId, java.sql.Date returnDate) {
+        String sql = "UPDATE borrow_records SET status = 'Returned', return_date = ? WHERE record_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setDate(1, returnDate);
+            pstmt.setInt(2, recordId);
+            
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public boolean updateRecordStatus(int recordId, String status) {
         String sql = "UPDATE borrow_records SET status = ? WHERE record_id = ?";
         try (Connection conn = DBConnection.getConnection();

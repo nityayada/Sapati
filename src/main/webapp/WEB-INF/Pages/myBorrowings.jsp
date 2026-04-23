@@ -98,12 +98,13 @@
                         <th>Due Date</th>
                         <th>Status</th>
                         <th style="text-align: right;">Fine Accrued</th>
+                        <th style="text-align: right;">Operations</th>
                     </tr>
                 </thead>
                 <tbody>
                     <% if (records == null || records.isEmpty()) { %>
                         <tr>
-                            <td colspan="6" style="padding: 10rem 0; text-align: center;">
+                            <td colspan="7" style="padding: 10rem 0; text-align: center;">
                                 <span class="material-symbols-outlined" style="font-size: 4rem; opacity: 0.1; margin-bottom: 2rem;">history_edu</span>
                                 <h3 style="font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--outline);">No Ledger Entries Found</h3>
                                 <p style="font-size: 0.75rem; color: var(--outline); margin-top: 1rem;">YOUR RECENT EXCHANGES WILL APPEAR HERE.</p>
@@ -143,6 +144,18 @@
                             </td>
                             <td style="text-align: right;" class="tabular">
                                 <%= "Overdue".equalsIgnoreCase(record.getStatus()) ? "NPR --" : "-" %>
+                            </td>
+                            <td style="text-align: right;">
+                                <% if ("Active".equalsIgnoreCase(record.getStatus()) || "Overdue".equalsIgnoreCase(record.getStatus())) { %>
+                                    <form action="${pageContext.request.contextPath}/borrow" method="POST" style="display: inline;">
+                                        <input type="hidden" name="action" value="return">
+                                        <input type="hidden" name="record_id" value="<%= record.getRecordId() %>">
+                                        <input type="hidden" name="item_id" value="<%= record.getItemId() %>">
+                                        <button type="submit" class="label-md" style="color: var(--primary); font-weight: 900; border: none; background: none; cursor: pointer; text-decoration: underline; padding: 0;">RETURN RESOURCE</button>
+                                    </form>
+                                <% } else { %>
+                                    <span class="label-md" style="opacity: 0.4;">COMPLETED</span>
+                                <% } %>
                             </td>
                         </tr>
                     <% } } %>

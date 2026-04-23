@@ -50,6 +50,7 @@
                 <th class="px-6 py-4">BORROWER</th>
                 <th class="px-6 py-4">DATE RANGE</th>
                 <th class="px-6 py-4 text-center">STATUS</th>
+                <th class="px-6 py-4 text-right">ACTIONS</th>
             </tr>
         </thead>
         <tbody class="divide-y divide-outline-variant/20">
@@ -71,6 +72,18 @@
                 </td>
                 <td class="px-6 py-4 text-center">
                     <span class="px-2 py-1 text-[10px] font-bold rounded-full <%= statusClass %>"><%= br.getStatus() %></span>
+                </td>
+                <td class="px-6 py-4 text-right">
+                    <% if (!"Returned".equalsIgnoreCase(br.getStatus())) { %>
+                        <form action="${pageContext.request.contextPath}/admin" method="POST" class="inline">
+                            <input type="hidden" name="action" value="admin_return_item">
+                            <input type="hidden" name="record_id" value="<%= br.getRecordId() %>">
+                            <input type="hidden" name="item_id" value="<%= br.getItemId() %>">
+                            <button type="submit" class="bg-primary text-on-primary text-[10px] px-3 py-1 font-bold rounded hover:opacity-80">MARK RETURNED</button>
+                        </form>
+                    <% } else { %>
+                        <span class="text-[10px] font-bold text-outline uppercase tracking-widest">ARCHIVED</span>
+                    <% } %>
                 </td>
             </tr>
             <%  }

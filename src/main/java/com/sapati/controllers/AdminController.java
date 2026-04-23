@@ -139,6 +139,12 @@ public class AdminController extends HttpServlet {
             int fineId = Integer.parseInt(request.getParameter("fine_id"));
             fineDAO.markAsPaid(fineId);
             response.sendRedirect(request.getContextPath() + "/admin?action=manage_fines&msg=fine_paid");
+        } else if ("admin_return_item".equals(action)) {
+            int recordId = Integer.parseInt(request.getParameter("record_id"));
+            int itemId = Integer.parseInt(request.getParameter("item_id"));
+            borrowDAO.returnResource(recordId, new java.sql.Date(System.currentTimeMillis()));
+            itemDAO.updateItemStatus(itemId, "Available");
+            response.sendRedirect(request.getContextPath() + "/admin?action=manage_borrows&msg=returned");
         }
     }
 }

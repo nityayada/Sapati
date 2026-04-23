@@ -54,6 +54,8 @@ public class BorrowController extends HttpServlet {
             handleApproveRequest(request, response);
         } else if ("reject".equals(action)) {
             handleRejectRequest(request, response);
+        } else if ("return".equals(action)) {
+            handleReturnResource(request, response);
         }
     }
 
@@ -125,6 +127,20 @@ public class BorrowController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&msg=rejected");
         } else {
             response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=update_failed");
+            }
+        }
+    private void handleReturnResource(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        int recordId = Integer.parseInt(request.getParameter("record_id"));
+        int itemId = Integer.parseInt(request.getParameter("item_id"));
+        
+        Date returnDate = Date.valueOf(LocalDate.now());
+
+        if (borrowDAO.returnResource(recordId, returnDate)) {
+            // Update item back to Available
+            itemDAO.updateItemStatus(itemId, "Available");
+            response.sendRedirect(request.getContextPath() + "/item?action=myBorrowings&msg=item_returned");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/item?action=myBorrowings&error=return_failed");
         }
     }
 }

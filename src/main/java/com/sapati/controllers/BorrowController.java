@@ -98,10 +98,25 @@ public class BorrowController extends HttpServlet {
     }
 
     private void handleApproveRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/user?action=login");
+            return;
+        }
+
         int requestId = Integer.parseInt(request.getParameter("request_id"));
         int itemId = Integer.parseInt(request.getParameter("item_id"));
         int requesterId = Integer.parseInt(request.getParameter("requester_id"));
         Date dueDate = Date.valueOf(request.getParameter("due_date"));
+
+        // Security: Ensure current user is the owner of the item
+        Item item = itemDAO.getItemById(itemId);
+        if (item == null || item.getOwnerId() != user.getUserId()) {
+            response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=unauthorized_action");
+            return;
+        }
+
 
         if (borrowDAO.updateRequestStatus(requestId, "Approved")) {
             BorrowRecord record = new BorrowRecord();
@@ -122,17 +137,48 @@ public class BorrowController extends HttpServlet {
     }
 
     private void handleRejectRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/user?action=login");
+            return;
+        }
+
         int requestId = Integer.parseInt(request.getParameter("request_id"));
+        int itemId = Integer.parseInt(request.getParameter("item_id"));
+
+        // Security: Ensure current user is the owner of the item
+        Item item = itemDAO.getItemById(itemId);
+        if (item == null || item.getOwnerId() != user.getUserId()) {
+            response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=unauthorized_action");
+            return;
+        }
+
         if (borrowDAO.updateRequestStatus(requestId, "Rejected")) {
             response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&msg=rejected");
         } else {
             response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=update_failed");
             }
         }
+
     private void handleReturnResource(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/user?action=login");
+            return;
+        }
+
         int recordId = Integer.parseInt(request.getParameter("record_id"));
         int itemId = Integer.parseInt(request.getParameter("item_id"));
         
+        // Security: Ensure current user is either the borrower or an admin
+        BorrowRecord record = borrowDAO.getBorrowRecordById(recordId);
+        if (record == null || (record.getBorrowerId() != user.getUserId() && !"Admin".equals(user.getRole()))) {
+            response.sendRedirect(request.getContextPath() + "/item?action=myBorrowings&error=unauthorized_return");
+            return;
+        }
+
         Date returnDate = Date.valueOf(LocalDate.now());
 
         if (borrowDAO.returnResource(recordId, returnDate)) {
@@ -143,4 +189,5 @@ public class BorrowController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/item?action=myBorrowings&error=return_failed");
         }
     }
+
 }

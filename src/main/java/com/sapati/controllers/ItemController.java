@@ -25,6 +25,8 @@ import java.util.List;
 import jakarta.servlet.annotation.MultipartConfig;
 import jakarta.servlet.http.Part;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 
 @WebServlet("/item")
 @MultipartConfig(
@@ -88,6 +90,8 @@ public class ItemController extends HttpServlet {
                 request.setAttribute("borrowRecords", records);
                 request.setAttribute("borrowStats", stats);
                 request.setAttribute("totalFine", totalFine);
+                request.setAttribute("fines", fines);
+
 
                 request.getRequestDispatcher("/WEB-INF/Pages/myBorrowings.jsp").forward(request, response);
             } else {
@@ -147,15 +151,52 @@ public class ItemController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + (user == null ? "/user?action=login" : "/item?action=myListings"));
             }
         } else {
-            // Default to member house
+            // Default to member house - Fetch real data for dashboard
             HttpSession session = request.getSession();
             User user = (User) session.getAttribute("user");
             if (user != null) {
+                // [NEW] Run soft fine calculation for this user to ensure up-to-date ledger
+                com.sapati.util.FineCalculator.runCalculationsForUser(user.getUserId());
+                
+                // Fetch Listings
+
                 List<Item> myItems = itemDAO.getItemsByOwner(user.getUserId());
+                request.setAttribute("myListings", myItems);
                 request.setAttribute("listedCount", myItems.size());
+                
+                // Fetch Borrow Stats & Records
+                Map<String, Integer> borrowStats = borrowDAO.getBorrowStats(user.getUserId());
+                int activeCount = (borrowStats.get("active") != null ? borrowStats.get("active") : 0);
+                int overdueCount = (borrowStats.get("overdue") != null ? borrowStats.get("overdue") : 0);
+                request.setAttribute("borrowedCount", activeCount + overdueCount);
+                
+                List<BorrowRecord> recentRecords = borrowDAO.getBorrowRecordsByUser(user.getUserId());
+                if (recentRecords.size() > 5) {
+                    recentRecords = recentRecords.subList(0, 5);
+                }
+                request.setAttribute("recentRecords", recentRecords);
+                
+                // Fetch Pending Requests (Incoming)
+                List<com.sapati.model.BorrowRequest> incomingRequests = borrowDAO.getRequestsForOwner(user.getUserId());
+                request.setAttribute("pendingCount", incomingRequests.size());
+                
+                // Fetch Fines
+                List<Fine> fines = fineDAO.getFinesByUser(user.getUserId());
+                double totalFine = fines.stream()
+                                       .filter(f -> "Unpaid".equalsIgnoreCase(f.getPaymentStatus()))
+                                       .mapToDouble(Fine::getAmount)
+                                       .sum();
+                request.setAttribute("finesAmount", (int)totalFine);
+                
+                // Fetch specific unpaid fines for the sidebar
+                List<Fine> unpaidFines = fines.stream()
+                                             .filter(f -> "Unpaid".equalsIgnoreCase(f.getPaymentStatus()))
+                                             .collect(Collectors.toList());
+                request.setAttribute("unpaidFines", unpaidFines);
             }
             request.getRequestDispatcher("/WEB-INF/Pages/memberHome.jsp").forward(request, response);
         }
+
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

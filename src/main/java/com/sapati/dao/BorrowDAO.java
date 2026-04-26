@@ -271,4 +271,30 @@ public class BorrowDAO {
         }
         return false;
     }
+    public BorrowRecord getBorrowRecordById(int recordId) {
+        String sql = "SELECT * FROM borrow_records WHERE record_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, recordId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                BorrowRecord record = new BorrowRecord();
+                record.setRecordId(rs.getInt("record_id"));
+                record.setItemId(rs.getInt("item_id"));
+                record.setBorrowerId(rs.getInt("borrower_id"));
+                record.setRequestId(rs.getInt("request_id"));
+                record.setBorrowDate(rs.getDate("borrow_date"));
+                record.setDueDate(rs.getDate("due_date"));
+                record.setReturnDate(rs.getDate("return_date"));
+                record.setStatus(rs.getString("status"));
+                return record;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
 }
+

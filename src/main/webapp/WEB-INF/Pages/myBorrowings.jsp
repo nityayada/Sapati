@@ -1,5 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.List, java.util.Map, com.sapati.model.BorrowRecord, com.sapati.model.BorrowRequest, com.sapati.model.User" %>
+<%@ page import="java.util.List, java.util.Map, com.sapati.model.BorrowRecord, com.sapati.model.BorrowRequest, com.sapati.model.User, com.sapati.model.Fine" %>
+
 <%
     List<BorrowRecord> records = (List<BorrowRecord>) request.getAttribute("borrowRecords");
     List<BorrowRequest> pendingRequests = (List<BorrowRequest>) request.getAttribute("borrowRequests");
@@ -143,8 +144,21 @@
                                 <span class="badge <%= statusClass %>"><%= record.getStatus() %></span>
                             </td>
                             <td style="text-align: right;" class="tabular">
-                                <%= "Overdue".equalsIgnoreCase(record.getStatus()) ? "NPR --" : "-" %>
+                                <% 
+                                    double recordFine = 0.0;
+                                    List<Fine> fines = (List<Fine>) request.getAttribute("fines");
+                                    if (fines != null) {
+                                        for (Fine f : fines) {
+                                            if (f.getRecordId() == record.getRecordId() && !"Paid".equalsIgnoreCase(f.getPaymentStatus())) {
+                                                recordFine = f.getAmount();
+                                                break;
+                                            }
+                                        }
+                                    }
+                                %>
+                                <%= recordFine > 0 ? "NPR " + String.format("%.2f", recordFine) : "-" %>
                             </td>
+
                             <td style="text-align: right;">
                                 <% if ("Active".equalsIgnoreCase(record.getStatus()) || "Overdue".equalsIgnoreCase(record.getStatus())) { %>
                                     <form action="${pageContext.request.contextPath}/borrow" method="POST" style="display: inline;">

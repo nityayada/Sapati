@@ -19,27 +19,30 @@ public class FineCalculator {
 
     public static void runCalculations() {
         BorrowDAO borrowDAO = new BorrowDAO();
-        FineDAO fineDAO = new FineDAO();
-        
-        // Note: For coursework, we might want to just grab ALL records and filter in Java
-        // since we haven't written a specific 'getAllActiveOrOverdue' method yet.
-        // We'll use getAllBorrowRecordsAdmin() to scan the entire ledger.
         List<BorrowRecord> allRecords = borrowDAO.getAllBorrowRecordsAdmin();
+        processRecords(allRecords);
+    }
+
+    public static void runCalculationsForUser(int userId) {
+        BorrowDAO borrowDAO = new BorrowDAO();
+        List<BorrowRecord> userRecords = borrowDAO.getBorrowRecordsByUser(userId);
+        processRecords(userRecords);
+    }
+
+    private static void processRecords(List<BorrowRecord> records) {
+        FineDAO fineDAO = new FineDAO();
+        BorrowDAO borrowDAO = new BorrowDAO();
         LocalDate today = LocalDate.now();
 
-        for (BorrowRecord record : allRecords) {
+        for (BorrowRecord record : records) {
             String status = record.getStatus();
             
-            // Only calculate for items that haven't been finally returned
             if ("Active".equalsIgnoreCase(status) || "Overdue".equalsIgnoreCase(status)) {
-                
                 Date sqlDueDate = record.getDueDate();
                 if (sqlDueDate != null) {
                     LocalDate dueDate = sqlDueDate.toLocalDate();
                     
-                    if (today.isAfter(dueDate)) { // It is late!
-                        
-                        // Calculate days difference
+                    if (today.isAfter(dueDate)) {
                         long daysLate = ChronoUnit.DAYS.between(dueDate, today);
                         if (daysLate > 0) {
                             double calculatedFine = daysLate * RATE_PER_DAY;
@@ -47,24 +50,20 @@ public class FineCalculator {
                                 calculatedFine = MAX_FINE_CAP;
                             }
                             
-                            // Check if fine already exists
                             Fine existingFine = fineDAO.getFineByRecordId(record.getRecordId());
                             
                             if (existingFine == null) {
-                                // Issue new fine
                                 Fine newFine = new Fine();
                                 newFine.setRecordId(record.getRecordId());
                                 newFine.setDaysLate((int) daysLate);
                                 newFine.setAmount(calculatedFine);
                                 fineDAO.issueFine(newFine);
                             } else {
-                                // Update existing fine if unpaid
                                 if (!"Paid".equalsIgnoreCase(existingFine.getPaymentStatus())) {
                                     fineDAO.updateFineAmount(existingFine.getFineId(), (int) daysLate, calculatedFine);
                                 }
                             }
                             
-                            // Ensure BorrowRecord status is 'Overdue'
                             if (!"Overdue".equalsIgnoreCase(status)) {
                                 borrowDAO.updateRecordStatus(record.getRecordId(), "Overdue");
                             }
@@ -74,4 +73,5 @@ public class FineCalculator {
             }
         }
     }
+
 }

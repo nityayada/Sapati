@@ -82,7 +82,7 @@
                     <input type="text" name="address" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none" value="<%= user.getAddress() != null ? user.getAddress() : "" %>" required>
                 </div>
 
-                <button type="submit" class="w-full bg-black text-white p-4 text-[10px] font-black tracking-[0.2em] uppercase hover:bg-gray-800 transition-colors mt-4">COMMIT IDENTITY CHANGES</button>
+                <button type="submit" class="btn btn-primary" style="padding: 1.25rem 3rem; font-size: 0.75rem; letter-spacing: 0.2em; margin-top: 1rem; width: 100%; border: none;">COMMIT CHANGES</button>
             </form>
         </section>
 
@@ -106,7 +106,7 @@
                         <input type="password" name="confirm_password" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none" required>
                     </div>
 
-                    <button type="submit" class="w-full border-2 border-black text-black p-4 text-[10px] font-black tracking-[0.2em] uppercase hover:bg-black hover:text-white transition-all mt-4">UPDATE ACCESS CREDENTIALS</button>
+                    <button type="submit" class="btn btn-ghost" style="width: 100%; border: 2px solid var(--primary); padding: 1.25rem; font-size: 0.75rem; letter-spacing: 0.1em; background-color: transparent; cursor: pointer;">UPDATE CREDENTIALS</button>
                 </form>
             </section>
 
@@ -132,7 +132,7 @@
                         <input type="text" name="security_answer" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none" placeholder="Update answer..." required>
                     </div>
 
-                    <button type="submit" class="w-full bg-[#1976D2] text-white p-4 text-[10px] font-black tracking-[0.2em] uppercase hover:bg-[#1565C0] transition-colors mt-4">SET RECOVERY QUESTION</button>
+                    <button type="submit" class="btn btn-ghost" style="width: 100%; border: 2px solid var(--primary); padding: 1.25rem; font-size: 0.75rem; letter-spacing: 0.1em; background-color: var(--primary); color: white; cursor: pointer;">SET RECOVERY QUESTION</button>
                 </form>
             </section>
 

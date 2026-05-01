@@ -108,9 +108,8 @@
                 <td class="px-6 py-4">
                     <div class="flex items-center justify-end gap-2">
                         <a href="${pageContext.request.contextPath}/item?action=view&id=<%= item.getItemId() %>" 
-                           class="flex items-center gap-2 px-3 py-1.5 bg-black text-white border border-black hover:bg-[#333333] transition-all no-underline shadow-sm">
-                            <span class="material-symbols-outlined text-[16px]">visibility</span>
-                            <span class="text-[9px] font-black uppercase tracking-widest">Inspect</span>
+                           class="admin-action-btn border border-outline-variant hover:border-primary no-underline text-outline">
+                            <span class="material-symbols-outlined text-base">visibility</span>
                         </a>
                         
                         <% if ("Listed".equalsIgnoreCase(item.getStatus())) { %>

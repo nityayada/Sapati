@@ -48,7 +48,7 @@
                 <div class="form-group">
                     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
                         <label for="password" class="form-label" style="margin-bottom: 0;">Password</label>
-                        <a href="#" style="font-size: 0.6875rem; color: var(--outline); font-weight: 500;">Forgot Password?</a>
+                        <a href="${pageContext.request.contextPath}/user?action=forgot_password" style="font-size: 0.6875rem; color: var(--primary); font-weight: 800; text-decoration: underline;">Forgot Password?</a>
                     </div>
                     <input type="password" id="password" name="password" class="form-input" placeholder="••••••••" required>
                 </div>

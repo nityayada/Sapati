@@ -84,6 +84,23 @@
                         </div>
                     </div>
 
+                    <div class="input-grid mt-8">
+                        <div class="form-group">
+                            <label for="security_question" class="form-label">Security Question</label>
+                            <select id="security_question" name="security_question" class="form-input" style="background-image: none;" required>
+                                <option value="" disabled selected>Select a question...</option>
+                                <option value="What was your first pet's name?">What was your first pet's name?</option>
+                                <option value="In what city were you born?">In what city were you born?</option>
+                                <option value="What was your childhood nickname?">What was your childhood nickname?</option>
+                                <option value="What is the name of your first school?">What is the name of your first school?</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label for="security_answer" class="form-label">Security Answer</label>
+                            <input type="text" id="security_answer" name="security_answer" class="form-input" placeholder="Your answer..." required>
+                        </div>
+                    </div>
+
                     <div class="mt-8 pt-8" style="border-top: 1px dashed var(--outline-variant);">
                         <label style="display: flex; gap: 1rem; cursor: pointer;">
                             <input type="checkbox" required style="margin-top: 0.25rem;">

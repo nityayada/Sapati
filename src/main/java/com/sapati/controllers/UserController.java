@@ -26,6 +26,8 @@ public class UserController extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/Pages/login.jsp").forward(request, response);
         } else if ("register".equals(action)) {
             request.getRequestDispatcher("/WEB-INF/Pages/register.jsp").forward(request, response);
+        } else if ("forgot_password".equals(action)) {
+            request.getRequestDispatcher("/WEB-INF/Pages/forgotPassword.jsp").forward(request, response);
         } else if ("profile".equals(action)) {
             showProfile(request, response);
         } else {
@@ -44,6 +46,12 @@ public class UserController extends HttpServlet {
             updateProfile(request, response);
         } else if ("update_password".equals(action)) {
             updatePassword(request, response);
+        } else if ("initiate_recovery".equals(action)) {
+            initiateRecovery(request, response);
+        } else if ("verify_answer".equals(action)) {
+            verifyRecoveryAnswer(request, response);
+        } else if ("complete_reset".equals(action)) {
+            completePasswordReset(request, response);
         }
     }
 
@@ -53,6 +61,8 @@ public class UserController extends HttpServlet {
         String phone = request.getParameter("phone");
         String password = request.getParameter("password");
         String address = request.getParameter("address");
+        String securityQuestion = request.getParameter("security_question");
+        String securityAnswer = request.getParameter("security_answer");
 
         if (userDAO.isEmailTaken(email)) {
             request.setAttribute("error", "Email already registered!");
@@ -67,6 +77,8 @@ public class UserController extends HttpServlet {
         user.setPasswordHash(password); // Will be hashed in DAO
         user.setAddress(address);
         user.setRole("Member");
+        user.setSecurityQuestion(securityQuestion);
+        user.setSecurityAnswer(securityAnswer);
 
         if (userDAO.registerUser(user)) {
             request.setAttribute("msg", "registered");
@@ -171,6 +183,54 @@ public class UserController extends HttpServlet {
         } else {
             request.setAttribute("error", "Failed to update password.");
             showProfile(request, response);
+        }
+    }
+    private void initiateRecovery(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String email = request.getParameter("email");
+        User user = userDAO.getUserByEmail(email);
+
+        if (user != null && user.getSecurityQuestion() != null) {
+            request.setAttribute("recoveryUser", user);
+            request.getRequestDispatcher("/WEB-INF/Pages/verifyIdentity.jsp").forward(request, response);
+        } else {
+            request.setAttribute("error", "Email not found or no recovery question set.");
+            request.getRequestDispatcher("/WEB-INF/Pages/forgotPassword.jsp").forward(request, response);
+        }
+    }
+
+    private void verifyRecoveryAnswer(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String email = request.getParameter("email");
+        String answer = request.getParameter("answer").toLowerCase().trim();
+        User user = userDAO.getUserByEmail(email);
+
+        if (user != null && com.sapati.util.PasswordUtil.checkPassword(answer, user.getSecurityAnswer())) {
+            request.setAttribute("resetEmail", email);
+            request.getRequestDispatcher("/WEB-INF/Pages/resetPassword.jsp").forward(request, response);
+        } else {
+            request.setAttribute("error", "Incorrect answer. Identity verification failed.");
+            request.setAttribute("recoveryUser", user);
+            request.getRequestDispatcher("/WEB-INF/Pages/verifyIdentity.jsp").forward(request, response);
+        }
+    }
+
+    private void completePasswordReset(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        String email = request.getParameter("email");
+        String newPassword = request.getParameter("new_password");
+        String confirmPassword = request.getParameter("confirm_password");
+
+        if (newPassword != null && newPassword.equals(confirmPassword)) {
+            if (userDAO.updatePasswordByEmail(email, newPassword)) {
+                request.setAttribute("msg", "password_reset_success");
+                request.getRequestDispatcher("/WEB-INF/Pages/login.jsp").forward(request, response);
+            } else {
+                request.setAttribute("error", "Failed to update password. Please try again.");
+                request.setAttribute("resetEmail", email);
+                request.getRequestDispatcher("/WEB-INF/Pages/resetPassword.jsp").forward(request, response);
+            }
+        } else {
+            request.setAttribute("error", "Passwords do not match.");
+            request.setAttribute("resetEmail", email);
+            request.getRequestDispatcher("/WEB-INF/Pages/resetPassword.jsp").forward(request, response);
         }
     }
 }

@@ -12,7 +12,7 @@ import java.sql.*;
 public class UserDAO {
 
     public boolean registerUser(User user) {
-        String sql = "INSERT INTO users (full_name, email, phone_number, password_hash, address, role) VALUES (?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (full_name, email, phone_number, password_hash, address, role, security_question, security_answer) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
@@ -22,6 +22,8 @@ public class UserDAO {
             pstmt.setString(4, PasswordUtil.hashPassword(user.getPasswordHash()));
             pstmt.setString(5, user.getAddress());
             pstmt.setString(6, user.getRole() == null ? "Member" : user.getRole());
+            pstmt.setString(7, user.getSecurityQuestion());
+            pstmt.setString(8, PasswordUtil.hashPassword(user.getSecurityAnswer().toLowerCase().trim()));
             
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
@@ -69,6 +71,32 @@ public class UserDAO {
             e.printStackTrace();
         }
         return false;
+    }
+
+    public User getUserByEmail(String email) {
+        String sql = "SELECT * FROM users WHERE email = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setString(1, email);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                User user = new User();
+                user.setUserId(rs.getInt("user_id"));
+                user.setFullName(rs.getString("full_name"));
+                user.setEmail(rs.getString("email"));
+                user.setRole(rs.getString("role"));
+                user.setAccountStatus(rs.getString("account_status"));
+                user.setAddress(rs.getString("address"));
+                user.setSecurityQuestion(rs.getString("security_question"));
+                user.setSecurityAnswer(rs.getString("security_answer"));
+                return user;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     public User getUserById(int userId) {
@@ -151,6 +179,19 @@ public class UserDAO {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, PasswordUtil.hashPassword(newPassword));
             pstmt.setInt(2, userId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
+    public boolean updatePasswordByEmail(String email, String newPassword) {
+        String sql = "UPDATE users SET password_hash = ? WHERE email = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, PasswordUtil.hashPassword(newPassword));
+            pstmt.setString(2, email);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

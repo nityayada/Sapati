@@ -8,15 +8,17 @@
     <jsp:param name="action" value="manage_users" />
 </jsp:include>
 
-<div class="flex items-end justify-between mb-8">
-    <div>
-        <span class="font-sans uppercase text-[10px] font-bold tracking-widest text-primary mb-1 block">ADMINISTRATION // SEC. 04</span>
-        <h1 class="text-4xl font-extrabold tracking-tight text-primary uppercase">Member Directory</h1>
+<!-- Search & Filter Bar -->
+<div class="mb-8">
+    <div class="bg-surface-container-low border border-outline-variant/30 flex items-center px-4 max-w-md focus-within:border-primary transition-all">
+        <span class="material-symbols-outlined text-outline text-[1.25rem]">search</span>
+        <input type="text" id="memberSearch" placeholder="SEARCH MEMBERS BY NAME OR EMAIL..." 
+               class="w-full bg-transparent border-none py-4 pl-3 font-sans text-[10px] font-bold tracking-widest outline-none">
     </div>
 </div>
 
 <div class="bg-surface-container-lowest border border-outline-variant/30 overflow-hidden">
-    <table class="w-full text-left text-sm">
+    <table class="w-full text-left text-sm" id="userTable">
         <thead class="bg-surface-container-low border-b border-outline-variant/30">
             <tr class="font-sans uppercase text-[10px] font-bold tracking-widest text-outline">
                 <th class="px-6 py-4">NODE ID</th>
@@ -32,10 +34,10 @@
                 for (User user : users) {
                     String statusClass = "Active".equalsIgnoreCase(user.getAccountStatus()) ? "bg-surface-container-high text-on-surface" : "bg-error text-white";
             %>
-            <tr class="transition-colors hover:bg-surface-container-lowest/50">
+            <tr class="transition-colors hover:bg-surface-container-lowest/50 user-row">
                 <td class="px-6 py-4 font-bold font-mono text-xs text-on-surface-variant">USR_<%= user.getUserId() %></td>
-                <td class="px-6 py-4 font-bold"><%= user.getFullName() %></td>
-                <td class="px-6 py-4 text-on-surface-variant"><%= user.getEmail() %></td>
+                <td class="px-6 py-4 font-bold user-name"><%= user.getFullName() %></td>
+                <td class="px-6 py-4 text-on-surface-variant user-email"><%= user.getEmail() %></td>
                 <td class="px-6 py-4">
                     <span class="text-[10px] uppercase font-bold tracking-widest <%= "Admin".equals(user.getRole()) ? "text-primary" : "" %>">
                         <%= user.getRole() %>
@@ -48,12 +50,12 @@
                     <form action="${pageContext.request.contextPath}/admin" method="POST" class="inline">
                         <input type="hidden" name="action" value="update_user_status">
                         <input type="hidden" name="user_id" value="<%= user.getUserId() %>">
-                        <% if ("Suspended".equalsIgnoreCase(user.getAccountStatus())) { %>
+                        <% if ("Locked".equalsIgnoreCase(user.getAccountStatus())) { %>
                             <input type="hidden" name="status" value="Active">
                             <button type="submit" class="bg-primary text-on-primary text-[10px] px-3 py-1 font-bold rounded hover:opacity-80">REACTIVATE</button>
                         <% } else { %>
-                            <input type="hidden" name="status" value="Suspended">
-                            <button type="submit" class="border border-error text-error text-[10px] px-3 py-1 font-bold rounded hover:bg-error hover:text-white transition-colors">SUSPEND</button>
+                            <input type="hidden" name="status" value="Locked">
+                            <button type="submit" class="border border-error text-error text-[10px] px-3 py-1 font-bold rounded hover:bg-error hover:text-white transition-colors">LOCK ACCOUNT</button>
                         <% } %>
                     </form>
                 </td>
@@ -64,5 +66,22 @@
         </tbody>
     </table>
 </div>
+
+<script>
+document.getElementById('memberSearch').addEventListener('keyup', function() {
+    let filter = this.value.toUpperCase();
+    let rows = document.querySelectorAll('.user-row');
+    
+    rows.forEach(row => {
+        let name = row.querySelector('.user-name').textContent.toUpperCase();
+        let email = row.querySelector('.user-email').textContent.toUpperCase();
+        if (name.indexOf(filter) > -1 || email.indexOf(filter) > -1) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+});
+</script>
 
 <jsp:include page="components/admin_layout_footer.jsp" />

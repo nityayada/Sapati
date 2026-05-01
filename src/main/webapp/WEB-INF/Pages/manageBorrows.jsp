@@ -62,9 +62,14 @@
                     else if ("Overdue".equalsIgnoreCase(br.getStatus())) statusClass = "bg-error text-white";
                     else if ("Returned".equalsIgnoreCase(br.getStatus())) statusClass = "border border-outline text-outline";
             %>
-            <tr class="transition-colors hover:bg-surface-container-lowest/50">
+            <tr class="transition-colors <%= "Overdue".equalsIgnoreCase(br.getStatus()) ? "bg-error/5 hover:bg-error/10" : "hover:bg-surface-container-lowest/50" %>">
                 <td class="px-6 py-4 font-bold font-mono text-xs text-on-surface-variant">TXN_<%= br.getRecordId() %></td>
-                <td class="px-6 py-4 font-bold"><%= br.getItemName() %></td>
+                <td class="px-6 py-4 font-bold">
+                    <%= br.getItemName() %>
+                    <% if ("Overdue".equalsIgnoreCase(br.getStatus())) { %>
+                        <span class="material-symbols-outlined text-error text-xs align-middle animate-pulse">warning</span>
+                    <% } %>
+                </td>
                 <td class="px-6 py-4 text-on-surface-variant font-medium"><%= br.getOwnerName() %></td>
                 <td class="px-6 py-4 text-on-surface-variant font-medium"><%= br.getBorrowerName() %></td>
                 <td class="px-6 py-4 text-xs font-semibold text-on-surface">

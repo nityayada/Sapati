@@ -8,10 +8,12 @@
     <jsp:param name="action" value="manage_items" />
 </jsp:include>
 
-<div class="flex items-end justify-between mb-8">
-    <div>
-        <span class="font-sans uppercase text-[10px] font-bold tracking-widest text-primary mb-1 block">ADMINISTRATION // SEC. 05</span>
-        <h1 class="text-4xl font-extrabold tracking-tight text-primary uppercase">Global Inventory</h1>
+<!-- Search & Filter Bar -->
+<div class="mb-8">
+    <div class="bg-surface-container-low border border-outline-variant/30 flex items-center px-4 max-w-md focus-within:border-primary transition-all">
+        <span class="material-symbols-outlined text-outline text-[1.25rem]">search</span>
+        <input type="text" id="itemSearch" placeholder="SEARCH RESOURCES BY NAME OR OWNER..." 
+               class="w-full bg-transparent border-none py-4 pl-3 font-sans text-[10px] font-bold tracking-widest outline-none">
     </div>
 </div>
 
@@ -72,7 +74,7 @@
                         statusIcon = "error";
                     }
             %>
-            <tr class="group hover:bg-surface-container-low/30 transition-colors">
+            <tr class="group hover:bg-surface-container-low/30 transition-colors item-row">
                 <td class="px-8 py-6">
                     <span class="font-mono text-[10px] font-bold text-outline">#RES_<%= item.getItemId() %></span>
                 </td>
@@ -88,7 +90,7 @@
                             <% } %>
                         </div>
                         <div>
-                            <div class="font-black text-sm uppercase tracking-tight"><%= item.getName() %></div>
+                            <div class="font-black text-sm uppercase tracking-tight item-name"><%= item.getName() %></div>
                             <div class="text-[10px] text-outline font-medium mt-0.5"><%= item.getCreatedAt().toString().substring(0, 10) %></div>
                         </div>
                     </div>
@@ -96,7 +98,7 @@
                 <td class="px-8 py-6">
                     <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined text-outline text-base">person</span>
-                        <span class="font-bold text-xs tracking-wide">NODE_<%= item.getOwnerId() %></span>
+                        <span class="font-bold text-xs tracking-wide owner-info">NODE_<%= item.getOwnerId() %></span>
                     </div>
                 </td>
                 <td class="px-8 py-6 text-center">
@@ -143,5 +145,22 @@
         </tbody>
     </table>
 </div>
+
+<script>
+document.getElementById('itemSearch').addEventListener('keyup', function() {
+    let filter = this.value.toUpperCase();
+    let rows = document.querySelectorAll('.item-row');
+    
+    rows.forEach(row => {
+        let name = row.querySelector('.item-name').textContent.toUpperCase();
+        let owner = row.querySelector('.owner-info').textContent.toUpperCase();
+        if (name.indexOf(filter) > -1 || owner.indexOf(filter) > -1) {
+            row.style.display = "";
+        } else {
+            row.style.display = "none";
+        }
+    });
+});
+</script>
 
 <jsp:include page="components/admin_layout_footer.jsp" />

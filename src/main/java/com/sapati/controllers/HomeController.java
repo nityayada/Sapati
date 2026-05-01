@@ -11,6 +11,12 @@ import java.io.IOException;
 public class HomeController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
+    private com.sapati.dao.ContactDAO contactDAO;
+
+    public void init() {
+        contactDAO = new com.sapati.dao.ContactDAO();
+    }
+
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String path = request.getServletPath();
         
@@ -24,6 +30,24 @@ public class HomeController extends HttpServlet {
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        doGet(request, response);
+        String path = request.getServletPath();
+        
+        if ("/contact".equals(path)) {
+            String name = request.getParameter("name");
+            String email = request.getParameter("email");
+            String subject = request.getParameter("subject");
+            String messageText = request.getParameter("message");
+            
+            com.sapati.model.ContactMessage msg = new com.sapati.model.ContactMessage(name, email, subject, messageText);
+            
+            if (contactDAO.saveMessage(msg)) {
+                response.sendRedirect(request.getContextPath() + "/contact?msg=sent");
+            } else {
+                request.setAttribute("error", "Could not send message. Please try again.");
+                request.getRequestDispatcher("/WEB-INF/Pages/contact.jsp").forward(request, response);
+            }
+        } else {
+            doGet(request, response);
+        }
     }
 }

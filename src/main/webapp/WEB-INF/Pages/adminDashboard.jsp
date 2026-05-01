@@ -99,6 +99,17 @@
         </div>
         <a href="${pageContext.request.contextPath}/admin?action=manage_fines" class="bg-primary text-on-primary py-3 px-4 text-center font-bold text-xs uppercase tracking-widest hover:opacity-90">MANAGE PENALTIES</a>
     </div>
+
+    <div class="bg-surface-container-lowest p-6 border border-outline-variant/30 flex flex-col justify-between hover:border-primary transition-colors">
+        <div>
+            <span class="material-symbols-outlined text-primary mb-4" style="font-size: 3rem;">contact_support</span>
+            <h3 class="font-sans uppercase text-sm font-black tracking-widest text-primary mb-2">Support Messages</h3>
+            <p class="text-sm text-on-surface-variant leading-relaxed mb-6">
+                Read and manage inquiries from the community sent via the public contact form.
+            </p>
+        </div>
+        <a href="${pageContext.request.contextPath}/admin?action=manage_messages" class="bg-primary text-on-primary py-3 px-4 text-center font-bold text-xs uppercase tracking-widest hover:opacity-90">OPEN MESSAGE CENTER</a>
+    </div>
 </div>
 
 <jsp:include page="components/admin_layout_footer.jsp" />

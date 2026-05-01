@@ -57,6 +57,10 @@
 <span class="material-symbols-outlined">payments</span>
 <span class="font-sans uppercase text-[10px] font-bold tracking-widest">Fines</span>
 </a>
+<a class="flex items-center space-x-3 p-3 transition-all duration-200 <%= action.equals("manage_messages") ? "bg-white text-black border border-black" : "text-gray-600 hover:bg-gray-200" %>" href="${pageContext.request.contextPath}/admin?action=manage_messages">
+<span class="material-symbols-outlined">mail</span>
+<span class="font-sans uppercase text-[10px] font-bold tracking-widest">Messages</span>
+</a>
 </nav>
 </aside>
 <main class="flex-1 ml-64 p-8">

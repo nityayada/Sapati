@@ -23,12 +23,14 @@ public class AdminController extends HttpServlet {
     private ItemDAO itemDAO;
     private BorrowDAO borrowDAO;
     private FineDAO fineDAO;
+    private com.sapati.dao.ContactDAO contactDAO;
 
     public void init() {
         userDAO = new UserDAO();
         itemDAO = new ItemDAO();
         borrowDAO = new BorrowDAO();
         fineDAO = new FineDAO();
+        contactDAO = new com.sapati.dao.ContactDAO();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -42,6 +44,10 @@ public class AdminController extends HttpServlet {
             List<User> users = userDAO.getAllUsers();
             request.setAttribute("users", users);
             request.getRequestDispatcher("/WEB-INF/Pages/manageUsers.jsp").forward(request, response);
+        } else if ("manage_messages".equals(action)) {
+            List<com.sapati.model.ContactMessage> messages = contactDAO.getAllMessages();
+            request.setAttribute("messages", messages);
+            request.getRequestDispatcher("/WEB-INF/Pages/manageMessages.jsp").forward(request, response);
         } else if ("manage_borrows".equals(action)) {
             List<BorrowRecord> borrows = borrowDAO.getAllBorrowRecordsAdmin();
             
@@ -135,6 +141,14 @@ public class AdminController extends HttpServlet {
             String status = request.getParameter("status");
             userDAO.updateUserStatus(userId, status);
             response.sendRedirect(request.getContextPath() + "/admin?action=manage_users&msg=user_updated");
+        } else if ("delete_message".equals(action)) {
+            int messageId = Integer.parseInt(request.getParameter("message_id"));
+            contactDAO.deleteMessage(messageId);
+            response.sendRedirect(request.getContextPath() + "/admin?action=manage_messages&msg=deleted");
+        } else if ("mark_message_read".equals(action)) {
+            int messageId = Integer.parseInt(request.getParameter("message_id"));
+            contactDAO.markAsRead(messageId);
+            response.sendRedirect(request.getContextPath() + "/admin?action=manage_messages");
         } else if ("mark_fine_paid".equals(action)) {
             int fineId = Integer.parseInt(request.getParameter("fine_id"));
             fineDAO.markAsPaid(fineId);

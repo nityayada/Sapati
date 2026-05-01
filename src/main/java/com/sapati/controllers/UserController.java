@@ -46,6 +46,8 @@ public class UserController extends HttpServlet {
             updateProfile(request, response);
         } else if ("update_password".equals(action)) {
             updatePassword(request, response);
+        } else if ("update_security_question".equals(action)) {
+            updateSecurityQuestion(request, response);
         } else if ("initiate_recovery".equals(action)) {
             initiateRecovery(request, response);
         } else if ("verify_answer".equals(action)) {
@@ -231,6 +233,28 @@ public class UserController extends HttpServlet {
             request.setAttribute("error", "Passwords do not match.");
             request.setAttribute("resetEmail", email);
             request.getRequestDispatcher("/WEB-INF/Pages/resetPassword.jsp").forward(request, response);
+        }
+    }
+    private void updateSecurityQuestion(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User currentUser = (User) session.getAttribute("user");
+        
+        if (currentUser == null) {
+            response.sendRedirect(request.getContextPath() + "/user?action=login");
+            return;
+        }
+
+        String question = request.getParameter("security_question");
+        String answer = request.getParameter("security_answer");
+
+        if (userDAO.updateSecurityQuestion(currentUser.getUserId(), question, answer)) {
+            // Update session object
+            currentUser.setSecurityQuestion(question);
+            session.setAttribute("user", currentUser);
+            response.sendRedirect(request.getContextPath() + "/user?action=profile&msg=security_updated");
+        } else {
+            request.setAttribute("error", "Failed to update security question.");
+            showProfile(request, response);
         }
     }
 }

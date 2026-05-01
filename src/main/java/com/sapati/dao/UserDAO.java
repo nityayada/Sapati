@@ -199,6 +199,20 @@ public class UserDAO {
         return false;
     }
 
+    public boolean updateSecurityQuestion(int userId, String question, String answer) {
+        String sql = "UPDATE users SET security_question = ?, security_answer = ? WHERE user_id = ?";
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setString(1, question);
+            pstmt.setString(2, PasswordUtil.hashPassword(answer.toLowerCase().trim()));
+            pstmt.setInt(3, userId);
+            return pstmt.executeUpdate() > 0;
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+
     public int getTotalUserCount() {
         String sql = "SELECT COUNT(*) FROM users";
         try (Connection conn = DBConnection.getConnection();

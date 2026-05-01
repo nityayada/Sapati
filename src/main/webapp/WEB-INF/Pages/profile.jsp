@@ -61,6 +61,12 @@
             </div>
         <% } %>
 
+        <% if ("security_updated".equals(msg)) { %>
+            <div style="background-color: #E3F2FD; border-left: 5px solid #1976D2; padding: 1.5rem; margin-bottom: 3rem; font-weight: 700; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.1em; color: #0D47A1;">
+                Identity Verification Protocols Configured
+            </div>
+        <% } %>
+
         <% if (error != null) { %>
             <div style="background-color: #FFEBEE; border-left: 5px solid #C62828; padding: 1.5rem; margin-bottom: 3rem; font-weight: 700; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.1em; color: #B71C1C;">
                 <%= error %>
@@ -116,12 +122,37 @@
                             <input type="password" name="new_password" class="filter-input" required style="width: 100%; border-color: var(--outline-variant);">
                         </div>
                         
-                        <div class="form-group">
+                        <div class="form-group" style="margin-bottom: 1.5rem;">
                             <label class="filter-label">Confirm Key</label>
                             <input type="password" name="confirm_password" class="filter-input" required style="width: 100%; border-color: var(--outline-variant);">
                         </div>
 
                         <button type="submit" class="btn btn-ghost" style="width: 100%; border: 2px solid var(--primary); padding: 1.25rem; font-size: 0.75rem; letter-spacing: 0.1em; background-color: transparent;">UPDATE CREDENTIALS</button>
+                    </form>
+
+                    <div style="margin: 2rem 0; border-top: 1px dashed var(--outline-variant);"></div>
+
+                    <!-- Recovery Section -->
+                    <form action="${pageContext.request.contextPath}/user" method="POST" class="space-y-6">
+                        <input type="hidden" name="action" value="update_security_question">
+                        
+                        <div class="form-group">
+                            <label class="filter-label">Identity Verification Question</label>
+                            <select name="security_question" class="filter-input" style="width: 100%; background-image: none; border-color: var(--outline-variant);" required>
+                                <option value="What was your first pet's name?" <%= "What was your first pet's name?".equals(user.getSecurityQuestion()) ? "selected" : "" %>>What was your first pet's name?</option>
+                                <option value="In what city were you born?" <%= "In what city were you born?".equals(user.getSecurityQuestion()) ? "selected" : "" %>>In what city were you born?</option>
+                                <option value="What was your childhood nickname?" <%= "What was your childhood nickname?".equals(user.getSecurityQuestion()) ? "selected" : "" %>>What was your childhood nickname?</option>
+                                <option value="What is the name of your first school?" <%= "What is the name of your first school?".equals(user.getSecurityQuestion()) ? "selected" : "" %>>What is the name of your first school?</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="filter-label">Verification Answer</label>
+                            <input type="text" name="security_answer" class="filter-input" placeholder="Update answer..." required style="width: 100%; border-color: var(--outline-variant);">
+                            <p style="font-size: 0.625rem; color: var(--outline); margin-top: 0.5rem; text-transform: uppercase; font-weight: 700;">Leave blank to keep existing answer (not recommended for first-time setup)</p>
+                        </div>
+
+                        <button type="submit" class="btn btn-ghost" style="width: 100%; border: 2px solid var(--primary); padding: 1.25rem; font-size: 0.75rem; letter-spacing: 0.1em; background-color: var(--primary); color: white;">SET RECOVERY QUESTION</button>
                     </form>
                 </section>
 

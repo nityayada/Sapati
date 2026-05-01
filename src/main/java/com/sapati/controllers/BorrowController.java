@@ -40,9 +40,13 @@ public class BorrowController extends HttpServlet {
 
         if ("view_requests".equals(action)) {
             List<BorrowRequest> requests = borrowDAO.getRequestsForOwner(user.getUserId());
+            List<BorrowRecord> pendingReturns = borrowDAO.getRecordsAwaitingVerification(user.getUserId());
+            
             request.setAttribute("incomingRequests", requests);
+            request.setAttribute("pendingReturns", pendingReturns);
             request.getRequestDispatcher("/WEB-INF/Pages/manageRequests.jsp").forward(request, response);
         }
+
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -56,7 +60,10 @@ public class BorrowController extends HttpServlet {
             handleRejectRequest(request, response);
         } else if ("return".equals(action)) {
             handleReturnResource(request, response);
+        } else if ("confirm_return".equals(action)) {
+            handleConfirmReturn(request, response);
         }
+
     }
 
     private void handleBorrowRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -182,12 +189,38 @@ public class BorrowController extends HttpServlet {
         Date returnDate = Date.valueOf(LocalDate.now());
 
         if (borrowDAO.returnResource(recordId, returnDate)) {
-            // Update item back to Available
-            itemDAO.updateItemStatus(itemId, "Available");
-            response.sendRedirect(request.getContextPath() + "/item?action=myBorrowings&msg=item_returned");
+            // Update item to 'Returned' - Owner must now verify
+            itemDAO.updateItemStatus(itemId, "Returned");
+            response.sendRedirect(request.getContextPath() + "/item?action=myBorrowings&msg=item_returned_pending");
         } else {
             response.sendRedirect(request.getContextPath() + "/item?action=myBorrowings&error=return_failed");
         }
     }
+
+    private void handleConfirmReturn(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/user?action=login");
+            return;
+        }
+
+        int itemId = Integer.parseInt(request.getParameter("item_id"));
+        
+        // Security: Ensure current user is the owner
+        Item item = itemDAO.getItemById(itemId);
+        if (item == null || item.getOwnerId() != user.getUserId()) {
+            response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=unauthorized_confirm");
+            return;
+        }
+
+        // Set item back to Available for new borrowers
+        if (itemDAO.updateItemStatus(itemId, "Available")) {
+            response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&msg=return_confirmed");
+        } else {
+            response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=confirm_failed");
+        }
+    }
+
 
 }

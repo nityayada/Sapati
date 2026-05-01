@@ -296,5 +296,41 @@ public class BorrowDAO {
         }
         return null;
     }
+    public List<BorrowRecord> getRecordsAwaitingVerification(int ownerId) {
+        List<BorrowRecord> records = new ArrayList<>();
+        String sql = "SELECT br.record_id, br.item_id, br.borrower_id, br.request_id, br.borrow_date, br.due_date, br.return_date, br.status, " +
+                     "i.name as item_name, u.full_name as borrower_name " +
+                     "FROM borrow_records br " +
+                     "JOIN items i ON br.item_id = i.item_id " +
+                     "LEFT JOIN users u ON br.borrower_id = u.user_id " +
+                     "WHERE i.owner_id = ? AND br.status = 'Returned' AND i.status IN ('Returned', 'Pending Check') " +
+                     "ORDER BY br.return_date DESC";
+
+        try (Connection conn = DBConnection.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, ownerId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            while (rs.next()) {
+                BorrowRecord record = new BorrowRecord();
+                record.setRecordId(rs.getInt("record_id"));
+                record.setItemId(rs.getInt("item_id"));
+                record.setBorrowerId(rs.getInt("borrower_id"));
+                record.setRequestId(rs.getInt("request_id"));
+                record.setBorrowDate(rs.getDate("borrow_date"));
+                record.setDueDate(rs.getDate("due_date"));
+                record.setReturnDate(rs.getDate("return_date"));
+                record.setStatus(rs.getString("status"));
+                record.setItemName(rs.getString("item_name"));
+                record.setBorrowerName(rs.getString("borrower_name"));
+                records.add(record);
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return records;
+    }
 }
+
 

@@ -1,7 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.List, com.sapati.model.BorrowRequest" %>
+<%@ page import="java.util.List, com.sapati.model.BorrowRequest, com.sapati.model.BorrowRecord" %>
 <%
     List<BorrowRequest> requests = (List<BorrowRequest>) request.getAttribute("incomingRequests");
+    List<BorrowRecord> pendingReturns = (List<BorrowRecord>) request.getAttribute("pendingReturns");
 %>
 <!DOCTYPE html>
 <html lang="en">
@@ -78,9 +79,59 @@
                                     <form action="${pageContext.request.contextPath}/borrow" method="POST" style="display: inline;">
                                         <input type="hidden" name="action" value="reject">
                                         <input type="hidden" name="request_id" value="<%= req.getRequestId() %>">
+                                        <input type="hidden" name="item_id" value="<%= req.getItemId() %>">
                                         <button type="submit" class="btn btn-ghost" style="padding: 0.5rem 1rem; font-size: 0.625rem; color: var(--error); border-color: var(--error);">REJECT</button>
                                     </form>
+
                                 </div>
+                            </td>
+                        </tr>
+                    <% } 
+                    } %>
+                </tbody>
+            </table>
+        </div>
+
+        <%-- NEW: Return Verifications Section --%>
+        <header style="margin-top: 6rem; margin-bottom: 3rem; border-bottom: 1px solid var(--outline-variant); padding-bottom: 2rem;">
+            <span class="label-md" style="color: var(--outline);">SEC. 02 // RETURN PROTOCOLS</span>
+            <h2 style="font-size: 2.5rem; font-weight: 900; text-transform: uppercase; margin-top: 1rem;">Return Verifications</h2>
+            <p style="opacity: 0.6; font-weight: 500;">Confirm that items have been returned in good condition before making them available again.</p>
+        </header>
+
+        <div class="ledger-container" style="margin-bottom: 4rem;">
+            <table class="ledger-table">
+                <thead>
+                    <tr>
+                        <th class="label-sm">RESOURCE</th>
+                        <th class="label-sm">BORROWER</th>
+                        <th class="label-sm">DATE RETURNED</th>
+                        <th class="label-sm" style="text-align: right;">ACTIONS</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <% if (pendingReturns == null || pendingReturns.isEmpty()) { %>
+                        <tr>
+                            <td colspan="4" style="text-align: center; padding: 4rem; opacity: 0.5;">
+                                <div class="label-md">No returns awaiting verification.</div>
+                            </td>
+                        </tr>
+                    <% } else { 
+                        for (BorrowRecord record : pendingReturns) { %>
+                        <tr>
+                            <td>
+                                <div style="font-weight: 800; text-transform: uppercase;"><%= record.getItemName() %></div>
+                            </td>
+                            <td>
+                                <div style="font-weight: 700;"><%= record.getBorrowerName() %></div>
+                            </td>
+                            <td class="tabular-nums"><%= record.getReturnDate() %></td>
+                            <td style="text-align: right;">
+                                <form action="${pageContext.request.contextPath}/borrow" method="POST">
+                                    <input type="hidden" name="action" value="confirm_return">
+                                    <input type="hidden" name="item_id" value="<%= record.getItemId() %>">
+                                    <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.625rem;">CONFIRM & MAKE AVAILABLE</button>
+                                </form>
                             </td>
                         </tr>
                     <% } 

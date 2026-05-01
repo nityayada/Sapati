@@ -139,6 +139,14 @@ public class AdminController extends HttpServlet {
         } else if ("update_user_status".equals(action)) {
             int userId = Integer.parseInt(request.getParameter("user_id"));
             String status = request.getParameter("status");
+            
+            // Critical Safety Check: Prevent Admins from being locked
+            User targetUser = userDAO.getUserById(userId);
+            if (targetUser != null && "Admin".equalsIgnoreCase(targetUser.getRole()) && "Locked".equalsIgnoreCase(status)) {
+                response.sendRedirect(request.getContextPath() + "/admin?action=manage_users&error=admin_immutable");
+                return;
+            }
+            
             userDAO.updateUserStatus(userId, status);
             response.sendRedirect(request.getContextPath() + "/admin?action=manage_users&msg=user_updated");
         } else if ("delete_message".equals(action)) {

@@ -46,19 +46,23 @@
                 <td class="px-6 py-4 text-center">
                     <span class="px-2 py-1 text-[10px] font-bold rounded-full <%= statusClass %>"><%= user.getAccountStatus() %></span>
                 </td>
-                <td class="px-6 py-4 text-right">
-                    <form action="${pageContext.request.contextPath}/admin" method="POST" class="inline">
-                        <input type="hidden" name="action" value="update_user_status">
-                        <input type="hidden" name="user_id" value="<%= user.getUserId() %>">
-                        <% if ("Locked".equalsIgnoreCase(user.getAccountStatus())) { %>
-                            <input type="hidden" name="status" value="Active">
-                            <button type="submit" class="bg-primary text-on-primary text-[10px] px-3 py-1 font-bold rounded hover:opacity-80">REACTIVATE</button>
+                    <td class="px-6 py-4 text-right">
+                        <% if (!"Admin".equalsIgnoreCase(user.getRole())) { %>
+                            <form action="${pageContext.request.contextPath}/admin" method="POST" class="inline">
+                                <input type="hidden" name="action" value="update_user_status">
+                                <input type="hidden" name="user_id" value="<%= user.getUserId() %>">
+                                <% if ("Locked".equalsIgnoreCase(user.getAccountStatus())) { %>
+                                    <input type="hidden" name="status" value="Active">
+                                    <button type="submit" class="bg-primary text-on-primary text-[10px] px-3 py-1 font-bold rounded hover:opacity-80">REACTIVATE</button>
+                                <% } else { %>
+                                    <input type="hidden" name="status" value="Locked">
+                                    <button type="submit" class="border border-error text-error text-[10px] px-3 py-1 font-bold rounded hover:bg-error hover:text-white transition-colors">LOCK ACCOUNT</button>
+                                <% } %>
+                            </form>
                         <% } else { %>
-                            <input type="hidden" name="status" value="Locked">
-                            <button type="submit" class="border border-error text-error text-[10px] px-3 py-1 font-bold rounded hover:bg-error hover:text-white transition-colors">LOCK ACCOUNT</button>
+                            <span class="text-[9px] font-black opacity-30 tracking-tighter">IMMUTABLE_ACCOUNT</span>
                         <% } %>
-                    </form>
-                </td>
+                    </td>
             </tr>
             <% } } else { %>
                 <tr><td colspan="6" class="px-6 py-8 text-center text-outline">No users found in directory.</td></tr>

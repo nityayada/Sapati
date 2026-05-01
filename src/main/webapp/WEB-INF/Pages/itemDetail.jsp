@@ -6,6 +6,10 @@
     User currentUser = (User) session.getAttribute("user");
     boolean isOwner = currentUser != null && owner != null && currentUser.getUserId() == owner.getUserId();
 %>
+<%
+    boolean isAdmin = currentUser != null && "Admin".equalsIgnoreCase(currentUser.getRole());
+%>
+<% if (!isAdmin) { %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,6 +32,18 @@
             <a href="${pageContext.request.contextPath}/item?action=list" class="material-symbols-outlined" style="text-decoration: none; color: var(--primary); font-size: 1.5rem;">arrow_back</a>
             <span class="label-md" style="color: var(--outline);">BACK TO COMMONS</span>
         </nav>
+<% } else { %>
+    <jsp:include page="components/admin_layout_header.jsp">
+        <jsp:param name="action" value="manage_items" />
+    </jsp:include>
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/CSS/landing.css">
+    
+    <!-- Admin Breadcrumb -->
+    <nav style="margin-bottom: 3rem; display: flex; align-items: center; gap: 1rem;">
+        <a href="${pageContext.request.contextPath}/admin?action=manage_items" class="material-symbols-outlined" style="text-decoration: none; color: var(--primary); font-size: 1.5rem;">arrow_back</a>
+        <span class="label-md" style="color: var(--outline);">BACK TO GLOBAL INVENTORY</span>
+    </nav>
+<% } %>
 
         <% if (item == null) { %>
             <div style="text-align: center; padding: 10rem 0;">
@@ -143,7 +159,13 @@
                     </div>
 
                     <div style="margin-top: 3rem;">
-                        <% if (isOwner) { %>
+                        <% if (isAdmin) { %>
+                            <div style="border: 2px dashed var(--outline-variant); padding: 2rem; text-align: center; background-color: var(--surface-container-low);">
+                                <span class="material-symbols-outlined" style="font-size: 2rem; margin-bottom: 1rem; color: var(--primary);">admin_panel_settings</span>
+                                <div style="font-weight: 900; text-transform: uppercase; font-size: 0.8125rem; letter-spacing: 0.1em; color: var(--primary);">Administrative Oversight Mode</div>
+                                <div style="font-size: 0.65rem; opacity: 0.8; margin-top: 0.5rem;">YOU ARE VIEWING THIS RESOURCE AS A SYSTEM MODERATOR. BORROWING IS DISABLED.</div>
+                            </div>
+                        <% } else if (isOwner) { %>
                             <a href="${pageContext.request.contextPath}/item?action=edit&id=<%= item.getItemId() %>" class="btn btn-primary" style="width: 100%; padding: 1.5rem; text-align: center; font-size: 0.75rem; letter-spacing: 0.3em; background-color: var(--surface-container-high); color: var(--primary); border: 1px solid var(--primary); text-decoration: none; display: block;">EDIT LISTING</a>
                         <% } else if ("Available".equalsIgnoreCase(item.getStatus())) { %>
                             <% if (request.getParameter("error") != null) { %>
@@ -191,7 +213,10 @@
 
     </main>
 
-    <jsp:include page="components/member_footer.jsp" />
-
-</body>
-</html>
+    <% if (!isAdmin) { %>
+        <jsp:include page="components/member_footer.jsp" />
+    </body>
+    </html>
+    <% } else { %>
+        <jsp:include page="components/admin_layout_footer.jsp" />
+    <% } %>

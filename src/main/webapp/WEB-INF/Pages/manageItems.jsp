@@ -44,18 +44,18 @@
     </div>
 <% } %>
 
-<div class="bg-white border border-outline-variant-30 shadow-sm overflow-hidden">
-    <table class="w-full text-left text-sm border-collapse table-fixed">
-        <thead>
-            <tr class="bg-surface-container-low border-b border-outline-variant-30 text-[10px] font-black tracking-widest text-outline uppercase">
-                <th class="px-8 py-5" style="width: 12%;">UID</th>
-                <th class="px-8 py-5" style="width: 40%;">RESOURCE SPECIFICATIONS</th>
-                <th class="px-8 py-5" style="width: 18%;">NODE OWNER</th>
-                <th class="px-8 py-5 text-center" style="width: 15%;">STATUS</th>
-                <th class="px-8 py-5 text-right" style="width: 15%;">OPERATIONS</th>
+<div class="bg-surface-container-lowest border border-outline-variant/30 overflow-hidden shadow-sm">
+    <table class="w-full text-left text-sm border-collapse">
+        <thead class="bg-surface-container-low border-b border-outline-variant/30">
+            <tr class="font-sans uppercase text-[10px] font-bold tracking-widest text-outline">
+                <th class="px-6 py-4" style="width: 150px;">RESOURCE ID</th>
+                <th class="px-6 py-4">SPECIFICATIONS</th>
+                <th class="px-6 py-4">NODE OWNER</th>
+                <th class="px-6 py-4 text-center">STATUS</th>
+                <th class="px-6 py-4 text-right">ACTIONS</th>
             </tr>
         </thead>
-        <tbody class="divide-y divide-outline-variant-20">
+        <tbody class="divide-y divide-outline-variant/20">
             <% if (items != null && !items.isEmpty()) {
                 for (Item item : items) {
                     String statusClass = "";
@@ -74,61 +74,55 @@
                         statusIcon = "error";
                     }
             %>
-            <tr class="group hover:bg-surface-container-low/30 transition-colors item-row">
-                <td class="px-8 py-6">
+            <tr class="transition-colors hover:bg-surface-container-low/50 item-row">
+                <td class="px-6 py-4">
                     <span class="font-mono text-[10px] font-bold text-outline">#RES_<%= item.getItemId() %></span>
                 </td>
-                <td class="px-8 py-6">
-                    <div class="flex items-center gap-4" style="min-width: 200px;">
-                        <div class="flex-shrink-0 w-12 h-12 bg-surface-container-high overflow-hidden border border-outline-variant-30 flex items-center justify-center">
+                <td class="px-6 py-4">
+                    <div class="flex items-center gap-4">
+                        <div class="w-10 h-10 bg-surface-container-high overflow-hidden border border-outline-variant/30 flex items-center justify-center flex-shrink-0">
                             <% if (item.getImagePath() != null) { %>
-                                <img src="<%= item.getImagePath() %>" class="w-full h-full object-cover filter grayscale group-hover:grayscale-0 transition-all duration-300" style="max-width: 100%; max-height: 100%;">
+                                <img src="<%= item.getImagePath() %>" class="w-full h-full object-cover transition-all duration-300">
                             <% } else { %>
-                                <div class="w-full h-full flex items-center justify-center opacity-20">
-                                    <span class="material-symbols-outlined">package_2</span>
-                                </div>
+                                <span class="material-symbols-outlined text-outline opacity-20">package_2</span>
                             <% } %>
                         </div>
                         <div>
-                            <div class="font-black text-sm uppercase tracking-tight item-name"><%= item.getName() %></div>
-                            <div class="text-[10px] text-outline font-medium mt-0.5"><%= item.getCreatedAt().toString().substring(0, 10) %></div>
+                            <div class="font-bold text-xs uppercase tracking-tight item-name"><%= item.getName() %></div>
+                            <div class="text-[9px] text-outline font-black uppercase tracking-widest mt-1"><%= item.getCreatedAt().toString().substring(0, 10) %></div>
                         </div>
                     </div>
                 </td>
-                <td class="px-8 py-6">
+                <td class="px-6 py-4">
                     <div class="flex items-center gap-2">
                         <span class="material-symbols-outlined text-outline text-base">person</span>
-                        <span class="font-bold text-xs tracking-wide owner-info">NODE_<%= item.getOwnerId() %></span>
+                        <span class="font-bold text-[10px] tracking-widest uppercase owner-info">NODE_<%= item.getOwnerId() %></span>
                     </div>
                 </td>
-                <td class="px-8 py-6 text-center">
-                    <span class="status-pill-premium <%= statusClass %>">
-                        <span class="material-symbols-outlined text-sm"><%= statusIcon %></span>
+                <td class="px-6 py-4 text-center">
+                    <span class="status-pill-premium <%= statusClass %>" style="font-size: 9px;">
+                        <span class="material-symbols-outlined text-xs"><%= statusIcon %></span>
                         <%= statusText %>
                     </span>
                 </td>
-                <td class="px-8 py-6">
-                    <div class="flex items-center justify-end gap-3">
-                        <a href="${pageContext.request.contextPath}/item?action=view&id=<%= item.getItemId() %>" class="admin-action-btn border border-outline-variant hover:border-primary">
-                            <span class="material-symbols-outlined text-base">visibility</span>
+                <td class="px-6 py-4">
+                    <div class="flex items-center justify-end gap-2">
+                        <a href="${pageContext.request.contextPath}/item?action=view&id=<%= item.getItemId() %>" 
+                           class="flex items-center gap-2 px-3 py-1.5 bg-black text-white border border-black hover:bg-[#333333] transition-all no-underline shadow-sm">
+                            <span class="material-symbols-outlined text-[16px]">visibility</span>
+                            <span class="text-[9px] font-black uppercase tracking-widest">Inspect</span>
                         </a>
                         
                         <% if ("Listed".equalsIgnoreCase(item.getStatus())) { %>
                             <form action="${pageContext.request.contextPath}/admin" method="POST" class="inline">
                                 <input type="hidden" name="action" value="approve_item">
                                 <input type="hidden" name="item_id" value="<%= item.getItemId() %>">
-                                <button type="submit" class="admin-action-btn action-approve">
-                                    <span class="material-symbols-outlined text-base">check</span>
-                                    APPROVE
-                                </button>
+                                <button type="submit" class="bg-primary text-on-primary text-[10px] px-3 py-1 font-bold rounded hover:opacity-80">APPROVE</button>
                             </form>
                             <form action="${pageContext.request.contextPath}/admin" method="POST" class="inline">
                                 <input type="hidden" name="action" value="reject_item">
                                 <input type="hidden" name="item_id" value="<%= item.getItemId() %>">
-                                <button type="submit" class="admin-action-btn action-reject">
-                                    <span class="material-symbols-outlined text-base">close</span>
-                                    REJECT
-                                </button>
+                                <button type="submit" class="border border-error text-error text-[10px] px-3 py-1 font-bold rounded hover:bg-error hover:text-white transition-colors">REJECT</button>
                             </form>
                         <% } %>
                     </div>

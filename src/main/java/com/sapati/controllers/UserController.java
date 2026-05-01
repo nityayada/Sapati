@@ -151,14 +151,22 @@ public class UserController extends HttpServlet {
         user.setPhoneNumber(phone);
         user.setAddress(address);
 
+        String redirect = request.getParameter("redirect");
+        String redirectPath = (redirect != null && !redirect.isEmpty()) ? redirect : "user?action=profile";
+
         if (userDAO.updateUser(user)) {
             // Update session object too
             currentUser.setFullName(fullName);
             session.setAttribute("user", currentUser);
-            response.sendRedirect(request.getContextPath() + "/user?action=profile&msg=profile_updated");
+            response.sendRedirect(request.getContextPath() + "/" + redirectPath + "&msg=profile_updated");
         } else {
             request.setAttribute("error", "Failed to update profile.");
-            showProfile(request, response);
+            if (redirectPath.contains("admin")) {
+                request.setAttribute("user", userDAO.getUserById(currentUser.getUserId()));
+                request.getRequestDispatcher("/WEB-INF/Pages/adminProfile.jsp").forward(request, response);
+            } else {
+                showProfile(request, response);
+            }
         }
     }
 
@@ -180,11 +188,19 @@ public class UserController extends HttpServlet {
             return;
         }
 
+        String redirect = request.getParameter("redirect");
+        String redirectPath = (redirect != null && !redirect.isEmpty()) ? redirect : "user?action=profile";
+
         if (userDAO.updatePassword(currentUser.getUserId(), newPassword)) {
-            response.sendRedirect(request.getContextPath() + "/user?action=profile&msg=password_updated");
+            response.sendRedirect(request.getContextPath() + "/" + redirectPath + "&msg=password_updated");
         } else {
             request.setAttribute("error", "Failed to update password.");
-            showProfile(request, response);
+            if (redirectPath.contains("admin")) {
+                request.setAttribute("user", userDAO.getUserById(currentUser.getUserId()));
+                request.getRequestDispatcher("/WEB-INF/Pages/adminProfile.jsp").forward(request, response);
+            } else {
+                showProfile(request, response);
+            }
         }
     }
     private void initiateRecovery(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -247,14 +263,22 @@ public class UserController extends HttpServlet {
         String question = request.getParameter("security_question");
         String answer = request.getParameter("security_answer");
 
+        String redirect = request.getParameter("redirect");
+        String redirectPath = (redirect != null && !redirect.isEmpty()) ? redirect : "user?action=profile";
+
         if (userDAO.updateSecurityQuestion(currentUser.getUserId(), question, answer)) {
             // Update session object
             currentUser.setSecurityQuestion(question);
             session.setAttribute("user", currentUser);
-            response.sendRedirect(request.getContextPath() + "/user?action=profile&msg=security_updated");
+            response.sendRedirect(request.getContextPath() + "/" + redirectPath + "&msg=security_updated");
         } else {
             request.setAttribute("error", "Failed to update security question.");
-            showProfile(request, response);
+            if (redirectPath.contains("admin")) {
+                request.setAttribute("user", userDAO.getUserById(currentUser.getUserId()));
+                request.getRequestDispatcher("/WEB-INF/Pages/adminProfile.jsp").forward(request, response);
+            } else {
+                showProfile(request, response);
+            }
         }
     }
 }

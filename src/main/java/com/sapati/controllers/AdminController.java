@@ -109,6 +109,15 @@ public class AdminController extends HttpServlet {
             request.setAttribute("outstandingAmount", outstandingAmount);
             
             request.getRequestDispatcher("/WEB-INF/Pages/manageFines.jsp").forward(request, response);
+        } else if ("profile".equals(action)) {
+            User sessionUser = (User) request.getSession().getAttribute("user");
+            if (sessionUser != null) {
+                User user = userDAO.getUserById(sessionUser.getUserId());
+                request.setAttribute("user", user);
+                request.getRequestDispatcher("/WEB-INF/Pages/adminProfile.jsp").forward(request, response);
+            } else {
+                response.sendRedirect(request.getContextPath() + "/user?action=login");
+            }
         } else {
             // Default to dashboard - Fetch Stats
             int userCount = userDAO.getTotalUserCount();

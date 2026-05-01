@@ -22,8 +22,19 @@
 </nav>
 <div class="flex items-center gap-4">
     <% if (sessionUser != null) { %>
-        <span class="font-bold text-xs"><%= sessionUser.getFullName() %></span>
-        <button class="text-gray-500 font-medium hover:text-black transition-colors scale-95 duration-75" onclick="window.location.href='${pageContext.request.contextPath}/user?action=logout'">Logout</button>
+        <div class="flex items-center gap-3 pr-4 border-r border-gray-300">
+            <div class="text-right">
+                <div class="text-[9px] font-black uppercase text-gray-500 tracking-widest leading-none">Admin Node</div>
+                <div class="text-xs font-bold text-black"><%= sessionUser.getFullName() %></div>
+            </div>
+            <div class="w-8 h-8 bg-black text-white flex items-center justify-center rounded-sm font-black text-xs">
+                <%= sessionUser.getFullName().substring(0,1).toUpperCase() %>
+            </div>
+        </div>
+        <a href="${pageContext.request.contextPath}/user?action=logout" class="flex items-center gap-2 text-[#C62828] hover:bg-[#FFEBEE] px-3 py-1.5 transition-colors rounded group no-underline">
+            <span class="material-symbols-outlined text-base">logout</span>
+            <span class="text-[10px] font-black uppercase tracking-widest">Secure Logout</span>
+        </a>
     <% } else { %>
         <button class="text-gray-500 font-medium hover:text-black transition-colors scale-95 duration-75" onclick="window.location.href='${pageContext.request.contextPath}/home'">Back to Site</button>
     <% } %>
@@ -61,6 +72,12 @@
 <span class="material-symbols-outlined">mail</span>
 <span class="font-sans uppercase text-[10px] font-bold tracking-widest">Messages</span>
 </a>
+<div class="pt-4 mt-4 border-t border-gray-300">
+    <a class="flex items-center space-x-3 p-3 transition-all duration-200 <%= action.equals("profile") ? "bg-white text-black border border-black" : "text-gray-600 hover:bg-gray-200" %>" href="${pageContext.request.contextPath}/admin?action=profile">
+        <span class="material-symbols-outlined">account_circle</span>
+        <span class="font-sans uppercase text-[10px] font-bold tracking-widest">My Profile</span>
+    </a>
+</div>
 </nav>
 </aside>
 <main class="flex-1 ml-64 p-8">

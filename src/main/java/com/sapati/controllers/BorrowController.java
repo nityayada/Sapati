@@ -16,6 +16,10 @@ import java.io.IOException;
 import java.sql.Date;
 import java.time.LocalDate;
 import java.util.List;
+import com.sapati.util.FineCalculator;
+import com.sapati.dao.FineDAO;
+import com.sapati.model.Fine;
+import java.time.temporal.ChronoUnit;
 
 @WebServlet("/borrow")
 public class BorrowController extends HttpServlet {
@@ -187,6 +191,16 @@ public class BorrowController extends HttpServlet {
         }
 
         Date returnDate = Date.valueOf(LocalDate.now());
+
+        // [NEW] Fine Check Logic
+        if (record.getDueDate() != null && returnDate.after(record.getDueDate())) {
+            long daysLate = ChronoUnit.DAYS.between(record.getDueDate().toLocalDate(), LocalDate.now());
+            if (daysLate > 0) {
+                // Redirect to payment flow
+                response.sendRedirect(request.getContextPath() + "/payment?action=settle&record_id=" + recordId);
+                return;
+            }
+        }
 
         if (borrowDAO.returnResource(recordId, returnDate)) {
             // Update item to 'Returned' - Owner must now verify

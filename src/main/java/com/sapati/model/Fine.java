@@ -12,8 +12,16 @@ public class Fine {
     private Timestamp paidAt;
     private String memberName;
     private String itemName;
+    private String paymentMethod;
+    private String transactionId;
 
     public Fine() {}
+
+    public String getPaymentMethod() { return paymentMethod; }
+    public void setPaymentMethod(String paymentMethod) { this.paymentMethod = paymentMethod; }
+
+    public String getTransactionId() { return transactionId; }
+    public void setTransactionId(String transactionId) { this.transactionId = transactionId; }
 
     public String getMemberName() { return memberName; }
     public void setMemberName(String memberName) { this.memberName = memberName; }

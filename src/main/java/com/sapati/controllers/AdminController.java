@@ -168,7 +168,7 @@ public class AdminController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin?action=manage_messages");
         } else if ("mark_fine_paid".equals(action)) {
             int fineId = Integer.parseInt(request.getParameter("fine_id"));
-            fineDAO.markAsPaid(fineId);
+            fineDAO.markAsPaid(fineId, "Manual (Admin)", "ADM-MANUAL-" + System.currentTimeMillis());
             response.sendRedirect(request.getContextPath() + "/admin?action=manage_fines&msg=fine_paid");
         } else if ("admin_return_item".equals(action)) {
             int recordId = Integer.parseInt(request.getParameter("record_id"));

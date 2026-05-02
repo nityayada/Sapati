@@ -52,6 +52,7 @@
                 <th class="px-6 py-4">ITEM</th>
                 <th class="px-6 py-4">DAYS OVERDUE</th>
                 <th class="px-6 py-4">FINE</th>
+                <th class="px-6 py-4">PAYMENT INFO</th>
                 <th class="px-6 py-4 text-center">STATUS</th>
                 <th class="px-6 py-4 text-right">ACTION</th>
             </tr>
@@ -69,6 +70,14 @@
                     <%= fine.getDaysLate() %> Days
                 </td>
                 <td class="px-6 py-4 font-black">NPR <%= Math.round(fine.getAmount()) %></td>
+                <td class="px-6 py-4">
+                    <% if (isPaid) { %>
+                        <div class="text-[10px] font-bold"><%= fine.getPaymentMethod() %></div>
+                        <div class="text-[9px] text-outline font-mono"><%= fine.getTransactionId() %></div>
+                    <% } else { %>
+                        <span class="text-[10px] text-outline italic">PENDING PAYMENT</span>
+                    <% } %>
+                </td>
                 <td class="px-6 py-4 text-center">
                     <span class="px-2 py-1 text-[10px] font-bold rounded-full <%= statusClass %>"><%= fine.getPaymentStatus() %></span>
                 </td>
@@ -86,7 +95,7 @@
             </tr>
             <%  }
                } else { %>
-                <tr><td colspan="6" class="px-6 py-8 text-center text-outline">No fine records found.</td></tr>
+                <tr><td colspan="7" class="px-6 py-8 text-center text-outline">No fine records found.</td></tr>
             <% } %>
         </tbody>
     </table>

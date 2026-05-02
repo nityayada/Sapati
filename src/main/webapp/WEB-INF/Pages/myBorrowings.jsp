@@ -37,6 +37,16 @@
                             <span>BORROW REQUEST TRANSMITTED SUCCESSFULLY. AWAITING OWNER OVERSIGHT.</span>
                         </div>
                     </div>
+                <% } else if ("fine_paid_item_returned".equalsIgnoreCase(msg)) { %>
+                    <div class="auth-msg auth-msg-success">
+                        <div style="display: flex; align-items: center; gap: 1rem;">
+                            <span class="material-symbols-outlined">payments</span>
+                            <div>
+                                <div style="font-weight: 900;">FINE SETTLED & ITEM RETURNED SUCCESSFULLY</div>
+                                <div style="font-size: 0.625rem; opacity: 0.8; letter-spacing: 0.1em; margin-top: 0.25rem;">TRANSACTION ID: <%= request.getParameter("txid") %></div>
+                            </div>
+                        </div>
+                    </div>
                 <% } else if (msg != null) { %>
                     <div class="auth-msg auth-msg-success">
                         <%= msg %>

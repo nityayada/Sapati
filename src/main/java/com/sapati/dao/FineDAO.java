@@ -44,6 +44,8 @@ public class FineDAO {
                 fine.setPaymentStatus(rs.getString("payment_status"));
                 fine.setCreatedAt(rs.getTimestamp("created_at"));
                 fine.setPaidAt(rs.getTimestamp("paid_at"));
+                fine.setPaymentMethod(rs.getString("payment_method"));
+                fine.setTransactionId(rs.getString("transaction_id"));
                 fines.add(fine);
             }
         } catch (SQLException e) {
@@ -52,12 +54,14 @@ public class FineDAO {
         return fines;
     }
 
-    public boolean markAsPaid(int fineId) {
-        String sql = "UPDATE fines SET payment_status = 'Paid', paid_at = CURRENT_TIMESTAMP WHERE fine_id = ?";
+    public boolean markAsPaid(int fineId, String paymentMethod, String transactionId) {
+        String sql = "UPDATE fines SET payment_status = 'Paid', paid_at = CURRENT_TIMESTAMP, payment_method = ?, transaction_id = ? WHERE fine_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
-            pstmt.setInt(1, fineId);
+            pstmt.setString(1, paymentMethod);
+            pstmt.setString(2, transactionId);
+            pstmt.setInt(3, fineId);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();
@@ -98,6 +102,8 @@ public class FineDAO {
                 fine.setPaymentStatus(rs.getString("payment_status"));
                 fine.setCreatedAt(rs.getTimestamp("created_at"));
                 fine.setPaidAt(rs.getTimestamp("paid_at"));
+                fine.setPaymentMethod(rs.getString("payment_method"));
+                fine.setTransactionId(rs.getString("transaction_id"));
                 fine.setMemberName(rs.getString("member_name"));
                 fine.setItemName(rs.getString("item_name"));
                 fines.add(fine);
@@ -125,6 +131,8 @@ public class FineDAO {
                 fine.setPaymentStatus(rs.getString("payment_status"));
                 fine.setCreatedAt(rs.getTimestamp("created_at"));
                 fine.setPaidAt(rs.getTimestamp("paid_at"));
+                fine.setPaymentMethod(rs.getString("payment_method"));
+                fine.setTransactionId(rs.getString("transaction_id"));
                 return fine;
             }
         } catch (SQLException e) {

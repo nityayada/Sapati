@@ -12,7 +12,7 @@ import java.sql.*;
 public class UserDAO {
 
     public boolean registerUser(User user) {
-        String sql = "INSERT INTO users (full_name, email, phone_number, password_hash, address, role, security_question, security_answer) VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (full_name, email, phone_number, password_hash, address, profile_image, role, security_question, security_answer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
@@ -21,9 +21,10 @@ public class UserDAO {
             pstmt.setString(3, user.getPhoneNumber());
             pstmt.setString(4, PasswordUtil.hashPassword(user.getPasswordHash()));
             pstmt.setString(5, user.getAddress());
-            pstmt.setString(6, user.getRole() == null ? "Member" : user.getRole());
-            pstmt.setString(7, user.getSecurityQuestion());
-            pstmt.setString(8, PasswordUtil.hashPassword(user.getSecurityAnswer().toLowerCase().trim()));
+            pstmt.setString(6, user.getProfileImage());
+            pstmt.setString(7, user.getRole() == null ? "Member" : user.getRole());
+            pstmt.setString(8, user.getSecurityQuestion());
+            pstmt.setString(9, PasswordUtil.hashPassword(user.getSecurityAnswer().toLowerCase().trim()));
             
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
@@ -50,6 +51,7 @@ public class UserDAO {
                     user.setEmail(rs.getString("email"));
                     user.setRole(rs.getString("role"));
                     user.setAccountStatus(rs.getString("account_status"));
+                    user.setProfileImage(rs.getString("profile_image"));
                     return user;
                 }
             }
@@ -89,6 +91,7 @@ public class UserDAO {
                 user.setRole(rs.getString("role"));
                 user.setAccountStatus(rs.getString("account_status"));
                 user.setAddress(rs.getString("address"));
+                user.setProfileImage(rs.getString("profile_image"));
                 user.setSecurityQuestion(rs.getString("security_question"));
                 user.setSecurityAnswer(rs.getString("security_answer"));
                 return user;
@@ -115,6 +118,7 @@ public class UserDAO {
                 user.setRole(rs.getString("role"));
                 user.setAccountStatus(rs.getString("account_status"));
                 user.setAddress(rs.getString("address"));
+                user.setProfileImage(rs.getString("profile_image"));
                 return user;
             }
         } catch (SQLException e) {
@@ -137,6 +141,7 @@ public class UserDAO {
                 user.setRole(rs.getString("role"));
                 user.setAccountStatus(rs.getString("account_status"));
                 user.setAddress(rs.getString("address"));
+                user.setProfileImage(rs.getString("profile_image"));
                 users.add(user);
             }
         } catch (SQLException e) {
@@ -159,13 +164,14 @@ public class UserDAO {
     }
 
     public boolean updateUser(User user) {
-        String sql = "UPDATE users SET full_name = ?, phone_number = ?, address = ? WHERE user_id = ?";
+        String sql = "UPDATE users SET full_name = ?, phone_number = ?, address = ?, profile_image = ? WHERE user_id = ?";
         try (Connection conn = DBConnection.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, user.getFullName());
             pstmt.setString(2, user.getPhoneNumber());
             pstmt.setString(3, user.getAddress());
-            pstmt.setInt(4, user.getUserId());
+            pstmt.setString(4, user.getProfileImage());
+            pstmt.setInt(5, user.getUserId());
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

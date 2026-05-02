@@ -49,8 +49,14 @@
                     <span class="label-md" style="font-size: 0.6rem; opacity: 0.6;">Active Member</span><br>
                     <span style="font-weight: 800; font-size: 0.875rem;"><%= sessionUser.getFullName() %></span>
                 </div>
-                <div style="display: flex; gap: 0.5rem;">
-                    <a href="${pageContext.request.contextPath}/user?action=profile" class="material-symbols-outlined nav-link" style="font-size: 1.5rem;">account_circle</a>
+                <div style="display: flex; gap: 0.5rem; align-items: center;">
+                    <a href="${pageContext.request.contextPath}/user?action=profile" style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; display: flex; align-items: center; justify-content: center; border: 2px solid var(--primary);">
+                        <% if (sessionUser.getProfileImage() != null && !sessionUser.getProfileImage().isEmpty()) { %>
+                            <img src="${pageContext.request.contextPath}/<%= sessionUser.getProfileImage() %>" alt="P" style="width: 100%; height: 100%; object-fit: cover;">
+                        <% } else { %>
+                            <span class="material-symbols-outlined" style="font-size: 1.5rem;">account_circle</span>
+                        <% } %>
+                    </a>
                     <a href="${pageContext.request.contextPath}/user?action=logout" class="material-symbols-outlined nav-link" style="font-size: 1.5rem; color: var(--error);">logout</a>
                 </div>
             <% } %>

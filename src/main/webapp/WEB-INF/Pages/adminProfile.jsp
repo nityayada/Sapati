@@ -27,8 +27,12 @@
     
     <!-- Profile Header -->
     <div class="mb-12 flex items-center gap-8 bg-surface-container-low p-8 border border-outline-variant/30">
-        <div class="w-24 h-24 bg-black text-white flex items-center justify-center rounded-sm font-black text-4xl">
-            <%= user.getFullName().substring(0,1).toUpperCase() %>
+        <div class="w-24 h-24 bg-black text-white flex items-center justify-center rounded-sm font-black text-4xl overflow-hidden">
+            <% if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) { %>
+                <img src="${pageContext.request.contextPath}/<%= user.getProfileImage() %>" alt="Profile" class="w-full h-full object-cover">
+            <% } else { %>
+                <%= user.getFullName().substring(0,1).toUpperCase() %>
+            <% } %>
         </div>
         <div>
             <div class="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-2">System Administrator Node</div>
@@ -58,7 +62,7 @@
         <section class="bg-white border border-outline-variant/30 p-8 shadow-sm">
             <h2 class="text-[10px] font-black uppercase tracking-[0.2em] text-outline border-b border-outline-variant/30 pb-4 mb-6">ADMIN_IDENTITY_REGISTRY</h2>
             
-            <form action="${pageContext.request.contextPath}/user" method="POST" class="space-y-6">
+            <form action="${pageContext.request.contextPath}/user" method="POST" enctype="multipart/form-data" class="space-y-6">
                 <input type="hidden" name="action" value="update_profile">
                 <input type="hidden" name="redirect" value="admin?action=profile">
                 
@@ -80,6 +84,11 @@
                 <div class="form-group">
                     <label class="text-[9px] font-black uppercase tracking-widest text-outline mb-2 block">Physical Node (Address)</label>
                     <input type="text" name="address" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none" value="<%= user.getAddress() != null ? user.getAddress() : "" %>" required>
+                </div>
+
+                <div class="form-group">
+                    <label class="text-[9px] font-black uppercase tracking-widest text-outline mb-2 block">Update Profile Picture</label>
+                    <input type="file" name="profile_image" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none bg-white" accept="image/*">
                 </div>
 
                 <button type="submit" class="btn btn-primary" style="padding: 1.25rem 3rem; font-size: 0.75rem; letter-spacing: 0.2em; margin-top: 1rem; width: 100%; border: none;">COMMIT CHANGES</button>

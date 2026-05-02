@@ -51,7 +51,7 @@
                     <div class="auth-msg auth-msg-error"><%= request.getAttribute("error") %></div>
                 <% } %>
 
-                <form action="${pageContext.request.contextPath}/user" method="POST">
+                <form action="${pageContext.request.contextPath}/user" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="register">
                     
                     <div class="input-grid">
@@ -81,6 +81,14 @@
                         <div style="position: relative;">
                             <span class="material-symbols-outlined" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--outline); font-size: 1.25rem;">location_on</span>
                             <input type="text" id="address" name="address" class="form-input" style="padding-left: 3rem;" placeholder="e.g. Kathmandu / 123 Main St" required>
+                        </div>
+                    </div>
+
+                    <div class="form-group mt-8">
+                        <label for="profile_image" class="form-label">Profile Picture (Optional)</label>
+                        <div style="position: relative;">
+                            <span class="material-symbols-outlined" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--outline); font-size: 1.25rem;">account_circle</span>
+                            <input type="file" id="profile_image" name="profile_image" class="form-input" style="padding-left: 3rem;" accept="image/*">
                         </div>
                     </div>
 

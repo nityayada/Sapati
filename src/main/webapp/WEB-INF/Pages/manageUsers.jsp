@@ -36,7 +36,18 @@
             %>
             <tr class="transition-colors hover:bg-surface-container-lowest/50 user-row">
                 <td class="px-6 py-4 font-bold font-mono text-xs text-on-surface-variant">USR_<%= user.getUserId() %></td>
-                <td class="px-6 py-4 font-bold user-name"><%= user.getFullName() %></td>
+                <td class="px-6 py-4 font-bold user-name">
+                    <div class="flex items-center gap-3">
+                        <div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-high flex-shrink-0 border border-outline-variant/30">
+                            <% if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) { %>
+                                <img src="${pageContext.request.contextPath}/<%= user.getProfileImage() %>" alt="" class="w-full h-full object-cover">
+                            <% } else { %>
+                                <span class="material-symbols-outlined text-outline text-xs flex items-center justify-center h-full">person</span>
+                            <% } %>
+                        </div>
+                        <%= user.getFullName() %>
+                    </div>
+                </td>
                 <td class="px-6 py-4 text-on-surface-variant user-email"><%= user.getEmail() %></td>
                 <td class="px-6 py-4">
                     <span class="text-[10px] uppercase font-bold tracking-widest <%= "Admin".equals(user.getRole()) ? "text-primary" : "" %>">

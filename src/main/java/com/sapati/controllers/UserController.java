@@ -9,8 +9,18 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.servlet.http.HttpSession;
 import java.io.IOException;
+import java.io.File;
+import java.nio.file.Paths;
+import java.util.UUID;
+import jakarta.servlet.annotation.MultipartConfig;
+import jakarta.servlet.http.Part;
 
 @WebServlet("/user")
+@MultipartConfig(
+    fileSizeThreshold = 1024 * 1024 * 1, // 1 MB
+    maxFileSize = 1024 * 1024 * 10,      // 10 MB
+    maxRequestSize = 1024 * 1024 * 15    // 15 MB
+)
 public class UserController extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private UserDAO userDAO;
@@ -82,6 +92,19 @@ public class UserController extends HttpServlet {
         user.setSecurityQuestion(securityQuestion);
         user.setSecurityAnswer(securityAnswer);
 
+        // Handle Profile Image Upload
+        Part filePart = request.getPart("profile_image");
+        if (filePart != null && filePart.getSize() > 0) {
+            String fileName = UUID.randomUUID().toString() + "_" + Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+            String uploadPath = getServletContext().getRealPath("/Images");
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) uploadDir.mkdir();
+            filePart.write(uploadPath + File.separator + fileName);
+            user.setProfileImage("Images/" + fileName);
+        } else {
+            user.setProfileImage("Images/default_profile.png"); // Set a default if not provided
+        }
+
         if (userDAO.registerUser(user)) {
             request.setAttribute("msg", "registered");
             request.getRequestDispatcher("/WEB-INF/Pages/login.jsp").forward(request, response);
@@ -151,12 +174,29 @@ public class UserController extends HttpServlet {
         user.setPhoneNumber(phone);
         user.setAddress(address);
 
+        // Handle Profile Image Update
+        Part filePart = request.getPart("profile_image");
+        if (filePart != null && filePart.getSize() > 0) {
+            String fileName = UUID.randomUUID().toString() + "_" + Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
+            String uploadPath = getServletContext().getRealPath("/Images");
+            File uploadDir = new File(uploadPath);
+            if (!uploadDir.exists()) uploadDir.mkdir();
+            filePart.write(uploadPath + File.separator + fileName);
+            user.setProfileImage("Images/" + fileName);
+            currentUser.setProfileImage("Images/" + fileName); // Update session object
+        } else {
+            // Keep existing image if no new one uploaded
+            user.setProfileImage(currentUser.getProfileImage());
+        }
+
         String redirect = request.getParameter("redirect");
         String redirectPath = (redirect != null && !redirect.isEmpty()) ? redirect : "user?action=profile";
 
         if (userDAO.updateUser(user)) {
             // Update session object too
             currentUser.setFullName(fullName);
+            currentUser.setPhoneNumber(phone);
+            currentUser.setAddress(address);
             session.setAttribute("user", currentUser);
             response.sendRedirect(request.getContextPath() + "/" + redirectPath + "&msg=profile_updated");
         } else {

@@ -33,8 +33,12 @@
         
         <!-- Profile Header -->
         <section class="welcome-banner" style="margin-bottom: 4rem;">
-            <div class="user-avatar" style="width: 100px; height: 100px; background-color: var(--primary-container); border: 2px solid var(--primary);">
-                <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary);">person</span>
+            <div class="user-avatar" style="width: 100px; height: 100px; background-color: var(--primary-container); border: 2px solid var(--primary); overflow: hidden; display: flex; align-items: center; justify-content: center;">
+                <% if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) { %>
+                    <img src="${pageContext.request.contextPath}/<%= user.getProfileImage() %>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                <% } else { %>
+                    <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary);">person</span>
+                <% } %>
             </div>
             <div>
                 <div style="display: flex; align-items: baseline; gap: 1.5rem; margin-bottom: 0.75rem;">
@@ -79,7 +83,7 @@
             <section style="background-color: white; border: 1px solid var(--outline-variant); padding: 3rem;">
                 <h2 class="label-md" style="margin-bottom: 3rem; border-bottom: 2px solid var(--primary); padding-bottom: 1rem; display: inline-block;">IDENTITY_REGISTRY_v1.0</h2>
                 
-                <form action="${pageContext.request.contextPath}/user" method="POST" class="space-y-8">
+                <form action="${pageContext.request.contextPath}/user" method="POST" enctype="multipart/form-data" class="space-y-8">
                     <input type="hidden" name="action" value="update_profile">
                     
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
@@ -102,6 +106,11 @@
                             <label class="filter-label">Physical Node (Address)</label>
                             <input type="text" name="address" class="filter-input" value="<%= user.getAddress() != null ? user.getAddress() : "" %>" required style="width: 100%; border-color: var(--outline-variant);">
                         </div>
+                    </div>
+
+                    <div class="form-group mb-8">
+                        <label class="filter-label">Update Profile Picture</label>
+                        <input type="file" name="profile_image" class="filter-input" accept="image/*" style="width: 100%; border-color: var(--outline-variant);">
                     </div>
 
                     <button type="submit" class="btn btn-primary" style="padding: 1.5rem 4rem; font-size: 0.8125rem; letter-spacing: 0.2em; margin-top: 2rem;">COMMIT CHANGES</button>

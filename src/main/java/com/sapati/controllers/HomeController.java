@@ -7,7 +7,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
-@WebServlet({"/home", "/about", "/contact", ""})
+@WebServlet({"/home", "/about", "/contact",""})
 public class HomeController extends HttpServlet {
     private static final long serialVersionUID = 1L;
 
@@ -19,14 +19,16 @@ public class HomeController extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String path = request.getServletPath();
-        
+       
         if ("/about".equals(path)) {
-            request.getRequestDispatcher("/WEB-INF/Pages/about.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/about.jsp").forward(request, response);
         } else if ("/contact".equals(path)) {
-            request.getRequestDispatcher("/WEB-INF/Pages/contact.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/contact.jsp").forward(request, response);
         } else {
-            request.getRequestDispatcher("/WEB-INF/Pages/landing.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/landing.jsp").forward(request, response);
         }
+      
+ 
     }
 
     protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -44,7 +46,7 @@ public class HomeController extends HttpServlet {
                 response.sendRedirect(request.getContextPath() + "/contact?msg=sent");
             } else {
                 request.setAttribute("error", "Could not send message. Please try again.");
-                request.getRequestDispatcher("/WEB-INF/Pages/contact.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/pages/contact.jsp").forward(request, response);
             }
         } else {
             doGet(request, response);

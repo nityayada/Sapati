@@ -39,15 +39,15 @@ public class AdminController extends HttpServlet {
         if ("manage_items".equals(action)) {
             List<Item> items = itemDAO.getAllItemsAdmin();
             request.setAttribute("items", items);
-            request.getRequestDispatcher("/WEB-INF/Pages/manageItems.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/manageItems.jsp").forward(request, response);
         } else if ("manage_users".equals(action)) {
             List<User> users = userDAO.getAllUsers();
             request.setAttribute("users", users);
-            request.getRequestDispatcher("/WEB-INF/Pages/manageUsers.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/manageUsers.jsp").forward(request, response);
         } else if ("manage_messages".equals(action)) {
             List<com.sapati.model.ContactMessage> messages = contactDAO.getAllMessages();
             request.setAttribute("messages", messages);
-            request.getRequestDispatcher("/WEB-INF/Pages/manageMessages.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/manageMessages.jsp").forward(request, response);
         } else if ("manage_borrows".equals(action)) {
             List<BorrowRecord> borrows = borrowDAO.getAllBorrowRecordsAdmin();
             
@@ -80,7 +80,7 @@ public class AdminController extends HttpServlet {
             request.setAttribute("newToday", newToday);
             request.setAttribute("returnRate", String.format("%.1f", returnRate));
             
-            request.getRequestDispatcher("/WEB-INF/Pages/manageBorrows.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/manageBorrows.jsp").forward(request, response);
         } else if ("run_fine_calc".equals(action)) {
             com.sapati.util.FineCalculator.runCalculations();
             response.sendRedirect(request.getContextPath() + "/admin?action=manage_fines&msg=fines_recalculated");
@@ -108,13 +108,13 @@ public class AdminController extends HttpServlet {
             request.setAttribute("collectedAmount", collectedAmount);
             request.setAttribute("outstandingAmount", outstandingAmount);
             
-            request.getRequestDispatcher("/WEB-INF/Pages/manageFines.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/manageFines.jsp").forward(request, response);
         } else if ("profile".equals(action)) {
             User sessionUser = (User) request.getSession().getAttribute("user");
             if (sessionUser != null) {
                 User user = userDAO.getUserById(sessionUser.getUserId());
                 request.setAttribute("user", user);
-                request.getRequestDispatcher("/WEB-INF/Pages/adminProfile.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/pages/adminProfile.jsp").forward(request, response);
             } else {
                 response.sendRedirect(request.getContextPath() + "/user?action=login");
             }
@@ -130,7 +130,7 @@ public class AdminController extends HttpServlet {
             request.setAttribute("activeBorrows", activeBorrows);
             request.setAttribute("totalUnpaidFines", totalUnpaidFines);
             
-            request.getRequestDispatcher("/WEB-INF/Pages/adminDashboard.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/adminDashboard.jsp").forward(request, response);
         }
     }
 

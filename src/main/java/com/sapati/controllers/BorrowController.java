@@ -48,7 +48,7 @@ public class BorrowController extends HttpServlet {
             
             request.setAttribute("incomingRequests", requests);
             request.setAttribute("pendingReturns", pendingReturns);
-            request.getRequestDispatcher("/WEB-INF/Pages/manageRequests.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/manageRequests.jsp").forward(request, response);
         }
 
     }

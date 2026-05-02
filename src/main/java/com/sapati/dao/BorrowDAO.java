@@ -1,6 +1,6 @@
 package com.sapati.dao;
 
-import com.sapati.config.DBConnection;
+import com.sapati.config.DBConfig;
 import com.sapati.model.BorrowRequest;
 import com.sapati.model.BorrowRecord;
 
@@ -12,7 +12,7 @@ public class BorrowDAO {
 
     public boolean createBorrowRequest(BorrowRequest request) {
         String sql = "INSERT INTO borrow_requests (item_id, requester_id, requested_date, proposed_due_date, request_status) VALUES (?, ?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, request.getItemId());
@@ -35,7 +35,7 @@ public class BorrowDAO {
                      "JOIN items i ON br.item_id = i.item_id " +
                      "JOIN users u ON br.requester_id = u.user_id " +
                      "WHERE i.owner_id = ? AND br.request_status = 'Pending'";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, ownerId);
@@ -68,7 +68,7 @@ public class BorrowDAO {
                      "JOIN users u ON i.owner_id = u.user_id " +
                      "WHERE br.requester_id = ? " +
                      "ORDER BY br.requested_date DESC";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, requesterId);
@@ -95,7 +95,7 @@ public class BorrowDAO {
 
     public boolean updateRequestStatus(int requestId, String status) {
         String sql = "UPDATE borrow_requests SET request_status = ? WHERE request_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, status);
@@ -110,7 +110,7 @@ public class BorrowDAO {
 
     public boolean createBorrowRecord(BorrowRecord record) {
         String sql = "INSERT INTO borrow_records (item_id, borrower_id, request_id, borrow_date, due_date, status) VALUES (?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, record.getItemId());
@@ -135,7 +135,7 @@ public class BorrowDAO {
                      "JOIN users u ON i.owner_id = u.user_id " +
                      "WHERE br.borrower_id = ? " +
                      "ORDER BY br.borrow_date DESC";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, userId);
@@ -168,7 +168,7 @@ public class BorrowDAO {
                      "SUM(CASE WHEN status = 'Active' THEN 1 ELSE 0 END) as active, " +
                      "SUM(CASE WHEN status = 'Overdue' THEN 1 ELSE 0 END) as overdue " +
                      "FROM borrow_records WHERE borrower_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, userId);
@@ -186,7 +186,7 @@ public class BorrowDAO {
 
     public int getTotalBorrowCount() {
         String sql = "SELECT COUNT(*) FROM borrow_records";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) return rs.getInt(1);
@@ -205,7 +205,7 @@ public class BorrowDAO {
                      "JOIN users u_borrower ON br.borrower_id = u_borrower.user_id " +
                      "ORDER BY br.borrow_date DESC";
                      
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             
@@ -232,7 +232,7 @@ public class BorrowDAO {
 
     public int getActiveBorrowCount() {
         String sql = "SELECT COUNT(*) FROM borrow_records WHERE status = 'Active' OR status = 'Overdue'";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) return rs.getInt(1);
@@ -244,7 +244,7 @@ public class BorrowDAO {
 
     public boolean returnResource(int recordId, java.sql.Date returnDate) {
         String sql = "UPDATE borrow_records SET status = 'Returned', return_date = ? WHERE record_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setDate(1, returnDate);
@@ -259,7 +259,7 @@ public class BorrowDAO {
 
     public boolean updateRecordStatus(int recordId, String status) {
         String sql = "UPDATE borrow_records SET status = ? WHERE record_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, status);
@@ -273,7 +273,7 @@ public class BorrowDAO {
     }
     public BorrowRecord getBorrowRecordById(int recordId) {
         String sql = "SELECT * FROM borrow_records WHERE record_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, recordId);
@@ -306,7 +306,7 @@ public class BorrowDAO {
                      "WHERE i.owner_id = ? AND br.status = 'Returned' AND i.status IN ('Returned', 'Pending Check') " +
                      "ORDER BY br.return_date DESC";
 
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, ownerId);

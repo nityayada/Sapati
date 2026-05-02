@@ -1,6 +1,6 @@
 package com.sapati.dao;
 
-import com.sapati.config.DBConnection;
+import com.sapati.config.DBConfig;
 import com.sapati.model.Fine;
 
 import java.sql.*;
@@ -11,7 +11,7 @@ public class FineDAO {
 
     public boolean issueFine(Fine fine) {
         String sql = "INSERT INTO fines (record_id, days_late, amount, payment_status) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, fine.getRecordId());
@@ -29,7 +29,7 @@ public class FineDAO {
     public List<Fine> getFinesByUser(int userId) {
         List<Fine> fines = new ArrayList<>();
         String sql = "SELECT f.* FROM fines f JOIN borrow_records br ON f.record_id = br.record_id WHERE br.borrower_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, userId);
@@ -56,7 +56,7 @@ public class FineDAO {
 
     public boolean markAsPaid(int fineId, String paymentMethod, String transactionId) {
         String sql = "UPDATE fines SET payment_status = 'Paid', paid_at = CURRENT_TIMESTAMP, payment_method = ?, transaction_id = ? WHERE fine_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, paymentMethod);
@@ -71,7 +71,7 @@ public class FineDAO {
 
     public double getTotalUnpaidFines() {
         String sql = "SELECT SUM(amount) FROM fines WHERE payment_status = 'Unpaid'";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) return rs.getDouble(1);
@@ -89,7 +89,7 @@ public class FineDAO {
                      "JOIN users u ON br.borrower_id = u.user_id " +
                      "JOIN items i ON br.item_id = i.item_id " +
                      "ORDER BY f.created_at DESC";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             
@@ -116,7 +116,7 @@ public class FineDAO {
 
     public Fine getFineByRecordId(int recordId) {
         String sql = "SELECT * FROM fines WHERE record_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, recordId);
@@ -143,7 +143,7 @@ public class FineDAO {
 
     public boolean updateFineAmount(int fineId, int daysLate, double amount) {
         String sql = "UPDATE fines SET days_late = ?, amount = ? WHERE fine_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, daysLate);
             pstmt.setDouble(2, amount);

@@ -46,7 +46,7 @@ public class AuthFilter implements Filter {
             chain.doFilter(request, response);
         } else {
             // Forward (instead of redirect) because WEB-INF is private
-            request.getRequestDispatcher("/WEB-INF/Pages/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/login.jsp").forward(request, response);
         }
     }
 

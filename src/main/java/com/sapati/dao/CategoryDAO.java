@@ -1,6 +1,6 @@
 package com.sapati.dao;
 
-import com.sapati.config.DBConnection;
+import com.sapati.config.DBConfig;
 import com.sapati.model.Category;
 
 import java.sql.*;
@@ -13,7 +13,7 @@ public class CategoryDAO {
         List<Category> categories = new ArrayList<>();
         String sql = "SELECT * FROM categories";
         
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             

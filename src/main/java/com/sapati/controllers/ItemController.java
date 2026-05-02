@@ -57,7 +57,7 @@ public class ItemController extends HttpServlet {
             List<Item> items = itemDAO.getAllAvailableItems();
             request.setAttribute("items", items);
             request.setAttribute("categories", categoryDAO.getAllCategories());
-            request.getRequestDispatcher("/WEB-INF/Pages/itemList.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/itemList.jsp").forward(request, response);
         } else if ("myListings".equals(action)) {
             HttpSession session = request.getSession();
             User user = (User) session.getAttribute("user");
@@ -69,7 +69,7 @@ public class ItemController extends HttpServlet {
                 
                 request.setAttribute("items", myItems);
                 request.setAttribute("availabilityRate", Math.round(availabilityRate));
-                request.getRequestDispatcher("/WEB-INF/Pages/myListings.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/pages/myListings.jsp").forward(request, response);
             } else {
                 response.sendRedirect("user?action=login");
             }
@@ -93,7 +93,7 @@ public class ItemController extends HttpServlet {
                 request.setAttribute("fines", fines);
 
 
-                request.getRequestDispatcher("/WEB-INF/Pages/myBorrowings.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/pages/myBorrowings.jsp").forward(request, response);
             } else {
                 response.sendRedirect("user?action=login");
             }
@@ -106,7 +106,7 @@ public class ItemController extends HttpServlet {
                     User owner = userDAO.getUserById(item.getOwnerId());
                     request.setAttribute("item", item);
                     request.setAttribute("owner", owner);
-                    request.getRequestDispatcher("/WEB-INF/Pages/itemDetail.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/pages/itemDetail.jsp").forward(request, response);
                 } else {
                     response.sendRedirect("item?action=list");
                 }
@@ -121,12 +121,12 @@ public class ItemController extends HttpServlet {
             List<Item> items = itemDAO.searchItems(query, categoryId);
             request.setAttribute("items", items);
             request.setAttribute("categories", categoryDAO.getAllCategories());
-            request.getRequestDispatcher("/WEB-INF/Pages/itemList.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/itemList.jsp").forward(request, response);
         } else if ("add".equals(action)) {
             HttpSession session = request.getSession();
             User user = (User) session.getAttribute("user");
             if (user != null) {
-                request.getRequestDispatcher("/WEB-INF/Pages/addItem.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/pages/addItem.jsp").forward(request, response);
             } else {
                 response.sendRedirect("user?action=login");
             }
@@ -143,7 +143,7 @@ public class ItemController extends HttpServlet {
                 if (item != null && item.getOwnerId() == user.getUserId()) {
                     request.setAttribute("item", item);
                     request.setAttribute("categories", categoryDAO.getAllCategories());
-                    request.getRequestDispatcher("/WEB-INF/Pages/editItem.jsp").forward(request, response);
+                    request.getRequestDispatcher("/WEB-INF/pages/editItem.jsp").forward(request, response);
                 } else {
                     response.sendRedirect(request.getContextPath() + "/item?action=myListings&error=unauthorized_access");
                 }
@@ -194,7 +194,7 @@ public class ItemController extends HttpServlet {
                                              .collect(Collectors.toList());
                 request.setAttribute("unpaidFines", unpaidFines);
             }
-            request.getRequestDispatcher("/WEB-INF/Pages/memberHome.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/memberHome.jsp").forward(request, response);
         }
 
     }
@@ -239,11 +239,11 @@ public class ItemController extends HttpServlet {
 
         if (filePart != null && filePart.getSize() > 0) {
             String fileName = UUID.randomUUID().toString() + "_" + Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-            String uploadPath = getServletContext().getRealPath("/Images");
+            String uploadPath = getServletContext().getRealPath("/images");
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) uploadDir.mkdir();
             filePart.write(uploadPath + File.separator + fileName);
-            imagePath = "Images/" + fileName;
+            imagePath = "images/" + fileName;
         } else if (imageUrl != null && !imageUrl.trim().isEmpty()) {
             imagePath = imageUrl;
         }
@@ -260,7 +260,7 @@ public class ItemController extends HttpServlet {
             request.setAttribute("error", "Failed to update item.");
             request.setAttribute("item", existingItem);
             request.setAttribute("categories", categoryDAO.getAllCategories());
-            request.getRequestDispatcher("/WEB-INF/Pages/editItem.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/editItem.jsp").forward(request, response);
         }
     }
 
@@ -269,7 +269,7 @@ public class ItemController extends HttpServlet {
         User user = (User) session.getAttribute("user");
 
         if (user == null) {
-            request.getRequestDispatcher("/WEB-INF/Pages/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/login.jsp").forward(request, response);
             return;
         }
 
@@ -286,13 +286,13 @@ public class ItemController extends HttpServlet {
         if (filePart != null && filePart.getSize() > 0) {
             // Priority: Local File Upload
             String fileName = UUID.randomUUID().toString() + "_" + Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-            String uploadPath = getServletContext().getRealPath("/Images");
+            String uploadPath = getServletContext().getRealPath("/images");
             
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) uploadDir.mkdir();
             
             filePart.write(uploadPath + File.separator + fileName);
-            imagePath = "Images/" + fileName;
+            imagePath = "images/" + fileName;
         } else if (imageUrl != null && !imageUrl.trim().isEmpty()) {
             // Fallback: External URL
             imagePath = imageUrl;
@@ -311,7 +311,7 @@ public class ItemController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/item?action=myListings&msg=item_added");
         } else {
             request.setAttribute("error", "Failed to add item. Try again.");
-            request.getRequestDispatcher("/WEB-INF/Pages/addItem.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/addItem.jsp").forward(request, response);
         }
     }
 }

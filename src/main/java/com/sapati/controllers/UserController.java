@@ -33,15 +33,15 @@ public class UserController extends HttpServlet {
         String action = request.getParameter("action");
         if ("logout".equals(action)) {
             request.getSession().invalidate();
-            request.getRequestDispatcher("/WEB-INF/Pages/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/login.jsp").forward(request, response);
         } else if ("register".equals(action)) {
-            request.getRequestDispatcher("/WEB-INF/Pages/register.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/register.jsp").forward(request, response);
         } else if ("forgot_password".equals(action)) {
-            request.getRequestDispatcher("/WEB-INF/Pages/forgotPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/forgotPassword.jsp").forward(request, response);
         } else if ("profile".equals(action)) {
             showProfile(request, response);
         } else {
-            request.getRequestDispatcher("/WEB-INF/Pages/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/login.jsp").forward(request, response);
         }
     }
 
@@ -78,7 +78,7 @@ public class UserController extends HttpServlet {
 
         if (userDAO.isEmailTaken(email)) {
             request.setAttribute("error", "Email already registered!");
-            request.getRequestDispatcher("/WEB-INF/Pages/register.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/register.jsp").forward(request, response);
             return;
         }
 
@@ -96,21 +96,21 @@ public class UserController extends HttpServlet {
         Part filePart = request.getPart("profile_image");
         if (filePart != null && filePart.getSize() > 0) {
             String fileName = UUID.randomUUID().toString() + "_" + Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-            String uploadPath = getServletContext().getRealPath("/Images");
+            String uploadPath = getServletContext().getRealPath("/images");
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) uploadDir.mkdir();
             filePart.write(uploadPath + File.separator + fileName);
-            user.setProfileImage("Images/" + fileName);
+            user.setProfileImage("images/" + fileName);
         } else {
             user.setProfileImage("Images/default_profile.png"); // Set a default if not provided
         }
 
         if (userDAO.registerUser(user)) {
             request.setAttribute("msg", "registered");
-            request.getRequestDispatcher("/WEB-INF/Pages/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/login.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Registration failed. Try again.");
-            request.getRequestDispatcher("/WEB-INF/Pages/register.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/register.jsp").forward(request, response);
         }
     }
 
@@ -123,7 +123,7 @@ public class UserController extends HttpServlet {
         if (user != null) {
             if ("Locked".equals(user.getAccountStatus())) {
                 request.setAttribute("error", "Account locked. Please contact admin.");
-                request.getRequestDispatcher("/WEB-INF/Pages/login.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/pages/login.jsp").forward(request, response);
                 return;
             }
 
@@ -137,7 +137,7 @@ public class UserController extends HttpServlet {
             }
         } else {
             request.setAttribute("error", "Invalid email or password.");
-            request.getRequestDispatcher("/WEB-INF/Pages/login.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/login.jsp").forward(request, response);
             }
         }
     private void showProfile(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -152,7 +152,7 @@ public class UserController extends HttpServlet {
         // Refresh user data from DB
         User user = userDAO.getUserById(currentUser.getUserId());
         request.setAttribute("user", user);
-        request.getRequestDispatcher("/WEB-INF/Pages/profile.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/pages/profile.jsp").forward(request, response);
     }
 
     private void updateProfile(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -178,12 +178,16 @@ public class UserController extends HttpServlet {
         Part filePart = request.getPart("profile_image");
         if (filePart != null && filePart.getSize() > 0) {
             String fileName = UUID.randomUUID().toString() + "_" + Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
-            String uploadPath = getServletContext().getRealPath("/Images");
+            String uploadPath = getServletContext().getRealPath("/images");
+            if (uploadPath == null) {
+                // Fallback to absolute path or context root if real path fails
+                uploadPath = getServletContext().getRealPath("/");
+            }
             File uploadDir = new File(uploadPath);
             if (!uploadDir.exists()) uploadDir.mkdir();
             filePart.write(uploadPath + File.separator + fileName);
-            user.setProfileImage("Images/" + fileName);
-            currentUser.setProfileImage("Images/" + fileName); // Update session object
+            user.setProfileImage("images/" + fileName);
+            currentUser.setProfileImage("images/" + fileName); // Update session object
         } else {
             // Keep existing image if no new one uploaded
             user.setProfileImage(currentUser.getProfileImage());
@@ -203,7 +207,7 @@ public class UserController extends HttpServlet {
             request.setAttribute("error", "Failed to update profile.");
             if (redirectPath.contains("admin")) {
                 request.setAttribute("user", userDAO.getUserById(currentUser.getUserId()));
-                request.getRequestDispatcher("/WEB-INF/Pages/adminProfile.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/pages/adminProfile.jsp").forward(request, response);
             } else {
                 showProfile(request, response);
             }
@@ -237,7 +241,7 @@ public class UserController extends HttpServlet {
             request.setAttribute("error", "Failed to update password.");
             if (redirectPath.contains("admin")) {
                 request.setAttribute("user", userDAO.getUserById(currentUser.getUserId()));
-                request.getRequestDispatcher("/WEB-INF/Pages/adminProfile.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/pages/adminProfile.jsp").forward(request, response);
             } else {
                 showProfile(request, response);
             }
@@ -249,10 +253,10 @@ public class UserController extends HttpServlet {
 
         if (user != null && user.getSecurityQuestion() != null) {
             request.setAttribute("recoveryUser", user);
-            request.getRequestDispatcher("/WEB-INF/Pages/verifyIdentity.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/verifyIdentity.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Email not found or no recovery question set.");
-            request.getRequestDispatcher("/WEB-INF/Pages/forgotPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/forgotPassword.jsp").forward(request, response);
         }
     }
 
@@ -263,11 +267,11 @@ public class UserController extends HttpServlet {
 
         if (user != null && com.sapati.util.PasswordUtil.checkPassword(answer, user.getSecurityAnswer())) {
             request.setAttribute("resetEmail", email);
-            request.getRequestDispatcher("/WEB-INF/Pages/resetPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/resetPassword.jsp").forward(request, response);
         } else {
             request.setAttribute("error", "Incorrect answer. Identity verification failed.");
             request.setAttribute("recoveryUser", user);
-            request.getRequestDispatcher("/WEB-INF/Pages/verifyIdentity.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/verifyIdentity.jsp").forward(request, response);
         }
     }
 
@@ -279,16 +283,16 @@ public class UserController extends HttpServlet {
         if (newPassword != null && newPassword.equals(confirmPassword)) {
             if (userDAO.updatePasswordByEmail(email, newPassword)) {
                 request.setAttribute("msg", "password_reset_success");
-                request.getRequestDispatcher("/WEB-INF/Pages/login.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/pages/login.jsp").forward(request, response);
             } else {
                 request.setAttribute("error", "Failed to update password. Please try again.");
                 request.setAttribute("resetEmail", email);
-                request.getRequestDispatcher("/WEB-INF/Pages/resetPassword.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/pages/resetPassword.jsp").forward(request, response);
             }
         } else {
             request.setAttribute("error", "Passwords do not match.");
             request.setAttribute("resetEmail", email);
-            request.getRequestDispatcher("/WEB-INF/Pages/resetPassword.jsp").forward(request, response);
+            request.getRequestDispatcher("/WEB-INF/pages/resetPassword.jsp").forward(request, response);
         }
     }
     private void updateSecurityQuestion(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -315,7 +319,7 @@ public class UserController extends HttpServlet {
             request.setAttribute("error", "Failed to update security question.");
             if (redirectPath.contains("admin")) {
                 request.setAttribute("user", userDAO.getUserById(currentUser.getUserId()));
-                request.getRequestDispatcher("/WEB-INF/Pages/adminProfile.jsp").forward(request, response);
+                request.getRequestDispatcher("/WEB-INF/pages/adminProfile.jsp").forward(request, response);
             } else {
                 showProfile(request, response);
             }

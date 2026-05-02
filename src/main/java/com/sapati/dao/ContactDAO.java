@@ -1,6 +1,6 @@
 package com.sapati.dao;
 
-import com.sapati.config.DBConnection;
+import com.sapati.config.DBConfig;
 import com.sapati.model.ContactMessage;
 import java.sql.*;
 import java.util.ArrayList;
@@ -10,7 +10,7 @@ public class ContactDAO {
 
     public boolean saveMessage(ContactMessage message) {
         String sql = "INSERT INTO contact_messages (name, email, subject, message) VALUES (?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, message.getName());
@@ -28,7 +28,7 @@ public class ContactDAO {
     public List<ContactMessage> getAllMessages() {
         List<ContactMessage> messages = new ArrayList<>();
         String sql = "SELECT * FROM contact_messages ORDER BY sent_at DESC";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             
@@ -51,7 +51,7 @@ public class ContactDAO {
 
     public boolean deleteMessage(int messageId) {
         String sql = "DELETE FROM contact_messages WHERE message_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, messageId);
             return pstmt.executeUpdate() > 0;
@@ -63,7 +63,7 @@ public class ContactDAO {
 
     public boolean markAsRead(int messageId) {
         String sql = "UPDATE contact_messages SET is_read = TRUE WHERE message_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, messageId);
             return pstmt.executeUpdate() > 0;

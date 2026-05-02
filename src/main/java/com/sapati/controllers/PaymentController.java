@@ -73,7 +73,7 @@ public class PaymentController extends HttpServlet {
         request.setAttribute("record", record);
         request.setAttribute("daysLate", daysLate);
         request.setAttribute("amount", amount);
-        request.getRequestDispatcher("/WEB-INF/Pages/settleFine.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/pages/settleFine.jsp").forward(request, response);
     }
 
     private void handleMockGateway(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -82,7 +82,7 @@ public class PaymentController extends HttpServlet {
         
         request.setAttribute("amount", amount);
         request.setAttribute("record_id", recordId);
-        request.getRequestDispatcher("/WEB-INF/Pages/mockPayment.jsp").forward(request, response);
+        request.getRequestDispatcher("/WEB-INF/pages/mockPayment.jsp").forward(request, response);
     }
 
     private void handleFinalizePayment(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {

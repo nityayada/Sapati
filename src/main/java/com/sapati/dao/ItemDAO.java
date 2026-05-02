@@ -1,6 +1,6 @@
 package com.sapati.dao;
 
-import com.sapati.config.DBConnection;
+import com.sapati.config.DBConfig;
 import com.sapati.model.Item;
 
 import java.sql.*;
@@ -11,7 +11,7 @@ public class ItemDAO {
 
     public boolean addItem(Item item) {
         String sql = "INSERT INTO items (owner_id, name, category_id, item_condition, description, image_path, status) VALUES (?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, item.getOwnerId());
@@ -32,7 +32,7 @@ public class ItemDAO {
     public List<Item> getAllAvailableItems() {
         List<Item> items = new ArrayList<>();
         String sql = "SELECT * FROM items WHERE status = 'Available'";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             
@@ -56,7 +56,7 @@ public class ItemDAO {
             sql.append(" AND category_id = ?");
         }
 
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql.toString())) {
             
             int paramIndex = 1;
@@ -82,7 +82,7 @@ public class ItemDAO {
     public List<Item> getItemsByOwner(int ownerId) {
         List<Item> items = new ArrayList<>();
         String sql = "SELECT * FROM items WHERE owner_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, ownerId);
@@ -99,7 +99,7 @@ public class ItemDAO {
 
     public Item getItemById(int itemId) {
         String sql = "SELECT * FROM items WHERE item_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, itemId);
@@ -115,7 +115,7 @@ public class ItemDAO {
 
     public boolean updateItemStatus(int itemId, String status) {
         String sql = "UPDATE items SET status = ? WHERE item_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, status);
@@ -143,7 +143,7 @@ public class ItemDAO {
 
     public boolean updateItem(Item item) {
         String sql = "UPDATE items SET name = ?, category_id = ?, item_condition = ?, description = ?, image_path = ? WHERE item_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, item.getName());
@@ -162,7 +162,7 @@ public class ItemDAO {
 
     public boolean deleteItem(int itemId) {
         String sql = "DELETE FROM items WHERE item_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1, itemId);
             return pstmt.executeUpdate() > 0;
@@ -176,7 +176,7 @@ public class ItemDAO {
     public List<Item> getAllItemsAdmin() {
         List<Item> items = new ArrayList<>();
         String sql = "SELECT * FROM items ORDER BY created_at DESC";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
@@ -190,7 +190,7 @@ public class ItemDAO {
 
     public int getTotalItemCount() {
         String sql = "SELECT COUNT(*) FROM items";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) return rs.getInt(1);

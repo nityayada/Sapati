@@ -1,6 +1,6 @@
 package com.sapati.dao;
 
-import com.sapati.config.DBConnection;
+import com.sapati.config.DBConfig;
 
 import com.sapati.model.User;
 import com.sapati.util.PasswordUtil;
@@ -13,7 +13,7 @@ public class UserDAO {
 
     public boolean registerUser(User user) {
         String sql = "INSERT INTO users (full_name, email, phone_number, password_hash, address, profile_image, role, security_question, security_answer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, user.getFullName());
@@ -36,7 +36,7 @@ public class UserDAO {
 
     public User loginUser(String email, String password) {
         String sql = "SELECT * FROM users WHERE email = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, email);
@@ -64,7 +64,7 @@ public class UserDAO {
 
     public boolean isEmailTaken(String email) {
         String sql = "SELECT 1 FROM users WHERE email = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, email);
@@ -78,7 +78,7 @@ public class UserDAO {
 
     public User getUserByEmail(String email) {
         String sql = "SELECT * FROM users WHERE email = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setString(1, email);
@@ -106,7 +106,7 @@ public class UserDAO {
 
     public User getUserById(int userId) {
         String sql = "SELECT * FROM users WHERE user_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, userId);
@@ -133,7 +133,7 @@ public class UserDAO {
     public List<User> getAllUsers() {
         List<User> users = new ArrayList<>();
         String sql = "SELECT * FROM users";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             while (rs.next()) {
@@ -156,7 +156,7 @@ public class UserDAO {
 
     public boolean updateUserStatus(int userId, String status) {
         String sql = "UPDATE users SET account_status = ? WHERE user_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, status);
             pstmt.setInt(2, userId);
@@ -169,7 +169,7 @@ public class UserDAO {
 
     public boolean updateUser(User user) {
         String sql = "UPDATE users SET full_name = ?, phone_number = ?, address = ?, profile_image = ? WHERE user_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, user.getFullName());
             pstmt.setString(2, user.getPhoneNumber());
@@ -185,7 +185,7 @@ public class UserDAO {
 
     public boolean updatePassword(int userId, String newPassword) {
         String sql = "UPDATE users SET password_hash = ? WHERE user_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, PasswordUtil.hashPassword(newPassword));
             pstmt.setInt(2, userId);
@@ -198,7 +198,7 @@ public class UserDAO {
 
     public boolean updatePasswordByEmail(String email, String newPassword) {
         String sql = "UPDATE users SET password_hash = ? WHERE email = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, PasswordUtil.hashPassword(newPassword));
             pstmt.setString(2, email);
@@ -211,7 +211,7 @@ public class UserDAO {
 
     public boolean updateSecurityQuestion(int userId, String question, String answer) {
         String sql = "UPDATE users SET security_question = ?, security_answer = ? WHERE user_id = ?";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, question);
             pstmt.setString(2, PasswordUtil.hashPassword(answer.toLowerCase().trim()));
@@ -225,7 +225,7 @@ public class UserDAO {
 
     public int getTotalUserCount() {
         String sql = "SELECT COUNT(*) FROM users";
-        try (Connection conn = DBConnection.getConnection();
+        try (Connection conn = DBConfig.getConnection();
              Statement stmt = conn.createStatement();
              ResultSet rs = stmt.executeQuery(sql)) {
             if (rs.next()) return rs.getInt(1);

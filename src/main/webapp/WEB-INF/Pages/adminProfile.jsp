@@ -69,52 +69,21 @@
     
     <!-- Profile Header -->
     <div class="mb-12 flex items-center gap-8 bg-surface-container-low p-8 border border-outline-variant/30">
-        <div class="w-24 h-24 bg-black text-white flex items-center justify-center rounded-sm font-black text-4xl overflow-hidden">
+        <div class="user-avatar" style="width: 100px; height: 100px;  border: 2px solid var(--primary); overflow: hidden; display: flex; align-items: center; justify-content: center;">
             <% if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) { %>
                 <img src="${pageContext.request.contextPath}/<%= user.getProfileImage() %>" alt="Profile" class="w-full h-full object-cover">
             <% } else { %>
-                <%= user.getFullName().substring(0,1).toUpperCase() %>
+               <%--  <%= user.getFullName().substring(0,1).toUpperCase() %> --%>
+              <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary);">person</span>
+               
             <% } %>
         </div>
         <div>
             <div class="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-2">System Administrator Node</div>
             <h1 class="text-3xl font-black uppercase tracking-tight text-black"><%= user.getFullName() %></h1>
-            background-color: var(--surface-container-low);
-            border-radius: 0.5rem;
-            margin-top: 1rem;
-        }
-
-        .upload-drop-zone:hover {
-            background-color: var(--surface-variant);
-            border-color: var(--primary);
-        }
-
-        .upload-icon {
-            font-size: 2.5rem;
-            color: var(--outline);
-            margin-bottom: 0.75rem;
-        }
-
-        .upload-text {
-            font-size: 0.75rem;
-            font-weight: 900;
-            letter-spacing: 0.05em;
-            color: var(--primary);
-            text-transform: uppercase;
-        }
-
-        #file-name-display {
-            font-size: 0.7rem;
-            color: var(--primary);
-            margin-top: 0.5rem;
-            font-weight: 700;
-            text-transform: uppercase;
-        }
-    </style>
-</head>
             <div class="flex gap-4 mt-2">
-                <span class="text-[9px] font-bold bg-black text-white px-2 py-0.5 tracking-widest">ID: USR_<%= user.getUserId() %></span>
-                <span class="text-[9px] font-bold border border-black px-2 py-0.5 tracking-widest uppercase">ROLE: <%= user.getRole() %></span>
+                <span class="status-chip" style="background-color: var(--primary); color: white; border: none;">ID: USR_<%= user.getUserId() %></span>
+                <span style="font-size: 0.8125rem; color: var(--outline); font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em;">ROLE: <span style="color: var(--primary); font-weight: 800;"><%= user.getRole() %></span></span>
             </div>
         </div>
     </div>

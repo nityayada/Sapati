@@ -8,6 +8,13 @@
     <jsp:param name="action" value="manage_users" />
 </jsp:include>
 
+<div class="flex items-end justify-between mb-8">
+    <div>
+        <span class="font-sans uppercase text-[10px] font-bold tracking-widest text-primary mb-1 block">ADMINISTRATION // SEC. 04</span>
+        <h1 class="text-4xl font-extrabold tracking-tight text-primary uppercase">MEMBER DIRECTORY</h1>
+    </div>
+</div>
+
 <!-- Search & Filter Bar -->
 <div class="mb-8">
     <div class="bg-surface-container-low border border-outline-variant/30 flex items-center px-4 max-w-md focus-within:border-primary transition-all">

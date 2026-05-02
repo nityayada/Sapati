@@ -21,6 +21,48 @@
     .container { max-width: none; padding: 0; }
     .form-input { border-radius: 0.25rem; }
     .btn-primary { border-radius: 0.25rem; }
+
+    .upload-drop-zone {
+        border: 2px dashed var(--outline-variant);
+        padding: 2rem;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--surface-container-low);
+        border-radius: 0.5rem;
+        margin-top: 1rem;
+    }
+
+    .upload-drop-zone:hover {
+        background-color: var(--surface-variant);
+        border-color: var(--primary);
+    }
+
+    .upload-icon {
+        font-size: 2.5rem;
+        color: var(--outline);
+        margin-bottom: 0.75rem;
+    }
+
+    .upload-text {
+        font-size: 0.75rem;
+        font-weight: 900;
+        letter-spacing: 0.05em;
+        color: var(--primary);
+        text-transform: uppercase;
+    }
+
+    #file-name-display {
+        font-size: 0.7rem;
+        color: var(--primary);
+        margin-top: 0.5rem;
+        font-weight: 700;
+        text-transform: uppercase;
+    }
 </style>
 
 <div class="max-w-5xl">
@@ -37,6 +79,39 @@
         <div>
             <div class="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-2">System Administrator Node</div>
             <h1 class="text-3xl font-black uppercase tracking-tight text-black"><%= user.getFullName() %></h1>
+            background-color: var(--surface-container-low);
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .upload-drop-zone:hover {
+            background-color: var(--surface-variant);
+            border-color: var(--primary);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--outline);
+            margin-bottom: 0.75rem;
+        }
+
+        .upload-text {
+            font-size: 0.75rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        #file-name-display {
+            font-size: 0.7rem;
+            color: var(--primary);
+            margin-top: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+    </style>
+</head>
             <div class="flex gap-4 mt-2">
                 <span class="text-[9px] font-bold bg-black text-white px-2 py-0.5 tracking-widest">ID: USR_<%= user.getUserId() %></span>
                 <span class="text-[9px] font-bold border border-black px-2 py-0.5 tracking-widest uppercase">ROLE: <%= user.getRole() %></span>
@@ -86,10 +161,29 @@
                     <input type="text" name="address" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none" value="<%= user.getAddress() != null ? user.getAddress() : "" %>" required>
                 </div>
 
-                <div class="form-group">
-                    <label class="text-[9px] font-black uppercase tracking-widest text-outline mb-2 block">Update Profile Picture</label>
-                    <input type="file" name="profile_image" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none bg-white" accept="image/*">
+                <div class="form-group mb-8">
+                    <label class="text-[9px] font-black uppercase tracking-widest text-outline mb-2 block">UPDATE PROFILE IDENTITY IMAGE</label>
+                    <div class="upload-drop-zone" onclick="document.getElementById('profile_image').click();">
+                        <span class="material-symbols-outlined upload-icon">upload_file</span>
+                        <span class="upload-text">LOCAL UPLOAD</span>
+                        <input type="file" id="profile_image" name="profile_image" accept="image/*" style="display: none;" onchange="updateFileName(this)">
+                        <p id="file-name-display" style="display: none;"></p>
+                    </div>
                 </div>
+
+                <script>
+                    function updateFileName(input) {
+                        const display = document.getElementById('file-name-display');
+                        if (input.files && input.files[0]) {
+                            display.textContent = "SELECTED: " + input.files[0].name.toUpperCase();
+                            display.style.display = 'block';
+                            document.querySelector('.upload-drop-zone').style.borderColor = 'var(--primary)';
+                        } else {
+                            display.style.display = 'none';
+                            document.querySelector('.upload-drop-zone').style.borderColor = 'var(--outline-variant)';
+                        }
+                    }
+                </script>
 
                 <button type="submit" class="btn btn-primary" style="padding: 1.25rem 3rem; font-size: 0.75rem; letter-spacing: 0.2em; margin-top: 1rem; width: 100%; border: none;">COMMIT CHANGES</button>
             </form>

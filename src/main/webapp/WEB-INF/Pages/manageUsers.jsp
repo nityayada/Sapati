@@ -37,12 +37,12 @@
             <tr class="transition-colors hover:bg-surface-container-lowest/50 user-row">
                 <td class="px-6 py-4 font-bold font-mono text-xs text-on-surface-variant">USR_<%= user.getUserId() %></td>
                 <td class="px-6 py-4 font-bold user-name">
-                    <div class="flex items-center gap-3">
-                        <div class="w-8 h-8 rounded-full overflow-hidden bg-surface-container-high flex-shrink-0 border border-outline-variant/30">
+                    <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+                        <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: var(--surface-container-high); border: 1px solid var(--outline-variant); flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
                             <% if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) { %>
-                                <img src="${pageContext.request.contextPath}/<%= user.getProfileImage() %>" alt="" class="w-full h-full object-cover">
+                                <img src="${pageContext.request.contextPath}/<%= user.getProfileImage() %>" alt="" style="width: 100%; height: 100%; object-fit: cover;">
                             <% } else { %>
-                                <span class="material-symbols-outlined text-outline text-xs flex items-center justify-center h-full">person</span>
+                                <span class="material-symbols-outlined" style="font-size: 1rem; color: var(--outline);">person</span>
                             <% } %>
                         </div>
                         <%= user.getFullName() %>

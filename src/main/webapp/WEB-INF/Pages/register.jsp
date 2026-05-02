@@ -14,6 +14,49 @@
     
     <!-- CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/CSS/landing.css">
+    <style>
+        .upload-drop-zone {
+            border: 2px dashed var(--outline-variant);
+            padding: 2.5rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--surface-container-low);
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .upload-drop-zone:hover {
+            background-color: var(--surface-variant);
+            border-color: var(--primary);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--outline);
+            margin-bottom: 0.75rem;
+        }
+
+        .upload-text {
+            font-size: 0.75rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        #file-name-display {
+            font-size: 0.7rem;
+            color: var(--primary);
+            margin-top: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+    </style>
 </head>
 <body style="min-height: 100vh; display: flex; flex-direction: column;">
 
@@ -85,12 +128,28 @@
                     </div>
 
                     <div class="form-group mt-8">
-                        <label for="profile_image" class="form-label">Profile Picture (Optional)</label>
-                        <div style="position: relative;">
-                            <span class="material-symbols-outlined" style="position: absolute; left: 1rem; top: 50%; transform: translateY(-50%); color: var(--outline); font-size: 1.25rem;">account_circle</span>
-                            <input type="file" id="profile_image" name="profile_image" class="form-input" style="padding-left: 3rem;" accept="image/*">
+                        <label class="label-md" style="color: var(--outline);">PROFILE IDENTITY IMAGE</label>
+                        <div class="upload-drop-zone" onclick="document.getElementById('profile_image').click();">
+                            <span class="material-symbols-outlined upload-icon">upload_file</span>
+                            <span class="upload-text">LOCAL UPLOAD</span>
+                            <input type="file" id="profile_image" name="profile_image" accept="image/*" style="display: none;" onchange="updateFileName(this)">
+                            <p id="file-name-display" style="display: none;"></p>
                         </div>
                     </div>
+
+                    <script>
+                        function updateFileName(input) {
+                            const display = document.getElementById('file-name-display');
+                            if (input.files && input.files[0]) {
+                                display.textContent = "SELECTED: " + input.files[0].name.toUpperCase();
+                                display.style.display = 'block';
+                                document.querySelector('.upload-drop-zone').style.borderColor = 'var(--primary)';
+                            } else {
+                                display.style.display = 'none';
+                                document.querySelector('.upload-drop-zone').style.borderColor = 'var(--outline-variant)';
+                            }
+                        }
+                    </script>
 
                     <div class="input-grid mt-8">
                         <div class="form-group">

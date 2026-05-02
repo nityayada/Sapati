@@ -24,6 +24,49 @@
     
     <!-- Custom Vanilla CSS -->
     <link rel="stylesheet" href="${pageContext.request.contextPath}/CSS/landing.css">
+    <style>
+        .upload-drop-zone {
+            border: 2px dashed var(--outline-variant);
+            padding: 2rem;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background-color: var(--surface-container-low);
+            border-radius: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .upload-drop-zone:hover {
+            background-color: var(--surface-variant);
+            border-color: var(--primary);
+        }
+
+        .upload-icon {
+            font-size: 2.5rem;
+            color: var(--outline);
+            margin-bottom: 0.75rem;
+        }
+
+        .upload-text {
+            font-size: 0.75rem;
+            font-weight: 900;
+            letter-spacing: 0.05em;
+            color: var(--primary);
+            text-transform: uppercase;
+        }
+
+        #file-name-display {
+            font-size: 0.7rem;
+            color: var(--primary);
+            margin-top: 0.5rem;
+            font-weight: 700;
+            text-transform: uppercase;
+        }
+    </style>
 </head>
 <body style="background-color: var(--surface);">
 
@@ -109,9 +152,28 @@
                     </div>
 
                     <div class="form-group mb-8">
-                        <label class="filter-label">Update Profile Picture</label>
-                        <input type="file" name="profile_image" class="filter-input" accept="image/*" style="width: 100%; border-color: var(--outline-variant);">
+                        <label class="label-md" style="color: var(--outline);">UPDATE PROFILE IDENTITY IMAGE</label>
+                        <div class="upload-drop-zone" onclick="document.getElementById('profile_image').click();">
+                            <span class="material-symbols-outlined upload-icon">upload_file</span>
+                            <span class="upload-text">LOCAL UPLOAD</span>
+                            <input type="file" id="profile_image" name="profile_image" accept="image/*" style="display: none;" onchange="updateFileName(this)">
+                            <p id="file-name-display" style="display: none;"></p>
+                        </div>
                     </div>
+
+                    <script>
+                        function updateFileName(input) {
+                            const display = document.getElementById('file-name-display');
+                            if (input.files && input.files[0]) {
+                                display.textContent = "SELECTED: " + input.files[0].name.toUpperCase();
+                                display.style.display = 'block';
+                                document.querySelector('.upload-drop-zone').style.borderColor = 'var(--primary)';
+                            } else {
+                                display.style.display = 'none';
+                                document.querySelector('.upload-drop-zone').style.borderColor = 'var(--outline-variant)';
+                            }
+                        }
+                    </script>
 
                     <button type="submit" class="btn btn-primary" style="padding: 1.5rem 4rem; font-size: 0.8125rem; letter-spacing: 0.2em; margin-top: 2rem;">COMMIT CHANGES</button>
                 </form>

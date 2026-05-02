@@ -49,6 +49,7 @@ public class UserDAO {
                     user.setUserId(rs.getInt("user_id"));
                     user.setFullName(rs.getString("full_name"));
                     user.setEmail(rs.getString("email"));
+                    user.setPhoneNumber(rs.getString("phone_number"));
                     user.setRole(rs.getString("role"));
                     user.setAccountStatus(rs.getString("account_status"));
                     user.setProfileImage(rs.getString("profile_image"));
@@ -88,6 +89,7 @@ public class UserDAO {
                 user.setUserId(rs.getInt("user_id"));
                 user.setFullName(rs.getString("full_name"));
                 user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone_number"));
                 user.setRole(rs.getString("role"));
                 user.setAccountStatus(rs.getString("account_status"));
                 user.setAddress(rs.getString("address"));
@@ -115,6 +117,7 @@ public class UserDAO {
                 user.setUserId(rs.getInt("user_id"));
                 user.setFullName(rs.getString("full_name"));
                 user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone_number"));
                 user.setRole(rs.getString("role"));
                 user.setAccountStatus(rs.getString("account_status"));
                 user.setAddress(rs.getString("address"));
@@ -138,6 +141,7 @@ public class UserDAO {
                 user.setUserId(rs.getInt("user_id"));
                 user.setFullName(rs.getString("full_name"));
                 user.setEmail(rs.getString("email"));
+                user.setPhoneNumber(rs.getString("phone_number"));
                 user.setRole(rs.getString("role"));
                 user.setAccountStatus(rs.getString("account_status"));
                 user.setAddress(rs.getString("address"));

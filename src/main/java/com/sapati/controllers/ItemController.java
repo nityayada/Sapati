@@ -206,6 +206,41 @@ public class ItemController extends HttpServlet {
             addItem(request, response);
         } else if ("edit".equals(action)) {
             editItem(request, response);
+        } else if ("remove".equals(action)) {
+            removeItem(request, response);
+        }
+    }
+
+    private void removeItem(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        User user = (User) session.getAttribute("user");
+
+        if (user == null) {
+            response.sendRedirect(request.getContextPath() + "/user?action=login");
+            return;
+        }
+
+        String idStr = request.getParameter("item_id");
+        if (idStr != null) {
+            int itemId = Integer.parseInt(idStr);
+            Item existingItem = itemDAO.getItemById(itemId);
+
+            if (existingItem != null && existingItem.getOwnerId() == user.getUserId()) {
+                if (borrowDAO.isItemCurrentlyBorrowed(itemId)) {
+                    response.sendRedirect(request.getContextPath() + "/item?action=myListings&error=item_currently_borrowed");
+                    return;
+                }
+                
+                if (itemDAO.deleteItem(itemId)) {
+                    response.sendRedirect(request.getContextPath() + "/item?action=myListings&msg=item_removed");
+                } else {
+                    response.sendRedirect(request.getContextPath() + "/item?action=myListings&error=failed_to_remove");
+                }
+            } else {
+                response.sendRedirect(request.getContextPath() + "/item?action=myListings&error=unauthorized");
+            }
+        } else {
+            response.sendRedirect(request.getContextPath() + "/item?action=myListings");
         }
     }
 

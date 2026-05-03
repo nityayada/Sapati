@@ -331,6 +331,22 @@ public class BorrowDAO {
         }
         return records;
     }
-}
 
+    public boolean isItemCurrentlyBorrowed(int itemId) {
+        String sql = "SELECT COUNT(*) FROM borrow_records WHERE item_id = ? AND status IN ('Active', 'Overdue')";
+        try (Connection conn = DBConfig.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            
+            pstmt.setInt(1, itemId);
+            ResultSet rs = pstmt.executeQuery();
+            
+            if (rs.next()) {
+                return rs.getInt(1) > 0;
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        return false;
+    }
+}
 

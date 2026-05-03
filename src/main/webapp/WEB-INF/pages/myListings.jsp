@@ -15,7 +15,23 @@
     
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;700;800;900&display=swap" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" rel="stylesheet" />
-    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/landing.css?v=<%= System.currentTimeMillis() %>">
+    <style>
+        .remove-btn {
+            transition: all 0.2s ease;
+        }
+        .remove-btn:hover {
+            background-color: var(--primary) !important;
+            color: var(--surface-container-lowest) !important;
+        }
+        .remove-btn:active {
+            transform: scale(0.96);
+        }
+        #removeConfirmDialog::backdrop {
+            background-color: rgba(0, 0, 0, 0.6);
+            backdrop-filter: blur(2px);
+        }
+    </style>
 </head>
 <body style="background-color: var(--surface);">
 
@@ -33,6 +49,12 @@
             <div class="auth-msg auth-msg-success" style="margin: 2rem 0; border: 1px solid var(--primary);">
                 <span class="material-symbols-outlined">edit_note</span>
                 METADATA REVISED SUCCESSFULLY. LEDGER UPDATED.
+            </div>
+        <% } %>
+        <% if ("item_removed".equals(request.getParameter("msg"))) { %>
+            <div class="auth-msg auth-msg-success" style="margin: 2rem 0; border: 1px solid var(--primary);">
+                <span class="material-symbols-outlined">delete</span>
+                RESOURCE REMOVED SUCCESSFULLY FROM THE LEDGER.
             </div>
         <% } %>
         <% if (request.getParameter("error") != null) { %>
@@ -105,7 +127,11 @@
                     </div>
                     <div style="display: flex; gap: 1rem; margin-top: 2rem;">
                         <a href="${pageContext.request.contextPath}/item?action=edit&id=<%= newestItem.getItemId() %>" class="btn btn-ghost" style="flex: 1; border: 1px solid var(--outline); font-size: 0.75rem; letter-spacing: 0.1em; font-weight: 900; display: flex; align-items: center; justify-content: center; text-decoration: none; color: inherit;">EDIT RECORD</a>
-                        <button class="btn btn-ghost" style="flex: 1; border: 1px solid var(--error); color: var(--error); font-size: 0.75rem; letter-spacing: 0.1em; font-weight: 900;">REMOVE</button>
+                        <form action="${pageContext.request.contextPath}/item" method="POST" style="flex: 1; display: flex;" onsubmit="confirmRemoval(event, this);">
+                            <input type="hidden" name="action" value="remove">
+                            <input type="hidden" name="item_id" value="<%= newestItem.getItemId() %>">
+                            <button type="submit" class="btn btn-ghost remove-btn" style="width: 100%; border: 1px solid var(--primary); color: var(--primary); font-size: 0.75rem; letter-spacing: 0.1em; font-weight: 900;">REMOVE</button>
+                        </form>
                     </div>
                 </div>
             </div>
@@ -160,7 +186,11 @@
                         <h3 class="item-title" style="font-size: 1.25rem;"><%= item.getName() %></h3>
                         <div style="display: flex; gap: 0.5rem; margin-top: auto;">
                             <a href="${pageContext.request.contextPath}/item?action=edit&id=<%= item.getItemId() %>" class="btn btn-ghost" style="flex: 1; border: 1px solid var(--outline); font-size: 0.625rem; font-weight: 900; letter-spacing: 0.1em; padding: 0.75rem; display: flex; align-items: center; justify-content: center; text-decoration: none; color: inherit;">EDIT</a>
-                            <button class="btn btn-ghost" style="flex: 1; border: 1px solid var(--outline-variant); font-size: 0.625rem; font-weight: 900; letter-spacing: 0.1em; padding: 0.75rem;">ARCHIVE</button>
+                            <form action="${pageContext.request.contextPath}/item" method="POST" style="flex: 1; display: flex;" onsubmit="confirmRemoval(event, this);">
+                                <input type="hidden" name="action" value="remove">
+                                <input type="hidden" name="item_id" value="<%= item.getItemId() %>">
+                                <button type="submit" class="btn btn-ghost remove-btn" style="width: 100%; border: 1px solid var(--primary); color: var(--primary); font-size: 0.625rem; font-weight: 900; letter-spacing: 0.1em; padding: 0.75rem;">REMOVE</button>
+                            </form>
                         </div>
                     </div>
                 </div>
@@ -179,6 +209,36 @@
         </div>
 
     </main>
+
+    <!-- Custom Dialog for Removal Confirmation -->
+    <dialog id="removeConfirmDialog" style="padding: 2.5rem; border: 2px solid var(--primary); background-color: var(--surface-container-lowest); border-radius: 0; max-width: 450px; margin: auto; box-shadow: 12px 12px 0px rgba(0,0,0,1);">
+        <div style="display: flex; align-items: center; gap: 1rem; margin-bottom: 1.5rem;">
+            <span class="material-symbols-outlined" style="color: var(--error); font-size: 2rem;">warning</span>
+            <h3 style="font-weight: 900; text-transform: uppercase; font-size: 1.25rem; margin: 0; line-height: 1;">CONFIRM DELETION</h3>
+        </div>
+        <p style="color: var(--on-surface-variant); font-size: 0.875rem; margin-bottom: 2.5rem; line-height: 1.6; font-weight: 500;">
+            Are you sure you want to permanently remove this listing from the ledger? This action cannot be undone and will erase all historical data associated with it.
+        </p>
+        <div style="display: flex; gap: 1rem;">
+            <button type="button" class="btn btn-ghost" onclick="document.getElementById('removeConfirmDialog').close()" style="flex: 1; border: 2px solid var(--outline); font-weight: 900; color: var(--outline);">CANCEL</button>
+            <button type="button" class="btn btn-primary" id="confirmRemoveBtn" style="flex: 1; background-color: var(--primary); border: 2px solid var(--primary); color: var(--surface-container-lowest); font-weight: 900;">REMOVE</button>
+        </div>
+    </dialog>
+
+    <script>
+        let formToSubmit = null;
+        function confirmRemoval(event, form) {
+            event.preventDefault();
+            formToSubmit = form;
+            document.getElementById('removeConfirmDialog').showModal();
+        }
+        
+        document.getElementById('confirmRemoveBtn').addEventListener('click', function() {
+            if (formToSubmit) {
+                formToSubmit.submit();
+            }
+        });
+    </script>
 
     <jsp:include page="components/member_footer.jsp" />
 

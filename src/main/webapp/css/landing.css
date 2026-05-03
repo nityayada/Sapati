@@ -880,6 +880,8 @@ h1, h2, h3 {
     background-color: #dcfce7;
     color: #14532d;
     border: 1px solid #16a34a;
+    display: flex;
+    gap: 1rem;
 }
 
 .auth-footer {

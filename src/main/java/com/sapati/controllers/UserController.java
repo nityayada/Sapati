@@ -106,8 +106,7 @@ public class UserController extends HttpServlet {
         }
 
         if (userDAO.registerUser(user)) {
-            request.setAttribute("msg", "registered");
-            request.getRequestDispatcher("/WEB-INF/pages/login.jsp").forward(request, response);
+            response.sendRedirect(request.getContextPath() + "/user?action=login&msg=registered");
         } else {
             request.setAttribute("error", "Registration failed. Try again.");
             request.getRequestDispatcher("/WEB-INF/pages/register.jsp").forward(request, response);
@@ -282,8 +281,7 @@ public class UserController extends HttpServlet {
 
         if (newPassword != null && newPassword.equals(confirmPassword)) {
             if (userDAO.updatePasswordByEmail(email, newPassword)) {
-                request.setAttribute("msg", "password_reset_success");
-                request.getRequestDispatcher("/WEB-INF/pages/login.jsp").forward(request, response);
+                response.sendRedirect(request.getContextPath() + "/user?action=login&msg=password_reset_success");
             } else {
                 request.setAttribute("error", "Failed to update password. Please try again.");
                 request.setAttribute("resetEmail", email);

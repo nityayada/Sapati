@@ -1,8 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.List, com.sapati.model.User" %>
-<%
-    List<User> users = (List<User>) request.getAttribute("users");
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <jsp:include page="components/admin_layout_header.jsp">
     <jsp:param name="action" value="manage_users" />
@@ -37,54 +35,66 @@
             </tr>
         </thead>
         <tbody class="divide-y divide-outline-variant/20">
-            <% if (users != null) {
-                for (User user : users) {
-                    String statusClass = "Active".equalsIgnoreCase(user.getAccountStatus()) ? "bg-surface-container-high text-on-surface" : "bg-error text-white";
-            %>
-            <tr class="transition-colors hover:bg-surface-container-lowest/50 user-row">
-                <td class="px-6 py-4 font-bold font-mono text-xs text-on-surface-variant">USR_<%= user.getUserId() %></td>
-                <td class="px-6 py-4 font-bold user-name">
-                    <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
-                        <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: var(--surface-container-high); border: 1px solid var(--outline-variant); flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
-                            <% if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) { %>
-                                <img src="${pageContext.request.contextPath}/<%= user.getProfileImage() %>" alt="" style="width: 100%; height: 100%; object-fit: cover;">
-                            <% } else { %>
-                                <span class="material-symbols-outlined" style="font-size: 1rem; color: var(--outline);">person</span>
-                            <% } %>
-                        </div>
-                        <%= user.getFullName() %>
-                    </div>
-                </td>
-                <td class="px-6 py-4 text-on-surface-variant user-email"><%= user.getEmail() %></td>
-                <td class="px-6 py-4">
-                    <span class="text-[10px] uppercase font-bold tracking-widest <%= "Admin".equals(user.getRole()) ? "text-primary" : "" %>">
-                        <%= user.getRole() %>
-                    </span>
-                </td>
-                <td class="px-6 py-4 text-center">
-                    <span class="px-2 py-1 text-[10px] font-bold rounded-full <%= statusClass %>"><%= user.getAccountStatus() %></span>
-                </td>
-                    <td class="px-6 py-4 text-right">
-                        <% if (!"Admin".equalsIgnoreCase(user.getRole())) { %>
-                            <form action="${pageContext.request.contextPath}/admin" method="POST" class="inline">
-                                <input type="hidden" name="action" value="update_user_status">
-                                <input type="hidden" name="user_id" value="<%= user.getUserId() %>">
-                                <% if ("Locked".equalsIgnoreCase(user.getAccountStatus())) { %>
-                                    <input type="hidden" name="status" value="Active">
-                                    <button type="submit" class="bg-primary text-on-primary text-[10px] px-3 py-1 font-bold rounded hover:opacity-80">REACTIVATE</button>
-                                <% } else { %>
-                                    <input type="hidden" name="status" value="Locked">
-                                    <button type="submit" class="border border-error text-error text-[10px] px-3 py-1 font-bold rounded hover:bg-error hover:text-white transition-colors">LOCK ACCOUNT</button>
-                                <% } %>
-                            </form>
-                        <% } else { %>
-                            <span class="text-[9px] font-black opacity-30 tracking-tighter">IMMUTABLE_ACCOUNT</span>
-                        <% } %>
-                    </td>
-            </tr>
-            <% } } else { %>
-                <tr><td colspan="6" class="px-6 py-8 text-center text-outline">No users found in directory.</td></tr>
-            <% } %>
+            <c:choose>
+                <c:when test="${not empty users}">
+                    <c:forEach items="${users}" var="user">
+                        <c:set var="statusClass" value="${user.accountStatus == 'Active' ? 'bg-surface-container-high text-on-surface' : 'bg-error text-white'}" />
+                        <tr class="transition-colors hover:bg-surface-container-lowest/50 user-row">
+                            <td class="px-6 py-4 font-bold font-mono text-xs text-on-surface-variant">USR_${user.userId}</td>
+                            <td class="px-6 py-4 font-bold user-name">
+                                <div class="flex items-center gap-3" style="display: flex; align-items: center; gap: 0.75rem;">
+                                    <div style="width: 32px; height: 32px; border-radius: 50%; overflow: hidden; background-color: var(--surface-container-high); border: 1px solid var(--outline-variant); flex-shrink: 0; display: flex; align-items: center; justify-content: center;">
+                                        <c:choose>
+                                            <c:when test="${not empty user.profileImage}">
+                                                <img src="${pageContext.request.contextPath}/${user.profileImage}" alt="" style="width: 100%; height: 100%; object-fit: cover;">
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="material-symbols-outlined" style="font-size: 1rem; color: var(--outline);">person</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </div>
+                                    ${user.fullName}
+                                </div>
+                            </td>
+                            <td class="px-6 py-4 text-on-surface-variant user-email">${user.email}</td>
+                            <td class="px-6 py-4">
+                                <span class="text-[10px] uppercase font-bold tracking-widest ${user.role == 'Admin' ? 'text-primary' : ''}">
+                                    ${user.role}
+                                </span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-2 py-1 text-[10px] font-bold rounded-full ${statusClass}">${user.accountStatus}</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <c:choose>
+                                    <c:when test="${user.role != 'Admin'}">
+                                        <form action="${pageContext.request.contextPath}/admin" method="POST" class="inline">
+                                            <input type="hidden" name="action" value="update_user_status">
+                                            <input type="hidden" name="user_id" value="${user.userId}">
+                                            <c:choose>
+                                                <c:when test="${user.accountStatus == 'Locked'}">
+                                                    <input type="hidden" name="status" value="Active">
+                                                    <button type="submit" class="bg-primary text-on-primary text-[10px] px-3 py-1 font-bold rounded hover:opacity-80">REACTIVATE</button>
+                                                </c:when>
+                                                <c:otherwise>
+                                                    <input type="hidden" name="status" value="Locked">
+                                                    <button type="submit" class="border border-error text-error text-[10px] px-3 py-1 font-bold rounded hover:bg-error hover:text-white transition-colors">LOCK ACCOUNT</button>
+                                                </c:otherwise>
+                                            </c:choose>
+                                        </form>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="text-[9px] font-black opacity-30 tracking-tighter">IMMUTABLE_ACCOUNT</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </c:when>
+                <c:otherwise>
+                    <tr><td colspan="6" class="px-6 py-8 text-center text-outline">No users found in directory.</td></tr>
+                </c:otherwise>
+            </c:choose>
         </tbody>
     </table>
 </div>

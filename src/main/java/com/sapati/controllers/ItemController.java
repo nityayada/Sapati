@@ -126,6 +126,7 @@ public class ItemController extends HttpServlet {
             HttpSession session = request.getSession();
             User user = (User) session.getAttribute("user");
             if (user != null) {
+                request.setAttribute("categories", categoryDAO.getAllCategories());
                 request.getRequestDispatcher("/WEB-INF/pages/addItem.jsp").forward(request, response);
             } else {
                 response.sendRedirect("user?action=login");
@@ -309,6 +310,13 @@ public class ItemController extends HttpServlet {
         }
 
         String name = request.getParameter("name");
+        
+        if (name != null && name.length() > 255) {
+            request.setAttribute("error", "Item title is too long (Maximum 255 characters allowed).");
+            request.getRequestDispatcher("/WEB-INF/pages/addItem.jsp").forward(request, response);
+            return;
+        }
+
         int categoryId = Integer.parseInt(request.getParameter("category_id"));
         String condition = request.getParameter("condition");
         String description = request.getParameter("description");

@@ -1,13 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.List, java.util.Map, com.sapati.model.BorrowRecord, com.sapati.model.BorrowRequest, com.sapati.model.User, com.sapati.model.Fine" %>
-
-<%
-    List<BorrowRecord> records = (List<BorrowRecord>) request.getAttribute("borrowRecords");
-    List<BorrowRequest> pendingRequests = (List<BorrowRequest>) request.getAttribute("borrowRequests");
-    Map<String, Integer> stats = (Map<String, Integer>) request.getAttribute("borrowStats");
-    Double totalFine = (Double) request.getAttribute("totalFine");
-    User user = (User) session.getAttribute("user");
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -24,45 +18,45 @@
     <jsp:include page="components/member_header.jsp" />
 
     <main class="container">
-        <% 
-            String msg = request.getParameter("msg");
-            String error = request.getParameter("error");
-            if (msg != null || error != null) {
-        %>
+        <c:if test="${not empty param.msg or not empty param.error}">
             <div style="margin: 2rem 0;">
-                <% if ("request_sent".equalsIgnoreCase(msg)) { %>
-                    <div class="auth-msg auth-msg-success">
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <span class="material-symbols-outlined">check_circle</span>
-                            <span>BORROW REQUEST TRANSMITTED SUCCESSFULLY. AWAITING OWNER OVERSIGHT.</span>
-                        </div>
-                    </div>
-                <% } else if ("fine_paid_item_returned".equalsIgnoreCase(msg)) { %>
-                    <div class="auth-msg auth-msg-success">
-                        <div style="display: flex; align-items: center; gap: 1rem;">
-                            <span class="material-symbols-outlined">payments</span>
-                            <div>
-                                <div style="font-weight: 900;">FINE SETTLED & ITEM RETURNED SUCCESSFULLY</div>
-                                <div style="font-size: 0.625rem; opacity: 0.8; letter-spacing: 0.1em; margin-top: 0.25rem;">TRANSACTION ID: <%= request.getParameter("txid") %></div>
+                <c:choose>
+                    <c:when test="${param.msg == 'request_sent'}">
+                        <div class="auth-msg auth-msg-success">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <span class="material-symbols-outlined">check_circle</span>
+                                <span>BORROW REQUEST TRANSMITTED SUCCESSFULLY. AWAITING OWNER OVERSIGHT.</span>
                             </div>
                         </div>
-                    </div>
-                <% } else if (msg != null) { %>
-                    <div class="auth-msg auth-msg-success">
-                        <%= msg %>
-                    </div>
-                <% } %>
+                    </c:when>
+                    <c:when test="${param.msg == 'fine_paid_item_returned'}">
+                        <div class="auth-msg auth-msg-success">
+                            <div style="display: flex; align-items: center; gap: 1rem;">
+                                <span class="material-symbols-outlined">payments</span>
+                                <div>
+                                    <div style="font-weight: 900;">FINE SETTLED & ITEM RETURNED SUCCESSFULLY</div>
+                                    <div style="font-size: 0.625rem; opacity: 0.8; letter-spacing: 0.1em; margin-top: 0.25rem;">TRANSACTION ID: ${param.txid}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </c:when>
+                    <c:when test="${not empty param.msg}">
+                        <div class="auth-msg auth-msg-success">
+                            ${param.msg}
+                        </div>
+                    </c:when>
+                </c:choose>
 
-                <% if (error != null) { %>
+                <c:if test="${not empty param.error}">
                     <div class="auth-msg auth-msg-error">
                         <div style="display: flex; align-items: center; gap: 1rem;">
                             <span class="material-symbols-outlined">error</span>
-                            <span><%= error.replace("_", " ").toUpperCase() %></span>
+                            <span>${fn:toUpperCase(fn:replace(param.error, '_', ' '))}</span>
                         </div>
                     </div>
-                <% } %>
+                </c:if>
             </div>
-        <% } %>
+        </c:if>
 
         
         <!-- Editorial Header Section -->
@@ -77,7 +71,7 @@
                 </div>
                 <div style="text-align: right;">
                     <span class="label-sm" style="color: var(--outline); margin-bottom: 0.5rem; display: block;">OUTSTANDING FINES</span>
-                    <div style="font-size: 3rem; font-weight: 900; letter-spacing: -0.05em;">NPR <%= String.format("%.2f", totalFine != null ? totalFine : 0.0) %></div>
+                    <div style="font-size: 3rem; font-weight: 900; letter-spacing: -0.05em;">NPR <fmt:formatNumber value="${not empty totalFine ? totalFine : 0.0}" pattern="#,##0.00" /></div>
                 </div>
             </div>
         </section>
@@ -86,15 +80,15 @@
         <section class="bento-grid">
             <div class="stat-box" style="grid-column: span 4;">
                 <span class="stat-label">Active Loans</span>
-                <span class="stat-value"><%= stats != null ? String.format("%02d", stats.get("active")) : "00" %></span>
+                <span class="stat-value"><fmt:formatNumber value="${not empty borrowStats.active ? borrowStats.active : 0}" pattern="00" /></span>
             </div>
             <div class="stat-box highlight" style="grid-column: span 4;">
                 <span class="stat-label">Overdue Items</span>
-                <span class="stat-value" style="color: var(--error);"><%= stats != null ? String.format("%02d", stats.get("overdue")) : "00" %></span>
+                <span class="stat-value" style="color: var(--error);"><fmt:formatNumber value="${not empty borrowStats.overdue ? borrowStats.overdue : 0}" pattern="00" /></span>
             </div>
             <div class="stat-box" style="grid-column: span 4;">
                 <span class="stat-label">Total Exchanges</span>
-                <span class="stat-value"><%= stats != null ? String.format("%02d", stats.get("total")) : "00" %></span>
+                <span class="stat-value"><fmt:formatNumber value="${not empty borrowStats.total ? borrowStats.total : 0}" pattern="00" /></span>
             </div>
         </section>
 
@@ -113,76 +107,83 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% if (records == null || records.isEmpty()) { %>
-                        <tr>
-                            <td colspan="7" style="padding: 10rem 0; text-align: center;">
-                                <span class="material-symbols-outlined" style="font-size: 4rem; opacity: 0.1; margin-bottom: 2rem;">history_edu</span>
-                                <h3 style="font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--outline);">No Ledger Entries Found</h3>
-                                <p style="font-size: 0.75rem; color: var(--outline); margin-top: 1rem;">YOUR RECENT EXCHANGES WILL APPEAR HERE.</p>
-                            </td>
-                        </tr>
-                    <% } else { 
-                        for (BorrowRecord record : records) {
-                            String statusClass = "";
-                            if ("Active".equalsIgnoreCase(record.getStatus())) statusClass = "badge-active";
-                            else if ("Overdue".equalsIgnoreCase(record.getStatus())) statusClass = "badge-overdue";
-                            else statusClass = "badge-returned";
-                    %>
-                        <tr>
-                            <td>
-                                <div class="item-info">
-                                    <div class="item-thumb">
-                                        <span class="material-symbols-outlined" style="color: var(--outline); opacity: 0.5;">inventory_2</span>
-                                    </div>
-                                    <div>
-                                        <div style="font-weight: 900; text-transform: uppercase; letter-spacing: -0.02em;"><%= record.getItemName() %></div>
-                                        <div style="font-size: 0.625rem; font-weight: 800; color: var(--outline); text-transform: uppercase;">REF_ID: #<%= record.getItemId() %>-S</div>
-                                    </div>
-                                </div>
-                            </td>
-                            <td>
-                                <div style="display: flex; align-items: center; gap: 0.5rem;">
-                                    <div style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--primary);"></div>
-                                    <span style="font-weight: 700; text-transform: uppercase; font-size: 0.75rem;"><%= record.getOwnerName() %></span>
-                                </div>
-                            </td>
-                            <td class="tabular"><%= record.getBorrowDate() %></td>
-                            <td class="tabular" style="<%= "Overdue".equalsIgnoreCase(record.getStatus()) ? "color: var(--error); font-weight: 900;" : "" %>">
-                                <%= record.getDueDate() %>
-                            </td>
-                            <td>
-                                <span class="badge <%= statusClass %>"><%= record.getStatus() %></span>
-                            </td>
-                            <td style="text-align: right;" class="tabular">
-                                <% 
-                                    double recordFine = 0.0;
-                                    List<Fine> fines = (List<Fine>) request.getAttribute("fines");
-                                    if (fines != null) {
-                                        for (Fine f : fines) {
-                                            if (f.getRecordId() == record.getRecordId() && !"Paid".equalsIgnoreCase(f.getPaymentStatus())) {
-                                                recordFine = f.getAmount();
-                                                break;
-                                            }
-                                        }
-                                    }
-                                %>
-                                <%= recordFine > 0 ? "NPR " + String.format("%.2f", recordFine) : "-" %>
-                            </td>
+                    <c:choose>
+                        <c:when test="${empty borrowRecords}">
+                            <tr>
+                                <td colspan="7" style="padding: 10rem 0; text-align: center;">
+                                    <span class="material-symbols-outlined" style="font-size: 4rem; opacity: 0.1; margin-bottom: 2rem;">history_edu</span>
+                                    <h3 style="font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; color: var(--outline);">No Ledger Entries Found</h3>
+                                    <p style="font-size: 0.75rem; color: var(--outline); margin-top: 1rem;">YOUR RECENT EXCHANGES WILL APPEAR HERE.</p>
+                                </td>
+                            </tr>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach items="${borrowRecords}" var="record">
+                                <c:set var="statusClass" value="" />
+                                <c:choose>
+                                    <c:when test="${record.status == 'Active'}"><c:set var="statusClass" value="badge-active" /></c:when>
+                                    <c:when test="${record.status == 'Overdue'}"><c:set var="statusClass" value="badge-overdue" /></c:when>
+                                    <c:otherwise><c:set var="statusClass" value="badge-returned" /></c:otherwise>
+                                </c:choose>
+                                <tr>
+                                    <td>
+                                        <div class="item-info">
+                                            <div class="item-thumb">
+                                                <span class="material-symbols-outlined" style="color: var(--outline); opacity: 0.5;">inventory_2</span>
+                                            </div>
+                                            <div>
+                                                <div style="font-weight: 900; text-transform: uppercase; letter-spacing: -0.02em;">${record.itemName}</div>
+                                                <div style="font-size: 0.625rem; font-weight: 800; color: var(--outline); text-transform: uppercase;">REF_ID: #${record.itemId}-S</div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 0.5rem;">
+                                            <div style="width: 8px; height: 8px; border-radius: 50%; background-color: var(--primary);"></div>
+                                            <span style="font-weight: 700; text-transform: uppercase; font-size: 0.75rem;">${record.ownerName}</span>
+                                        </div>
+                                    </td>
+                                    <td class="tabular">${record.borrowDate}</td>
+                                    <td class="tabular" style="${record.status == 'Overdue' ? 'color: var(--error); font-weight: 900;' : ''}">
+                                        ${record.dueDate}
+                                    </td>
+                                    <td>
+                                        <span class="badge ${statusClass}">${record.status}</span>
+                                    </td>
+                                    <td style="text-align: right;" class="tabular">
+                                        <c:set var="recordFine" value="0.0" />
+                                        <c:forEach items="${fines}" var="f">
+                                            <c:if test="${f.recordId == record.recordId && f.paymentStatus != 'Paid'}">
+                                                <c:set var="recordFine" value="${f.amount}" />
+                                            </c:if>
+                                        </c:forEach>
+                                        <c:choose>
+                                            <c:when test="${recordFine > 0}">
+                                                NPR <fmt:formatNumber value="${recordFine}" pattern="#,##0.00" />
+                                            </c:when>
+                                            <c:otherwise>-</c:otherwise>
+                                        </c:choose>
+                                    </td>
 
-                            <td style="text-align: right;">
-                                <% if ("Active".equalsIgnoreCase(record.getStatus()) || "Overdue".equalsIgnoreCase(record.getStatus())) { %>
-                                    <form action="${pageContext.request.contextPath}/borrow" method="POST" style="display: inline;">
-                                        <input type="hidden" name="action" value="return">
-                                        <input type="hidden" name="record_id" value="<%= record.getRecordId() %>">
-                                        <input type="hidden" name="item_id" value="<%= record.getItemId() %>">
-                                        <button type="submit" class="label-md" style="color: var(--primary); font-weight: 900; border: none; background: none; cursor: pointer; text-decoration: underline; padding: 0;">RETURN RESOURCE</button>
-                                    </form>
-                                <% } else { %>
-                                    <span class="label-md" style="opacity: 0.4;">COMPLETED</span>
-                                <% } %>
-                            </td>
-                        </tr>
-                    <% } } %>
+                                    <td style="text-align: right;">
+                                        <c:choose>
+                                            <c:when test="${record.status == 'Active' or record.status == 'Overdue'}">
+                                                <form action="${pageContext.request.contextPath}/borrow" method="POST" style="display: inline;">
+                                                    <input type="hidden" name="action" value="return">
+                                                    <input type="hidden" name="record_id" value="${record.recordId}">
+                                                    <input type="hidden" name="item_id" value="${record.itemId}">
+                                                    <button type="submit" class="label-md" style="color: var(--primary); font-weight: 900; border: none; background: none; cursor: pointer; text-decoration: underline; padding: 0;">RETURN RESOURCE</button>
+                                                </form>
+                                            </c:when>
+                                            <c:otherwise>
+                                                <span class="label-md" style="opacity: 0.4;">COMPLETED</span>
+                                            </c:otherwise>
+                                        </c:choose>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
                 </tbody>
             </table>
         </div>

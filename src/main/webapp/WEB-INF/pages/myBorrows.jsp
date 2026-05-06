@@ -1,12 +1,12 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.List, com.sapati.model.BorrowRecord, com.sapati.model.User" %>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>My Borrows - Sapati</title>
-    <link rel="stylesheet" href="<%= request.getContextPath() %>/css/style.css">
+    <link rel="stylesheet" href="${pageContext.request.contextPath}/css/style.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
 </head>
 <body>
@@ -17,9 +17,9 @@
             <h2 style="color: white;">My Borrowing History</h2>
         </div>
 
-        <% if (request.getParameter("msg") != null && request.getParameter("msg").equals("request_sent")) { %>
+        <c:if test="${param.msg == 'request_sent'}">
             <div class="success-msg">Your borrow request has been sent to the owner!</div>
-        <% } %>
+        </c:if>
 
         <div class="card">
             <table style="width: 100%; border-collapse: collapse; text-align: left;">
@@ -33,10 +33,6 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% 
-                        // In a real app, these would come from the controller
-                        // For the prototype, we show a placeholder if no data is passed
-                    %>
                     <tr>
                         <td colspan="5" style="padding: 2rem; text-align: center; color: #666;">
                             You haven't borrowed anything yet. <a href="itemList.jsp" style="color: var(--primary)">Start browsing!</a>

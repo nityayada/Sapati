@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -33,16 +34,16 @@
 
         <section class="section">
             <div class="form-container">
-                <% if ("sent".equals(request.getParameter("msg"))) { %>
+                <c:if test="${param.msg == 'sent'}">
                     <div style="background: #e5f9f6; color: var(--primary); padding: 1rem; border-radius: 0.5rem; margin-bottom: 2rem; text-align: center; font-weight: 700;">
                         Message sent successfully! We'll get back to you soon.
                     </div>
-                <% } %>
-                <% if (request.getAttribute("error") != null) { %>
+                </c:if>
+                <c:if test="${not empty error}">
                     <div style="background: #ffe5e5; color: #e76f51; padding: 1rem; border-radius: 0.5rem; margin-bottom: 2rem; text-align: center; font-weight: 700;">
-                        <%= request.getAttribute("error") %>
+                        ${error}
                     </div>
-                <% } %>
+                </c:if>
                 
                 <form action="${pageContext.request.contextPath}/contact" method="POST">
                     <div class="form-group">

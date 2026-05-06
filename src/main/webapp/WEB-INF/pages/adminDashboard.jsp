@@ -1,11 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.sapati.model.User" %>
-<%
-    Integer userCount = (Integer) request.getAttribute("userCount");
-    Integer itemCount = (Integer) request.getAttribute("itemCount");
-    Integer activeBorrows = (Integer) request.getAttribute("activeBorrows");
-    Double totalUnpaidFines = (Double) request.getAttribute("totalUnpaidFines");
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 
 <jsp:include page="components/admin_layout_header.jsp">
     <jsp:param name="action" value="dashboard" />
@@ -39,19 +35,26 @@
 <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
     <div class="bg-surface-container-lowest p-6 border border-outline-variant/30 hover:border-primary transition-colors">
         <div class="font-sans uppercase text-[10px] font-bold tracking-widest text-outline mb-1">Total Members</div>
-        <div class="text-3xl font-black text-primary"><%= userCount != null ? userCount : 0 %></div>
+        <div class="text-3xl font-black text-primary">${not empty userCount ? userCount : 0}</div>
     </div>
     <div class="bg-surface-container-lowest p-6 border border-outline-variant/30 hover:border-primary transition-colors">
         <div class="font-sans uppercase text-[10px] font-bold tracking-widest text-outline mb-1">Total Items Listed</div>
-        <div class="text-3xl font-black text-primary"><%= itemCount != null ? itemCount : 0 %></div>
+        <div class="text-3xl font-black text-primary">${not empty itemCount ? itemCount : 0}</div>
     </div>
     <div class="bg-surface-container-lowest p-6 border border-outline-variant/30 hover:border-primary transition-colors">
         <div class="font-sans uppercase text-[10px] font-bold tracking-widest text-outline mb-1">Active Borrowings</div>
-        <div class="text-3xl font-black text-primary"><%= activeBorrows != null ? activeBorrows : 0 %></div>
+        <div class="text-3xl font-black text-primary">${not empty activeBorrows ? activeBorrows : 0}</div>
     </div>
     <div class="bg-surface-container-lowest p-6 border border-outline-variant/30 hover:border-primary transition-colors">
         <div class="font-sans uppercase text-[10px] font-bold tracking-widest text-outline mb-1">Outstanding Fines</div>
-        <div class="text-3xl font-black text-error"><%= totalUnpaidFines != null && totalUnpaidFines > 0 ? "NPR " + Math.round(totalUnpaidFines) : "Clean" %></div>
+        <div class="text-3xl font-black text-error">
+            <c:choose>
+                <c:when test="${not empty totalUnpaidFines and totalUnpaidFines > 0}">
+                    NPR <fmt:formatNumber value="${totalUnpaidFines}" maxFractionDigits="0" />
+                </c:when>
+                <c:otherwise>Clean</c:otherwise>
+            </c:choose>
+        </div>
     </div>
 </section>
 

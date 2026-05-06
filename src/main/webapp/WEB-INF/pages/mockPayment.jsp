@@ -1,8 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%
-    String amount = (String) request.getAttribute("amount");
-    String recordId = (String) request.getAttribute("record_id");
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,15 +81,16 @@
             </div>
             <div style="text-align: right;">
                 <div style="font-size: 0.75rem; color: var(--outline); font-weight: 700;">AMOUNT</div>
-                <div style="font-size: 1.25rem; font-weight: 900; color: var(--primary);">NPR <%= amount %></div>
+                <div style="font-size: 1.25rem; font-weight: 900; color: var(--primary);">NPR ${amount}</div>
             </div>
         </div>
 
         <form id="paymentForm" action="${pageContext.request.contextPath}/payment" method="POST">
             <input type="hidden" name="action" value="finalize">
-            <input type="hidden" name="record_id" value="<%= recordId %>">
-            <input type="hidden" name="amount" value="<%= amount %>">
-            <input type="hidden" name="days_late" value="<%= (int)(Double.parseDouble(amount)/50) %>">
+            <input type="hidden" name="record_id" value="${record_id}">
+            <input type="hidden" name="amount" value="${amount}">
+            <fmt:parseNumber var="amountNum" value="${amount}" />
+            <input type="hidden" name="days_late" value="${(amountNum / 50).intValue()}">
             <input type="hidden" id="selectedMethod" name="payment_method" value="eSewa">
 
             <div class="payment-option active" onclick="selectMethod('eSewa', this)">

@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -90,9 +91,9 @@
                     </p>
                 </div>
 
-                <% if (request.getAttribute("error") != null) { %>
-                    <div class="auth-msg auth-msg-error"><%= request.getAttribute("error") %></div>
-                <% } %>
+                <c:if test="${not empty error}">
+                    <div class="auth-msg auth-msg-error">${error}</div>
+                </c:if>
 
                 <form action="${pageContext.request.contextPath}/user" method="POST" enctype="multipart/form-data">
                     <input type="hidden" name="action" value="register">

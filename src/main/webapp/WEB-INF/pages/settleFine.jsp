@@ -1,11 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.sapati.model.BorrowRecord, com.sapati.model.User" %>
-<%
-    BorrowRecord record = (BorrowRecord) request.getAttribute("record");
-    Long daysLate = (Long) request.getAttribute("daysLate");
-    Double amount = (Double) request.getAttribute("amount");
-    User user = (User) session.getAttribute("user");
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -31,8 +26,8 @@
 
             <div style="background-color: var(--surface-container-low); padding: 2rem; border-left: 4px solid var(--primary); margin-bottom: 3rem;">
                 <p style="font-size: 0.875rem; line-height: 1.6; color: var(--on-surface-variant);">
-                    The resource <strong><%= record.getItemName() %></strong> was due on <strong><%= record.getDueDate() %></strong>. 
-                    Our records indicate it is currently <strong><%= daysLate %> days overdue</strong>.
+                    The resource <strong>${record.itemName}</strong> was due on <strong>${record.dueDate}</strong>. 
+                    Our records indicate it is currently <strong>${daysLate} days overdue</strong>.
                 </p>
             </div>
 
@@ -43,16 +38,16 @@
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
                     <span class="label-md" style="color: var(--outline);">DAYS OVERDUE</span>
-                    <span style="font-weight: 700;"><%= daysLate %> DAYS</span>
+                    <span style="font-weight: 700;">${daysLate} DAYS</span>
                 </div>
                 <div style="display: flex; justify-content: space-between; align-items: center;">
                     <span class="label-md" style="color: var(--primary); font-weight: 900;">TOTAL AMOUNT DUE</span>
-                    <span style="font-size: 1.5rem; font-weight: 900; color: var(--primary);">NPR <%= String.format("%.2f", amount) %></span>
+                    <span style="font-size: 1.5rem; font-weight: 900; color: var(--primary);">NPR <fmt:formatNumber value="${amount}" pattern="#,##0.00" /></span>
                 </div>
             </div>
 
             <div style="display: flex; flex-direction: column; gap: 1rem;">
-                <a href="${pageContext.request.contextPath}/payment?action=mock_gateway&amount=<%= amount %>&record_id=<%= record.getRecordId() %>" class="btn btn-primary" style="width: 100%; padding: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 1rem; font-size: 0.8125rem; letter-spacing: 0.2em;">
+                <a href="${pageContext.request.contextPath}/payment?action=mock_gateway&amount=${amount}&record_id=${record.recordId}" class="btn btn-primary" style="width: 100%; padding: 1.5rem; display: flex; align-items: center; justify-content: center; gap: 1rem; font-size: 0.8125rem; letter-spacing: 0.2em;">
                     <span class="material-symbols-outlined">payments</span>
                     PROCEED TO SECURE PAYMENT
                 </a>

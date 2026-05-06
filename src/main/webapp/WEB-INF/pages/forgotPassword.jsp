@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -29,11 +30,11 @@
                 </p>
             </div>
 
-            <% if (request.getAttribute("error") != null) { %>
+            <c:if test="${not empty error}">
                 <div class="auth-msg auth-msg-error" style="background: #fee2e2; color: #b91c1c; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.875rem; text-align: center;">
-                    <%= request.getAttribute("error") %>
+                    ${error}
                 </div>
-            <% } %>
+            </c:if>
 
             <form action="${pageContext.request.contextPath}/user" method="POST">
                 <input type="hidden" name="action" value="initiate_recovery">

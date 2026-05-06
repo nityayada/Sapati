@@ -1,14 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.sapati.model.User" %>
-<%
-    User user = (User) request.getAttribute("user");
-    if (user == null) {
-        response.sendRedirect(request.getContextPath() + "/user?action=login");
-        return;
-    }
-    String msg = request.getParameter("msg");
-    String error = (String) request.getAttribute("error");
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:if test="${empty user}">
+    <c:redirect url="/user?action=login" />
+</c:if>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -77,48 +71,51 @@
         <!-- Profile Header -->
         <section class="welcome-banner" style="margin-bottom: 4rem;">
             <div class="user-avatar" style="width: 100px; height: 100px; background-color: var(--primary-container); border: 2px solid var(--primary); overflow: hidden; display: flex; align-items: center; justify-content: center;">
-                <% if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) { %>
-                    <img src="${pageContext.request.contextPath}/<%= user.getProfileImage() %>" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
-                <% } else { %>
-                    <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary);">person</span>
-                <% } %>
+                <c:choose>
+                    <c:when test="${not empty user.profileImage}">
+                        <img src="${pageContext.request.contextPath}/${user.profileImage}" alt="Profile" style="width: 100%; height: 100%; object-fit: cover;">
+                    </c:when>
+                    <c:otherwise>
+                        <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary);">person</span>
+                    </c:otherwise>
+                </c:choose>
             </div>
             <div>
                 <div style="display: flex; align-items: baseline; gap: 1.5rem; margin-bottom: 0.75rem;">
                     <h1 style="font-size: 3rem; font-weight: 900; line-height: 1; text-transform: uppercase; letter-spacing: -0.04em;">Member Registry</h1>
                 </div>
                 <div style="display: flex; gap: 2rem; align-items: center;">
-                    <span class="status-chip" style="background-color: var(--primary); color: white; border: none;">NODE_<%= user.getUserId() %></span>
+                    <span class="status-chip" style="background-color: var(--primary); color: white; border: none;">NODE_${user.userId}</span>
                     <p style="font-size: 0.8125rem; color: var(--outline); font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em;">
-                        System Role: <span style="color: var(--primary); font-weight: 800;"><%= user.getRole() %></span>
+                        System Role: <span style="color: var(--primary); font-weight: 800;">${user.role}</span>
                     </p>
                 </div>
             </div>
         </section>
 
-        <% if ("profile_updated".equals(msg)) { %>
+        <c:if test="${param.msg eq 'profile_updated'}">
             <div style="background-color: #E8F5E9; border-left: 5px solid #2E7D32; padding: 1.5rem; margin-bottom: 3rem; font-weight: 700; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.1em; color: #1B5E20;">
                 Identity Records Successfully Updated
             </div>
-        <% } %>
+        </c:if>
         
-        <% if ("password_updated".equals(msg)) { %>
+        <c:if test="${param.msg eq 'password_updated'}">
             <div style="background-color: #E8F5E9; border-left: 5px solid #2E7D32; padding: 1.5rem; margin-bottom: 3rem; font-weight: 700; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.1em; color: #1B5E20;">
                 Security Protocols Updated
             </div>
-        <% } %>
+        </c:if>
 
-        <% if ("security_updated".equals(msg)) { %>
+        <c:if test="${param.msg eq 'security_updated'}">
             <div style="background-color: #E3F2FD; border-left: 5px solid #1976D2; padding: 1.5rem; margin-bottom: 3rem; font-weight: 700; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.1em; color: #0D47A1;">
                 Identity Verification Protocols Configured
             </div>
-        <% } %>
+        </c:if>
 
-        <% if (error != null) { %>
+        <c:if test="${not empty error}">
             <div style="background-color: #FFEBEE; border-left: 5px solid #C62828; padding: 1.5rem; margin-bottom: 3rem; font-weight: 700; font-size: 0.875rem; text-transform: uppercase; letter-spacing: 0.1em; color: #B71C1C;">
-                <%= error %>
+                ${error}
             </div>
-        <% } %>
+        </c:if>
 
         <div class="dashboard-grid" style="grid-template-columns: 1.5fr 1fr; gap: 4rem;">
             
@@ -132,22 +129,22 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
                         <div class="form-group">
                             <label class="filter-label">Full Name</label>
-                            <input type="text" name="full_name" class="filter-input" value="<%= user.getFullName() %>" required style="width: 100%; border-color: var(--outline-variant);">
+                            <input type="text" name="full_name" class="filter-input" value="${user.fullName}" required style="width: 100%; border-color: var(--outline-variant);">
                         </div>
                         <div class="form-group">
                             <label class="filter-label">Email Access (Read-Only)</label>
-                            <input type="email" class="filter-input" value="<%= user.getEmail() %>" disabled style="width: 100%; background-color: var(--surface-container-lowest); opacity: 0.6;">
+                            <input type="email" class="filter-input" value="${user.email}" disabled style="width: 100%; background-color: var(--surface-container-lowest); opacity: 0.6;">
                         </div>
                     </div>
 
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 2rem; margin-bottom: 2rem;">
                         <div class="form-group">
                             <label class="filter-label">Contact Number</label>
-                            <input type="text" name="phone" class="filter-input" value="<%= user.getPhoneNumber() != null ? user.getPhoneNumber() : "" %>" style="width: 100%; border-color: var(--outline-variant);">
+                            <input type="text" name="phone" class="filter-input" value="${not empty user.phoneNumber ? user.phoneNumber : ''}" style="width: 100%; border-color: var(--outline-variant);">
                         </div>
                         <div class="form-group">
                             <label class="filter-label">Physical Node (Address)</label>
-                            <input type="text" name="address" class="filter-input" value="<%= user.getAddress() != null ? user.getAddress() : "" %>" required style="width: 100%; border-color: var(--outline-variant);">
+                            <input type="text" name="address" class="filter-input" value="${not empty user.address ? user.address : ''}" required style="width: 100%; border-color: var(--outline-variant);">
                         </div>
                     </div>
 
@@ -210,10 +207,10 @@
                         <div class="form-group">
                             <label class="filter-label">Identity Verification Question</label>
                             <select name="security_question" class="filter-input" style="width: 100%; background-image: none; border-color: var(--outline-variant);" required>
-                                <option value="What was your first pet's name?" <%= "What was your first pet's name?".equals(user.getSecurityQuestion()) ? "selected" : "" %>>What was your first pet's name?</option>
-                                <option value="In what city were you born?" <%= "In what city were you born?".equals(user.getSecurityQuestion()) ? "selected" : "" %>>In what city were you born?</option>
-                                <option value="What was your childhood nickname?" <%= "What was your childhood nickname?".equals(user.getSecurityQuestion()) ? "selected" : "" %>>What was your childhood nickname?</option>
-                                <option value="What is the name of your first school?" <%= "What is the name of your first school?".equals(user.getSecurityQuestion()) ? "selected" : "" %>>What is the name of your first school?</option>
+                                <option value="What was your first pet's name?" ${user.securityQuestion eq "What was your first pet's name?" ? 'selected' : ''}>What was your first pet's name?</option>
+                                <option value="In what city were you born?" ${user.securityQuestion eq "In what city were you born?" ? 'selected' : ''}>In what city were you born?</option>
+                                <option value="What was your childhood nickname?" ${user.securityQuestion eq "What was your childhood nickname?" ? 'selected' : ''}>What was your childhood nickname?</option>
+                                <option value="What is the name of your first school?" ${user.securityQuestion eq "What is the name of your first school?" ? 'selected' : ''}>What is the name of your first school?</option>
                             </select>
                         </div>
 
@@ -232,11 +229,11 @@
                     <div style="font-family: 'Inter', sans-serif; font-size: 0.75rem; line-height: 2;">
                         <div style="display: flex; justify-content: space-between;">
                             <span style="font-weight: 700; color: var(--outline);">Status</span>
-                            <span style="font-weight: 900; color: var(--primary);"><%= user.getAccountStatus() %></span>
+                            <span style="font-weight: 900; color: var(--primary);">${user.accountStatus}</span>
                         </div>
                         <div style="display: flex; justify-content: space-between;">
                             <span style="font-weight: 700; color: var(--outline);">Permissions</span>
-                            <span style="font-weight: 900; color: var(--primary);"><%= user.getRole().toUpperCase() %>_ACCESS</span>
+                            <span style="font-weight: 900; color: var(--primary);">${user.role.toUpperCase()}_ACCESS</span>
                         </div>
                         <div style="display: flex; justify-content: space-between; margin-top: 1rem; padding-top: 1rem; border-top: 1px dashed var(--outline-variant);">
                             <span style="font-weight: 700; color: var(--error);">DANGER_ZONE</span>
@@ -254,3 +251,4 @@
 
 </body>
 </html>
+

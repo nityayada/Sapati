@@ -1,9 +1,7 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.List, com.sapati.model.BorrowRequest, com.sapati.model.BorrowRecord" %>
-<%
-    List<BorrowRequest> requests = (List<BorrowRequest>) request.getAttribute("incomingRequests");
-    List<BorrowRecord> pendingReturns = (List<BorrowRecord>) request.getAttribute("pendingReturns");
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -26,9 +24,9 @@
             <p style="opacity: 0.6; font-weight: 500;">Review community requests to borrow your listed resources.</p>
         </header>
 
-        <% if (request.getParameter("msg") != null) { %>
-            <div class="auth-msg auth-msg-success" style="margin-bottom: 2rem;"><%= request.getParameter("msg") %> successful.</div>
-        <% } %>
+        <c:if test="${not empty param.msg}">
+            <div class="auth-msg auth-msg-success" style="margin-bottom: 2rem;">${param.msg} successful.</div>
+        </c:if>
 
         <div class="ledger-container">
             <table class="ledger-table">
@@ -42,57 +40,59 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% if (requests == null || requests.isEmpty()) { %>
-                        <tr>
-                            <td colspan="5" style="text-align: center; padding: 5rem; opacity: 0.5;">
-                                <span class="material-symbols-outlined" style="font-size: 3rem; display: block; margin-bottom: 1rem;">inbox</span>
-                                <div class="label-md">No pending requests at this time.</div>
-                            </td>
-                        </tr>
-                    <% } else { 
-                        for (BorrowRequest req : requests) { %>
-                        <tr>
-                            <td>
-                                <div style="font-weight: 800; text-transform: uppercase;"><%= req.getItemName() %></div>
-                                <div style="font-size: 0.625rem; opacity: 0.5;">ID: <%= req.getItemId() %></div>
-                            </td>
-                            <td>
-                                <div style="display: flex; align-items: center; gap: 0.75rem;">
-                                    <div style="width: 24px; height: 24px; background-color: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 900;">
-                                        <%= req.getRequesterName().substring(0, 1) %>
-                                    </div>
-                                    <span style="font-weight: 700;"><%= req.getRequesterName() %></span>
-                                </div>
-                            </td>
-                            <td class="tabular-nums"><%= req.getRequestedDate() %></td>
-                            <td class="tabular-nums" style="color: var(--primary); font-weight: 700;"><%= req.getProposedDueDate() %></td>
-                            <td style="text-align: right;">
-                                <div style="display: flex; gap: 1rem; justify-content: flex-end;">
-                                    <form action="${pageContext.request.contextPath}/borrow" method="POST" style="display: inline;">
-                                        <input type="hidden" name="action" value="approve">
-                                        <input type="hidden" name="request_id" value="<%= req.getRequestId() %>">
-                                        <input type="hidden" name="item_id" value="<%= req.getItemId() %>">
-                                        <input type="hidden" name="requester_id" value="<%= req.getRequesterId() %>">
-                                        <input type="hidden" name="due_date" value="<%= req.getProposedDueDate() %>">
-                                        <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.625rem;">APPROVE</button>
-                                    </form>
-                                    <form action="${pageContext.request.contextPath}/borrow" method="POST" style="display: inline;">
-                                        <input type="hidden" name="action" value="reject">
-                                        <input type="hidden" name="request_id" value="<%= req.getRequestId() %>">
-                                        <input type="hidden" name="item_id" value="<%= req.getItemId() %>">
-                                        <button type="submit" class="btn btn-ghost" style="padding: 0.5rem 1rem; font-size: 0.625rem; color: var(--error); border-color: var(--error);">REJECT</button>
-                                    </form>
-
-                                </div>
-                            </td>
-                        </tr>
-                    <% } 
-                    } %>
+                    <c:choose>
+                        <c:when test="${empty incomingRequests}">
+                            <tr>
+                                <td colspan="5" style="text-align: center; padding: 5rem; opacity: 0.5;">
+                                    <span class="material-symbols-outlined" style="font-size: 3rem; display: block; margin-bottom: 1rem;">inbox</span>
+                                    <div class="label-md">No pending requests at this time.</div>
+                                </td>
+                            </tr>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach items="${incomingRequests}" var="req">
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 800; text-transform: uppercase;">${req.itemName}</div>
+                                        <div style="font-size: 0.625rem; opacity: 0.5;">ID: ${req.itemId}</div>
+                                    </td>
+                                    <td>
+                                        <div style="display: flex; align-items: center; gap: 0.75rem;">
+                                            <div style="width: 24px; height: 24px; background-color: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 0.6rem; font-weight: 900;">
+                                                ${fn:substring(req.requesterName, 0, 1)}
+                                            </div>
+                                            <span style="font-weight: 700;">${req.requesterName}</span>
+                                        </div>
+                                    </td>
+                                    <td class="tabular-nums">${req.requestedDate}</td>
+                                    <td class="tabular-nums" style="color: var(--primary); font-weight: 700;">${req.proposedDueDate}</td>
+                                    <td style="text-align: right;">
+                                        <div style="display: flex; gap: 1rem; justify-content: flex-end;">
+                                            <form action="${pageContext.request.contextPath}/borrow" method="POST" style="display: inline;">
+                                                <input type="hidden" name="action" value="approve">
+                                                <input type="hidden" name="request_id" value="${req.requestId}">
+                                                <input type="hidden" name="item_id" value="${req.itemId}">
+                                                <input type="hidden" name="requester_id" value="${req.requesterId}">
+                                                <input type="hidden" name="due_date" value="${req.proposedDueDate}">
+                                                <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1rem; font-size: 0.625rem;">APPROVE</button>
+                                            </form>
+                                            <form action="${pageContext.request.contextPath}/borrow" method="POST" style="display: inline;">
+                                                <input type="hidden" name="action" value="reject">
+                                                <input type="hidden" name="request_id" value="${req.requestId}">
+                                                <input type="hidden" name="item_id" value="${req.itemId}">
+                                                <button type="submit" class="btn btn-ghost" style="padding: 0.5rem 1rem; font-size: 0.625rem; color: var(--error); border-color: var(--error);">REJECT</button>
+                                            </form>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
                 </tbody>
             </table>
         </div>
 
-        <%-- NEW: Return Verifications Section --%>
+        <%-- Return Verifications Section --%>
         <header style="margin-top: 6rem; margin-bottom: 3rem; border-bottom: 1px solid var(--outline-variant); padding-bottom: 2rem;">
             <span class="label-md" style="color: var(--outline);">SEC. 02 // RETURN PROTOCOLS</span>
             <h2 style="font-size: 2.5rem; font-weight: 900; text-transform: uppercase; margin-top: 1rem;">Return Verifications</h2>
@@ -110,32 +110,35 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <% if (pendingReturns == null || pendingReturns.isEmpty()) { %>
-                        <tr>
-                            <td colspan="4" style="text-align: center; padding: 4rem; opacity: 0.5;">
-                                <div class="label-md">No returns awaiting verification.</div>
-                            </td>
-                        </tr>
-                    <% } else { 
-                        for (BorrowRecord record : pendingReturns) { %>
-                        <tr>
-                            <td>
-                                <div style="font-weight: 800; text-transform: uppercase;"><%= record.getItemName() %></div>
-                            </td>
-                            <td>
-                                <div style="font-weight: 700;"><%= record.getBorrowerName() %></div>
-                            </td>
-                            <td class="tabular-nums"><%= record.getReturnDate() %></td>
-                            <td style="text-align: right;">
-                                <form action="${pageContext.request.contextPath}/borrow" method="POST">
-                                    <input type="hidden" name="action" value="confirm_return">
-                                    <input type="hidden" name="item_id" value="<%= record.getItemId() %>">
-                                    <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.625rem;">CONFIRM & MAKE AVAILABLE</button>
-                                </form>
-                            </td>
-                        </tr>
-                    <% } 
-                    } %>
+                    <c:choose>
+                        <c:when test="${empty pendingReturns}">
+                            <tr>
+                                <td colspan="4" style="text-align: center; padding: 4rem; opacity: 0.5;">
+                                    <div class="label-md">No returns awaiting verification.</div>
+                                </td>
+                            </tr>
+                        </c:when>
+                        <c:otherwise>
+                            <c:forEach items="${pendingReturns}" var="record">
+                                <tr>
+                                    <td>
+                                        <div style="font-weight: 800; text-transform: uppercase;">${record.itemName}</div>
+                                    </td>
+                                    <td>
+                                        <div style="font-weight: 700;">${record.borrowerName}</div>
+                                    </td>
+                                    <td class="tabular-nums">${record.returnDate}</td>
+                                    <td style="text-align: right;">
+                                        <form action="${pageContext.request.contextPath}/borrow" method="POST">
+                                            <input type="hidden" name="action" value="confirm_return">
+                                            <input type="hidden" name="item_id" value="${record.itemId}">
+                                            <button type="submit" class="btn btn-primary" style="padding: 0.5rem 1.5rem; font-size: 0.625rem;">CONFIRM & MAKE AVAILABLE</button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            </c:forEach>
+                        </c:otherwise>
+                    </c:choose>
                 </tbody>
             </table>
         </div>

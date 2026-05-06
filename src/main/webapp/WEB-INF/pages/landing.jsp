@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -97,7 +98,7 @@
                     <h2 class="section-title">Available for Borrowing</h2>
                 </div>
                 <div class="catalog-actions">
-                    <form action="<%= request.getContextPath() %>/item" method="GET" class="search-box">
+                    <form action="${pageContext.request.contextPath}/item" method="GET" class="search-box">
                         <input type="hidden" name="action" value="search">
                         <span class="material-symbols-outlined">search</span>
                         <input type="text" name="query" class="search-input" placeholder="Search items...">
@@ -125,7 +126,7 @@
                     </div>
                     <h3>DeWalt Cordless Drill</h3>
                     <p class="owner-text">Owned by <span class="owner-name">Rajan K.</span></p>
-                    <a href="<%= request.getContextPath() %>/item?action=list" class="btn btn-secondary">
+                    <a href="${pageContext.request.contextPath}/item?action=list" class="btn btn-secondary">
                         Request to Borrow <span class="material-symbols-outlined" style="font-size: 1rem;">arrow_forward</span>
                     </a>
                 </div>
@@ -143,7 +144,7 @@
                     </div>
                     <h3>Epson 4K Projector</h3>
                     <p class="owner-text">Owned by <span class="owner-name">Sita M.</span></p>
-                    <a href="<%= request.getContextPath() %>/item?action=list" class="btn btn-secondary">
+                    <a href="${pageContext.request.contextPath}/item?action=list" class="btn btn-secondary">
                         Request to Borrow <span class="material-symbols-outlined" style="font-size: 1rem;">arrow_forward</span>
                     </a>
                 </div>
@@ -179,14 +180,14 @@
                     </div>
                     <h3>High-Power Washer</h3>
                     <p class="owner-text">Owned by <span class="owner-name">Bibek T.</span></p>
-                    <a href="<%= request.getContextPath() %>/item?action=list" class="btn btn-secondary">
+                    <a href="${pageContext.request.contextPath}/item?action=list" class="btn btn-secondary">
                         Request to Borrow <span class="material-symbols-outlined" style="font-size: 1rem;">arrow_forward</span>
                     </a>
                 </div>
             </div>
 
             <div style="margin-top: 4rem; display: flex; justify-content: center;">
-                <a href="<%= request.getContextPath() %>/item?action=list" class="nav-link" style="font-weight: 900; letter-spacing: 0.1em; display: flex; align-items: center; gap: 1rem;">
+                <a href="${pageContext.request.contextPath}/item?action=list" class="nav-link" style="font-weight: 900; letter-spacing: 0.1em; display: flex; align-items: center; gap: 1rem;">
                     VIEW ALL CATALOG ITEMS
                     <span style="width: 3rem; height: 2px; background-color: var(--primary);"></span>
                 </a>
@@ -205,7 +206,7 @@
                         <div class="cta-number">98%</div>
                         <div class="cta-stat-label">Return Accuracy</div>
                     </div>
-                    <a href="<%= request.getContextPath() %>/user?action=register" class="btn">Join Now</a>
+                    <a href="${pageContext.request.contextPath}/user?action=register" class="btn">Join Now</a>
                 </div>
             </div>
         </section>

@@ -1,10 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.List, com.sapati.model.Item, com.sapati.model.Category" %>
-<%
-    List<Item> items = (List<Item>) request.getAttribute("items");
-    List<Category> categories = (List<Category>) request.getAttribute("categories");
-    boolean isLoggedIn = session.getAttribute("user") != null;
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -23,11 +18,14 @@
 </head>
 <body style="background-color: var(--surface);">
 
-    <% if (isLoggedIn) { %>
-        <jsp:include page="components/member_header.jsp" />
-    <% } else { %>
-        <jsp:include page="components/public_header.jsp" />
-    <% } %>
+    <c:choose>
+        <c:when test="${not empty sessionScope.user}">
+            <jsp:include page="components/member_header.jsp" />
+        </c:when>
+        <c:otherwise>
+            <jsp:include page="components/public_header.jsp" />
+        </c:otherwise>
+    </c:choose>
 
     <main class="container" style="padding: 0;">
         
@@ -43,21 +41,18 @@
                 
                 <div class="filter-group">
                     <label class="filter-label">Search Keywords</label>
-                    <input type="text" name="query" class="filter-input" placeholder="Enter resource name..." value="<%= request.getParameter("query") != null ? request.getParameter("query") : "" %>">
+                    <input type="text" name="query" class="filter-input" placeholder="Enter resource name..." value="${param.query}">
                 </div>
 
                 <div class="filter-group">
                     <label class="filter-label">Resource Category</label>
                     <select name="category" class="filter-input">
                         <option value="">All Categories</option>
-                        <% 
-                            String selectedCat = request.getParameter("category");
-                            if (categories != null) { 
-                                for (Category cat : categories) { 
-                                    boolean isSelected = selectedCat != null && selectedCat.equals(String.valueOf(cat.getCategoryId()));
-                        %>
-                            <option value="<%= cat.getCategoryId() %>" <%= isSelected ? "selected" : "" %>><%= cat.getCategoryName() %></option>
-                        <% } } %>
+                        <c:forEach items="${categories}" var="cat">
+                            <option value="${cat.categoryId}" ${param.category == cat.categoryId ? 'selected' : ''}>
+                                ${cat.categoryName}
+                            </option>
+                        </c:forEach>
                     </select>
                 </div>
 
@@ -70,40 +65,44 @@
         <!-- Structured Results Grid -->
         <div style="padding: 0 1.5rem 8rem 1.5rem;">
             <div class="items-grid">
-                <% 
-                    if (items == null || items.isEmpty()) {
-                %>
-                    <div style="grid-column: 1/-1; padding: 10rem 0; text-align: center; border-right: 1px solid var(--outline-variant); border-bottom: 1px solid var(--outline-variant);">
-                        <span class="material-symbols-outlined" style="font-size: 5rem; color: var(--primary); opacity: 0.1; margin-bottom: 2rem;">inventory_2</span>
-                        <h3 style="font-size: 1.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;">No Records Found</h3>
-                        <a href="${pageContext.request.contextPath}/item?action=list" class="label-md" style="margin-top: 2rem; display: inline-block; text-decoration: underline;">RESET CATALOG VIEW</a>
-                    </div>
-                <% } else { 
-                    for (Item item : items) {
-                %>
-                    <div class="inventory-card">
-                        <div class="image-box">
-                            <div class="status-pill"><%= item.getStatus().toUpperCase() %></div>
-                            <% if (item.getImagePath() != null && !item.getImagePath().isEmpty()) { %>
-                                <img src="<%= item.getImagePath() %>" alt="<%= item.getName() %>" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); mix-blend-mode: multiply;">
-                            <% } else { %>
-                                <span class="material-symbols-outlined" style="font-size: 4rem; opacity: 0.1;">package_2</span>
-                            <% } %>
+                <c:choose>
+                    <c:when test="${empty items}">
+                        <div style="grid-column: 1/-1; padding: 10rem 0; text-align: center; border-right: 1px solid var(--outline-variant); border-bottom: 1px solid var(--outline-variant);">
+                            <span class="material-symbols-outlined" style="font-size: 5rem; color: var(--primary); opacity: 0.1; margin-bottom: 2rem;">inventory_2</span>
+                            <h3 style="font-size: 1.5rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em;">No Records Found</h3>
+                            <a href="${pageContext.request.contextPath}/item?action=list" class="label-md" style="margin-top: 2rem; display: inline-block; text-decoration: underline;">RESET CATALOG VIEW</a>
                         </div>
-                        <div class="card-body">
-                            <span class="category-tag">ARCHIVE.REF_<%= item.getItemId() %></span>
-                            <h3 class="item-title"><%= item.getName() %></h3>
-                            
-                            <div class="card-footer">
-                                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
-                                    <span style="font-size: 0.75rem; font-weight: 800; color: var(--outline); text-transform: uppercase;">Ownership</span>
-                                    <span style="font-size: 0.8125rem; font-weight: 900; text-transform: uppercase;">Peer Node</span>
+                    </c:when>
+                    <c:otherwise>
+                        <c:forEach items="${items}" var="item">
+                            <div class="inventory-card">
+                                <div class="image-box">
+                                    <div class="status-pill">${item.status.toUpperCase()}</div>
+                                    <c:choose>
+                                        <c:when test="${not empty item.imagePath}">
+                                            <img src="${item.imagePath}" alt="${item.name}" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); mix-blend-mode: multiply;">
+                                        </c:when>
+                                        <c:otherwise>
+                                            <span class="material-symbols-outlined" style="font-size: 4rem; opacity: 0.1;">package_2</span>
+                                        </c:otherwise>
+                                    </c:choose>
                                 </div>
-                                <a href="${pageContext.request.contextPath}/item?action=view&id=<%= item.getItemId() %>" class="btn btn-primary" style="width: 100%; padding: 1.25rem; font-size: 0.75rem; letter-spacing: 0.2em;">VIEW RESOURCE</a>
+                                <div class="card-body">
+                                    <span class="category-tag">ARCHIVE.REF_${item.itemId}</span>
+                                    <h3 class="item-title">${item.name}</h3>
+                                    
+                                    <div class="card-footer">
+                                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+                                            <span style="font-size: 0.75rem; font-weight: 800; color: var(--outline); text-transform: uppercase;">Ownership</span>
+                                            <span style="font-size: 0.8125rem; font-weight: 900; text-transform: uppercase;">Peer Node</span>
+                                        </div>
+                                        <a href="${pageContext.request.contextPath}/item?action=view&id=${item.itemId}" class="btn btn-primary" style="width: 100%; padding: 1.25rem; font-size: 0.75rem; letter-spacing: 0.2em;">VIEW RESOURCE</a>
+                                    </div>
+                                </div>
                             </div>
-                        </div>
-                    </div>
-                <% } } %>
+                        </c:forEach>
+                    </c:otherwise>
+                </c:choose>
             </div>
 
             <!-- Footer Pagination Structural -->
@@ -114,11 +113,15 @@
 
     </main>
 
-    <% if (isLoggedIn) { %>
-        <jsp:include page="components/member_footer.jsp" />
-    <% } else { %>
-        <jsp:include page="components/public_header.jsp" />
-    <% } %>
+    <c:choose>
+        <c:when test="${not empty sessionScope.user}">
+            <jsp:include page="components/member_footer.jsp" />
+        </c:when>
+        <c:otherwise>
+            <jsp:include page="components/public_header.jsp" />
+        </c:otherwise>
+    </c:choose>
 
 </body>
 </html>
+

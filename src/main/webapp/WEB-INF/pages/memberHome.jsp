@@ -1,27 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.sapati.model.User, com.sapati.model.Item, com.sapati.model.BorrowRecord, com.sapati.model.Fine, java.util.List" %>
-<%
-    User sessionUser = (User) session.getAttribute("user");
-    if (sessionUser == null) {
-        response.sendRedirect(request.getContextPath() + "/user?action=login");
-        return;
-    }
-    
-    // Fetch counts dynamically from request attributes
-    Integer listedCount = (Integer) request.getAttribute("listedCount");
-    Integer borrowedCount = (Integer) request.getAttribute("borrowedCount");
-    Integer pendingCount = (Integer) request.getAttribute("pendingCount");
-    Integer finesAmount = (Integer) request.getAttribute("finesAmount");
-    
-    List<BorrowRecord> recentRecords = (List<BorrowRecord>) request.getAttribute("recentRecords");
-    List<Item> myListings = (List<Item>) request.getAttribute("myListings");
-    List<Fine> unpaidFines = (List<Fine>) request.getAttribute("unpaidFines");
-
-    listedCount = (listedCount != null) ? listedCount : 0;
-    borrowedCount = (borrowedCount != null) ? borrowedCount : 0;
-    pendingCount = (pendingCount != null) ? pendingCount : 0;
-    finesAmount = (finesAmount != null) ? finesAmount : 0;
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<%@ taglib prefix="fmt" uri="jakarta.tags.fmt" %>
+<c:if test="${empty sessionScope.user}">
+    <c:redirect url="/user?action=login" />
+</c:if>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -51,12 +34,12 @@
             </div>
             <div>
                 <div style="display: flex; align-items: baseline; gap: 1.5rem; margin-bottom: 0.75rem;">
-                    <h1 style="font-size: 2.5rem; font-weight: 900; line-height: 1; text-transform: uppercase; letter-spacing: -0.02em;">Welcome back, <%= sessionUser.getFullName() %></h1>
+                    <h1 style="font-size: 2.5rem; font-weight: 900; line-height: 1; text-transform: uppercase; letter-spacing: -0.02em;">Welcome back, ${sessionScope.user.fullName}</h1>
                 </div>
                 <div style="display: flex; gap: 2rem; align-items: center;">
                     <span class="status-chip" style="background-color: var(--primary); color: white; border: none;">Verified Member</span>
                     <p style="font-size: 0.8125rem; color: var(--outline); font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em;">
-                        Node: <span style="color: var(--primary); font-weight: 800;"><%= sessionUser.getAddress() != null ? sessionUser.getAddress() : "Remote" %></span>
+                        Node: <span style="color: var(--primary); font-weight: 800;">${not empty sessionScope.user.address ? sessionScope.user.address : 'Remote'}</span>
                     </p>
                 </div>
             </div>
@@ -66,19 +49,25 @@
         <section class="stat-row" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 2rem; margin-bottom: 4rem;">
             <div class="stat-box" style="background: white; border: 1px solid var(--outline-variant); padding: 2rem;">
                 <span class="label-md" style="opacity: 0.6; display: block; margin-bottom: 0.5rem;">Items Borrowing</span>
-                <div class="count" style="font-size: 2.5rem; font-weight: 900;"><%= String.format("%02d", borrowedCount) %></div>
+                <div class="count" style="font-size: 2.5rem; font-weight: 900;">
+                    <fmt:formatNumber value="${not empty borrowedCount ? borrowedCount : 0}" pattern="00" />
+                </div>
             </div>
             <div class="stat-box" style="background: white; border: 1px solid var(--outline-variant); padding: 2rem;">
                 <span class="label-md" style="opacity: 0.6; display: block; margin-bottom: 0.5rem;">My Shared Items</span>
-                <div class="count" style="font-size: 2.5rem; font-weight: 900;"><%= String.format("%02d", listedCount) %></div>
+                <div class="count" style="font-size: 2.5rem; font-weight: 900;">
+                    <fmt:formatNumber value="${not empty listedCount ? listedCount : 0}" pattern="00" />
+                </div>
             </div>
             <div class="stat-box" style="background: white; border: 1px solid var(--outline-variant); padding: 2rem;">
                 <span class="label-md" style="opacity: 0.6; display: block; margin-bottom: 0.5rem;">Incoming Requests</span>
-                <div class="count" style="font-size: 2.5rem; font-weight: 900;"><%= String.format("%02d", pendingCount) %></div>
+                <div class="count" style="font-size: 2.5rem; font-weight: 900;">
+                    <fmt:formatNumber value="${not empty pendingCount ? pendingCount : 0}" pattern="00" />
+                </div>
             </div>
             <div class="stat-box error-state" style="background: white; border: 1px solid var(--error); padding: 2rem;">
                 <span class="label-md" style="color: var(--error); opacity: 0.8; display: block; margin-bottom: 0.5rem;">Outstanding Balance</span>
-                <div class="count" style="color: var(--error); font-size: 2.5rem; font-weight: 900;">NPR <%= finesAmount %></div>
+                <div class="count" style="color: var(--error); font-size: 2.5rem; font-weight: 900;">NPR ${not empty finesAmount ? finesAmount : 0}</div>
             </div>
         </section>
 
@@ -107,26 +96,29 @@
                                 </tr>
                             </thead>
                             <tbody>
-                                <% if (recentRecords == null || recentRecords.isEmpty()) { %>
-                                    <tr>
-                                        <td colspan="5" style="padding: 3rem 0; text-align: center; color: var(--outline); font-size: 0.75rem;">NO ACTIVE BORROW RECORDS DETECTED.</td>
-                                    </tr>
-                                <% } else { 
-                                    for (BorrowRecord record : recentRecords) {
-                                        boolean isOverdue = "Overdue".equalsIgnoreCase(record.getStatus());
-                                %>
-                                <tr style="border-bottom: 1px solid var(--outline-variant);">
-                                    <td style="padding: 1.5rem 0; font-weight: 800; color: var(--primary);"><%= record.getItemName() %></td>
-                                    <td style="padding: 1.5rem 0; font-size: 0.8125rem;"><%= record.getOwnerName() %></td>
-                                    <td style="padding: 1.5rem 0; font-size: 0.8125rem;"><%= record.getBorrowDate() %></td>
-                                    <td style="padding: 1.5rem 0; font-size: 0.8125rem; <%= isOverdue ? "color: var(--error); font-weight: 900;" : "" %>"><%= record.getDueDate() %></td>
-                                    <td style="padding: 1.5rem 0;">
-                                        <span class="status-chip <%= isOverdue ? "overdue" : "" %>" style="padding: 0.25rem 0.75rem; font-size: 0.6rem; font-weight: 900; background-color: <%= isOverdue ? "var(--error)" : "var(--primary)" %>; color: white;">
-                                            <%= record.getStatus().toUpperCase() %>
-                                        </span>
-                                    </td>
-                                </tr>
-                                <% } } %>
+                                <c:choose>
+                                    <c:when test="${empty recentRecords}">
+                                        <tr>
+                                            <td colspan="5" style="padding: 3rem 0; text-align: center; color: var(--outline); font-size: 0.75rem;">NO ACTIVE BORROW RECORDS DETECTED.</td>
+                                        </tr>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <c:forEach items="${recentRecords}" var="record">
+                                            <c:set var="isOverdue" value="${record.status.equalsIgnoreCase('Overdue')}" />
+                                            <tr style="border-bottom: 1px solid var(--outline-variant);">
+                                                <td style="padding: 1.5rem 0; font-weight: 800; color: var(--primary);">${record.itemName}</td>
+                                                <td style="padding: 1.5rem 0; font-size: 0.8125rem;">${record.ownerName}</td>
+                                                <td style="padding: 1.5rem 0; font-size: 0.8125rem;">${record.borrowDate}</td>
+                                                <td style="padding: 1.5rem 0; font-size: 0.8125rem; ${isOverdue ? 'color: var(--error); font-weight: 900;' : ''}">${record.dueDate}</td>
+                                                <td style="padding: 1.5rem 0;">
+                                                    <span class="status-chip ${isOverdue ? 'overdue' : ''}" style="padding: 0.25rem 0.75rem; font-size: 0.6rem; font-weight: 900; background-color: ${isOverdue ? 'var(--error)' : 'var(--primary)'}; color: white;">
+                                                        ${record.status.toUpperCase()}
+                                                    </span>
+                                                </td>
+                                            </tr>
+                                        </c:forEach>
+                                    </c:otherwise>
+                                </c:choose>
                             </tbody>
                         </table>
                     </div>
@@ -140,32 +132,38 @@
                     </div>
                     
                     <div class="grid-3" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 2rem;">
-                        <% if (myListings == null || myListings.isEmpty()) { %>
-                            <div style="grid-column: span 3; padding: 3rem; background: var(--surface-container-low); border: 1px dashed var(--outline-variant); text-align: center;">
-                                <p style="font-size: 0.75rem; color: var(--outline);">YOU HAVEN'T SHARED ANY RESOURCES YET.</p>
-                            </div>
-                        <% } else { 
-                            int count = 0;
-                            for (Item item : myListings) {
-                                if (count++ >= 3) break; // Limit to 3 on home
-                        %>
-                            <div class="item-card" style="padding: 0; background-color: transparent; border: none;">
-                                <div class="item-image" style="height: 180px; background-color: var(--surface-container-low); border: 1px dashed var(--outline-variant); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; overflow: hidden;">
-                                    <% if (item.getImagePath() != null && !item.getImagePath().contains("placeholder")) { %>
-                                        <img src="<%= item.getImagePath() %>" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); transition: 0.3s;" onmouseover="this.style.filter='grayscale(0)'" onmouseout="this.style.filter='grayscale(1)'">
-                                    <% } else { %>
-                                        <span class="material-symbols-outlined" style="opacity: 0.2; font-size: 3rem;">inventory_2</span>
-                                    <% } %>
+                        <c:choose>
+                            <c:when test="${empty myListings}">
+                                <div style="grid-column: span 3; padding: 3rem; background: var(--surface-container-low); border: 1px dashed var(--outline-variant); text-align: center;">
+                                    <p style="font-size: 0.75rem; color: var(--outline);">YOU HAVEN'T SHARED ANY RESOURCES YET.</p>
                                 </div>
-                                <div style="padding: 1rem 0;">
-                                    <h3 style="font-size: 0.875rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;"><%= item.getName() %></h3>
-                                    <div style="display: flex; gap: 1rem;">
-                                        <a href="${pageContext.request.contextPath}/item?action=edit&id=<%= item.getItemId() %>" class="label-md" style="font-size: 0.6rem; text-decoration: underline;">EDIT</a>
-                                        <span class="label-md" style="font-size: 0.6rem; opacity: 0.5;"><%= item.getStatus().toUpperCase() %></span>
-                                    </div>
-                                </div>
-                            </div>
-                        <% } } %>
+                            </c:when>
+                            <c:otherwise>
+                                <c:forEach items="${myListings}" var="item" varStatus="status">
+                                    <c:if test="${status.index < 3}">
+                                        <div class="item-card" style="padding: 0; background-color: transparent; border: none;">
+                                            <div class="item-image" style="height: 180px; background-color: var(--surface-container-low); border: 1px dashed var(--outline-variant); border-radius: 0.5rem; display: flex; align-items: center; justify-content: center; overflow: hidden;">
+                                                <c:choose>
+                                                    <c:when test="${not empty item.imagePath and not fn:contains(item.imagePath, 'placeholder')}">
+                                                        <img src="${item.imagePath}" style="width: 100%; height: 100%; object-fit: cover; filter: grayscale(1); transition: 0.3s;" onmouseover="this.style.filter='grayscale(0)'" onmouseout="this.style.filter='grayscale(1)'">
+                                                    </c:when>
+                                                    <c:otherwise>
+                                                        <span class="material-symbols-outlined" style="opacity: 0.2; font-size: 3rem;">inventory_2</span>
+                                                    </c:otherwise>
+                                                </c:choose>
+                                            </div>
+                                            <div style="padding: 1rem 0;">
+                                                <h3 style="font-size: 0.875rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 0.75rem;">${item.name}</h3>
+                                                <div style="display: flex; gap: 1rem;">
+                                                    <a href="${pageContext.request.contextPath}/item?action=edit&id=${item.itemId}" class="label-md" style="font-size: 0.6rem; text-decoration: underline;">EDIT</a>
+                                                    <span class="label-md" style="font-size: 0.6rem; opacity: 0.5;">${item.status.toUpperCase()}</span>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </c:if>
+                                </c:forEach>
+                            </c:otherwise>
+                        </c:choose>
                     </div>
                 </section>
 
@@ -180,26 +178,31 @@
                     <div class="sidebar-card" style="background: white; border: 1px solid var(--outline-variant); padding: 2.5rem;">
                         <div style="margin-bottom: 2.5rem;">
                             <span class="label-md" style="opacity: 0.5; font-size: 0.6rem;">Outstanding Liabilities</span>
-                            <div style="font-size: 2.5rem; font-weight: 900; color: var(--error);">NPR <%= finesAmount %></div>
+                            <div style="font-size: 2.5rem; font-weight: 900; color: var(--error);">NPR ${not empty finesAmount ? finesAmount : 0}</div>
                         </div>
                         
-                        <% if (unpaidFines != null && !unpaidFines.isEmpty()) { %>
-                            <ul style="margin-bottom: 2.5rem; border-top: 1px dashed var(--outline-variant); padding-top: 1.5rem; list-style: none;">
-                                <% for (Fine fine : unpaidFines) { %>
-                                <li style="display: flex; justify-content: space-between; margin-bottom: 1.25rem;">
-                                    <div>
-                                        <span style="font-weight: 800; font-size: 0.8125rem;">REF_TXN #<%= fine.getRecordId() %></span><br>
-                                        <span style="font-size: 0.625rem; font-weight: 800; color: var(--error); text-transform: uppercase;">LATE FINE [<%= fine.getDaysLate() %>D]</span>
-                                    </div>
-                                    <span style="font-weight: 900; font-size: 0.8125rem;"><%= (int)fine.getAmount() %></span>
-                                </li>
-                                <% } %>
-                            </ul>
-                        <% } else { %>
-                            <div style="margin-bottom: 2.5rem; border-top: 1px dashed var(--outline-variant); padding-top: 1.5rem; font-size: 0.75rem; color: var(--outline);">
-                                ALL FINANCIAL PROTOCOLS CLEAR.
-                            </div>
-                        <% } %>
+                        <c:choose>
+                            <c:when test="${not empty unpaidFines}">
+                                <ul style="margin-bottom: 2.5rem; border-top: 1px dashed var(--outline-variant); padding-top: 1.5rem; list-style: none;">
+                                    <c:forEach items="${unpaidFines}" var="fine">
+                                        <li style="display: flex; justify-content: space-between; margin-bottom: 1.25rem;">
+                                            <div>
+                                                <span style="font-weight: 800; font-size: 0.8125rem;">REF_TXN #${fine.recordId}</span><br>
+                                                <span style="font-size: 0.625rem; font-weight: 800; color: var(--error); text-transform: uppercase;">LATE FINE [${fine.daysLate}D]</span>
+                                            </div>
+                                            <span style="font-weight: 900; font-size: 0.8125rem;">
+                                                <fmt:formatNumber value="${fine.amount}" pattern="#" />
+                                            </span>
+                                        </li>
+                                    </c:forEach>
+                                </ul>
+                            </c:when>
+                            <c:otherwise>
+                                <div style="margin-bottom: 2.5rem; border-top: 1px dashed var(--outline-variant); padding-top: 1.5rem; font-size: 0.75rem; color: var(--outline);">
+                                    ALL FINANCIAL PROTOCOLS CLEAR.
+                                </div>
+                            </c:otherwise>
+                        </c:choose>
                         
                         <button class="btn btn-primary" onclick="window.location.href='${pageContext.request.contextPath}/contact'" style="width: 100%; padding: 1.25rem; font-size: 0.75rem; letter-spacing: 0.15em; background: var(--primary); color: white; border: none; cursor: pointer;">RESOLVE BALANCE</button>
                     </div>

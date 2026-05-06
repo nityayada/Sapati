@@ -1,13 +1,9 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
-<%@ page import="java.util.List, com.sapati.model.Category, com.sapati.model.Item, com.sapati.dao.CategoryDAO" %>
-<%
-    Item item = (Item) request.getAttribute("item");
-    List<Category> categories = (List<Category>) request.getAttribute("categories");
-    if (item == null) {
-        response.sendRedirect(request.getContextPath() + "/item?action=myListings");
-        return;
-    }
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+<c:if test="${empty item}">
+    <c:redirect url="/item?action=myListings" />
+</c:if>
 <!DOCTYPE html>
 <html lang="en">
 
@@ -164,7 +160,7 @@
                         <div>
                             <div style="font-weight: 900; text-transform: uppercase; font-size: 0.875rem;">
                                 Active Ledger Entry</div>
-                            <div style="font-size: 0.75rem; opacity: 0.6;">Modifying REF_#<%= item.getItemId() %>-L. All changes are logged for community trust.</div>
+                            <div style="font-size: 0.75rem; opacity: 0.6;">Modifying REF_#${item.itemId}-L. All changes are logged for community trust.</div>
                         </div>
                     </div>
                 </div>
@@ -173,21 +169,21 @@
             <!-- Right: Update Form -->
             <section class="auth-card"
                 style="padding: 4rem; border: 1px solid var(--outline-variant); background-color: white;">
-                <% if (request.getAttribute("error") != null) { %>
+                <c:if test="${not empty error}">
                     <div class="auth-msg auth-msg-error" style="margin-bottom: 2rem;">
-                        <%= request.getAttribute("error") %>
+                        ${error}
                     </div>
-                <% } %>
+                </c:if>
 
-                <form action="<%= request.getContextPath() %>/item" method="POST" class="space-y-12"
+                <form action="${pageContext.request.contextPath}/item" method="POST" class="space-y-12"
                     enctype="multipart/form-data">
                     <input type="hidden" name="action" value="edit">
-                    <input type="hidden" name="item_id" value="<%= item.getItemId() %>">
+                    <input type="hidden" name="item_id" value="${item.itemId}">
 
                     <div class="form-group">
                         <label class="label-md" style="color: var(--outline);">RESOURCE NAME</label>
                         <input type="text" name="name" class="form-input" required
-                            value="<%= item.getName().toUpperCase() %>"
+                            value="${fn:toUpperCase(item.name)}"
                             placeholder="e.g. DEWALT POWER DRILL"
                             style="text-transform: uppercase; font-weight: 900; letter-spacing: 0.05em;">
                     </div>
@@ -197,17 +193,17 @@
                             <label class="label-md" style="color: var(--outline);">CATEGORY</label>
                             <select name="category_id" class="form-input" required
                                 style="font-weight: 700;">
-                                <% for (Category cat : categories) { %>
-                                    <option value="<%= cat.getCategoryId() %>" <%= item.getCategoryId() == cat.getCategoryId() ? "selected" : "" %>>
-                                        <%= cat.getCategoryName().toUpperCase() %>
+                                <c:forEach items="${categories}" var="cat">
+                                    <option value="${cat.categoryId}" ${item.categoryId == cat.categoryId ? 'selected' : ''}>
+                                        ${fn:toUpperCase(cat.categoryName)}
                                     </option>
-                                <% } %>
+                                </c:forEach>
                             </select>
                         </div>
                         <div class="form-group">
                             <label class="label-md" style="color: var(--outline);">CONDITION</label>
                             <input type="text" name="condition" class="form-input" required
-                                value="<%= item.getItemCondition().toUpperCase() %>"
+                                value="${fn:toUpperCase(item.itemCondition)}"
                                 placeholder="e.g. LIKE NEW" style="font-weight: 700;">
                         </div>
                     </div>
@@ -217,17 +213,17 @@
                             SPECIFICATIONS</label>
                         <textarea name="description" class="form-input" rows="4" required
                             placeholder="PROVIDE CLEAR DETAILS FOR BORROWERS..."
-                            style="font-family: inherit;"><%= item.getDescription() %></textarea>
+                            style="font-family: inherit;">${item.description}</textarea>
                     </div>
 
                     <div class="form-group">
                         <label class="label-md" style="color: var(--outline);">RESOURCE PHOTO</label>
                         
-                        <% if (item.getImagePath() != null && !item.getImagePath().isEmpty()) { %>
-                            <div class="current-image-preview" style="background-image: url('<%= item.getImagePath() %>');">
+                        <c:if test="${not empty item.imagePath}">
+                            <div class="current-image-preview" style="background-image: url('${item.imagePath}');">
                                 <div class="preview-label">CURRENT VISUAL</div>
                             </div>
-                        <% } %>
+                        </c:if>
 
                         <div class="upload-container">
                             <div class="upload-drop-zone"
@@ -272,7 +268,7 @@
                         UPDATE COMMUNITY LEDGER
                     </button>
                     
-                    <a href="<%= request.getContextPath() %>/item?action=myListings" class="btn btn-ghost" style="width: 100%; margin-top: 1rem; font-size: 0.65rem; font-weight: 900; letter-spacing: 0.1em; color: var(--outline);">CANCEL REVISION</a>
+                    <a href="${pageContext.request.contextPath}/item?action=myListings" class="btn btn-ghost" style="width: 100%; margin-top: 1rem; font-size: 0.65rem; font-weight: 900; letter-spacing: 0.1em; color: var(--outline);">CANCEL REVISION</a>
                 </form>
             </section>
         </div>

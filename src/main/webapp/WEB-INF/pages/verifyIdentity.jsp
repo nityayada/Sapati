@@ -1,12 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.sapati.model.User" %>
-<%
-    User user = (User) request.getAttribute("recoveryUser");
-    if (user == null) {
-        response.sendRedirect(request.getContextPath() + "/user?action=forgot_password");
-        return;
-    }
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:if test="${empty recoveryUser}">
+    <c:redirect url="/user?action=forgot_password" />
+</c:if>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -37,20 +33,20 @@
                 </p>
             </div>
 
-            <% if (request.getAttribute("error") != null) { %>
+            <c:if test="${not empty error}">
                 <div class="auth-msg auth-msg-error" style="background: #fee2e2; color: #b91c1c; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.875rem; text-align: center;">
-                    <%= request.getAttribute("error") %>
+                    ${error}
                 </div>
-            <% } %>
+            </c:if>
 
             <form action="${pageContext.request.contextPath}/user" method="POST">
                 <input type="hidden" name="action" value="verify_answer">
-                <input type="hidden" name="email" value="<%= user.getEmail() %>">
+                <input type="hidden" name="email" value="${recoveryUser.email}">
                 
                 <div class="form-group">
                     <label class="form-label">Security Question</label>
                     <div style="padding: 1rem; background-color: var(--surface-container-high); border-radius: 8px; font-weight: 700; color: var(--primary); font-size: 0.9rem; border-left: 4px solid var(--primary);">
-                        <%= user.getSecurityQuestion() %>
+                        ${recoveryUser.securityQuestion}
                     </div>
                 </div>
 

@@ -35,12 +35,23 @@ public class AuthFilter implements Filter {
         boolean isLoggedIn = (session != null && session.getAttribute("user") != null);
 
         if (isLoggedIn || isPublicPath) {
-            // Role-based security for /admin
-            if (path.startsWith("/admin")) {
+            if (isLoggedIn) {
                 User user = (User) session.getAttribute("user");
-                if (user == null || !"Admin".equals(user.getRole())) {
-                    httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: Administrative Authority Required");
-                    return;
+                
+                // Inject Header Stats for Members
+                if ("Member".equals(user.getRole())) {
+                    com.sapati.dao.BorrowDAO headerDAO = new com.sapati.dao.BorrowDAO();
+                    int reqCount = headerDAO.getRequestsForOwner(user.getUserId()).size();
+                    int retCount = headerDAO.getRecordsAwaitingVerification(user.getUserId()).size();
+                    httpRequest.setAttribute("pendingActionCount", reqCount + retCount);
+                }
+
+                // Role-based security for /admin
+                if (path.startsWith("/admin")) {
+                    if (!"Admin".equals(user.getRole())) {
+                        httpResponse.sendError(HttpServletResponse.SC_FORBIDDEN, "Access Denied: Administrative Authority Required");
+                        return;
+                    }
                 }
             }
             chain.doFilter(request, response);

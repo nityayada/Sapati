@@ -1,12 +1,6 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="java.util.List, com.sapati.model.BorrowRecord" %>
-<%
-    List<BorrowRecord> borrows = (List<BorrowRecord>) request.getAttribute("borrows");
-    Integer totalActive = (Integer) request.getAttribute("totalActive");
-    Integer overdueItems = (Integer) request.getAttribute("overdueItems");
-    Integer newToday = (Integer) request.getAttribute("newToday");
-    String returnRate = (String) request.getAttribute("returnRate");
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
 
 <jsp:include page="components/admin_layout_header.jsp">
     <jsp:param name="action" value="manage_borrows" />
@@ -23,19 +17,19 @@
 <section class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-12">
     <div class="bg-surface-container-lowest p-6 border border-outline-variant/30 hover:border-primary transition-colors">
         <div class="font-sans uppercase text-[10px] font-bold tracking-widest text-outline mb-1">Total Active</div>
-        <div class="text-3xl font-black text-primary"><%= totalActive != null ? totalActive : 0 %></div>
+        <div class="text-3xl font-black text-primary">${not empty totalActive ? totalActive : 0}</div>
     </div>
     <div class="bg-surface-container-lowest p-6 border border-outline-variant/30 hover:border-primary transition-colors">
         <div class="font-sans uppercase text-[10px] font-bold tracking-widest text-outline mb-1">Overdue Items</div>
-        <div class="text-3xl font-black <%= overdueItems != null && overdueItems > 0 ? "text-error" : "text-primary" %>"><%= overdueItems != null ? overdueItems : 0 %></div>
+        <div class="text-3xl font-black ${overdueItems > 0 ? 'text-error' : 'text-primary'}">${not empty overdueItems ? overdueItems : 0}</div>
     </div>
     <div class="bg-surface-container-lowest p-6 border border-outline-variant/30 hover:border-primary transition-colors">
         <div class="font-sans uppercase text-[10px] font-bold tracking-widest text-outline mb-1">New Today</div>
-        <div class="text-3xl font-black text-primary"><%= newToday != null ? newToday : 0 %></div>
+        <div class="text-3xl font-black text-primary">${not empty newToday ? newToday : 0}</div>
     </div>
     <div class="bg-surface-container-lowest p-6 border border-outline-variant/30 hover:border-primary transition-colors">
         <div class="font-sans uppercase text-[10px] font-bold tracking-widest text-outline mb-1">Return Rate</div>
-        <div class="text-3xl font-black text-primary"><%= returnRate != null ? returnRate : "0.0" %>%</div>
+        <div class="text-3xl font-black text-primary">${not empty returnRate ? returnRate : '0.0'}%</div>
     </div>
 </section>
 
@@ -54,47 +48,59 @@
             </tr>
         </thead>
         <tbody class="divide-y divide-outline-variant/20">
-            <% if (borrows != null && !borrows.isEmpty()) {
-                for (int i = 0; i < borrows.size(); i++) {
-                    BorrowRecord br = borrows.get(i);
-                    String statusClass = "";
-                    if ("Active".equalsIgnoreCase(br.getStatus())) statusClass = "bg-surface-container-high text-on-surface";
-                    else if ("Overdue".equalsIgnoreCase(br.getStatus())) statusClass = "bg-error text-white";
-                    else if ("Returned".equalsIgnoreCase(br.getStatus())) statusClass = "border border-outline text-outline";
-            %>
-            <tr class="transition-colors <%= "Overdue".equalsIgnoreCase(br.getStatus()) ? "bg-error/5 hover:bg-error/10" : "hover:bg-surface-container-lowest/50" %>">
-                <td class="px-6 py-4 font-bold font-mono text-xs text-on-surface-variant">TXN_<%= br.getRecordId() %></td>
-                <td class="px-6 py-4 font-bold">
-                    <%= br.getItemName() %>
-                    <% if ("Overdue".equalsIgnoreCase(br.getStatus())) { %>
-                        <span class="material-symbols-outlined text-error text-xs align-middle animate-pulse">warning</span>
-                    <% } %>
-                </td>
-                <td class="px-6 py-4 text-on-surface-variant font-medium"><%= br.getOwnerName() %></td>
-                <td class="px-6 py-4 text-on-surface-variant font-medium"><%= br.getBorrowerName() %></td>
-                <td class="px-6 py-4 text-xs font-semibold text-on-surface">
-                    <%= br.getBorrowDate() %> <br> <span class="opacity-60 font-normal">&rarr; <%= br.getDueDate() %></span>
-                </td>
-                <td class="px-6 py-4 text-center">
-                    <span class="px-2 py-1 text-[10px] font-bold rounded-full <%= statusClass %>"><%= br.getStatus() %></span>
-                </td>
-                <td class="px-6 py-4 text-right">
-                    <% if (!"Returned".equalsIgnoreCase(br.getStatus())) { %>
-                        <form action="${pageContext.request.contextPath}/admin" method="POST" class="inline">
-                            <input type="hidden" name="action" value="admin_return_item">
-                            <input type="hidden" name="record_id" value="<%= br.getRecordId() %>">
-                            <input type="hidden" name="item_id" value="<%= br.getItemId() %>">
-                            <button type="submit" class="bg-primary text-on-primary text-[10px] px-3 py-1 font-bold rounded hover:opacity-80">MARK RETURNED</button>
-                        </form>
-                    <% } else { %>
-                        <span class="text-[10px] font-bold text-outline uppercase tracking-widest">ARCHIVED</span>
-                    <% } %>
-                </td>
-            </tr>
-            <%  }
-               } else { %>
-                <tr><td colspan="6" class="px-6 py-8 text-center text-outline">No transaction records found in the ledger.</td></tr>
-            <% } %>
+            <c:choose>
+                <c:when test="${not empty borrows}">
+                    <c:forEach items="${borrows}" var="br">
+                        <c:set var="statusClass" value="" />
+                        <c:choose>
+                            <c:when test="${br.status == 'Active'}">
+                                <c:set var="statusClass" value="bg-surface-container-high text-on-surface" />
+                            </c:when>
+                            <c:when test="${br.status == 'Overdue'}">
+                                <c:set var="statusClass" value="bg-error text-white" />
+                            </c:when>
+                            <c:when test="${br.status == 'Returned'}">
+                                <c:set var="statusClass" value="border border-outline text-outline" />
+                            </c:when>
+                        </c:choose>
+                        <tr class="transition-colors ${br.status == 'Overdue' ? 'bg-error/5 hover:bg-error/10' : 'hover:bg-surface-container-lowest/50'}">
+                            <td class="px-6 py-4 font-bold font-mono text-xs text-on-surface-variant">TXN_${br.recordId}</td>
+                            <td class="px-6 py-4 font-bold">
+                                ${br.itemName}
+                                <c:if test="${br.status == 'Overdue'}">
+                                    <span class="material-symbols-outlined text-error text-xs align-middle animate-pulse">warning</span>
+                                </c:if>
+                            </td>
+                            <td class="px-6 py-4 text-on-surface-variant font-medium">${br.ownerName}</td>
+                            <td class="px-6 py-4 text-on-surface-variant font-medium">${br.borrowerName}</td>
+                            <td class="px-6 py-4 text-xs font-semibold text-on-surface">
+                                ${br.borrowDate} <br> <span class="opacity-60 font-normal">&rarr; ${br.dueDate}</span>
+                            </td>
+                            <td class="px-6 py-4 text-center">
+                                <span class="px-2 py-1 text-[10px] font-bold rounded-full ${statusClass}">${br.status}</span>
+                            </td>
+                            <td class="px-6 py-4 text-right">
+                                <c:choose>
+                                    <c:when test="${br.status != 'Returned'}">
+                                        <form action="${pageContext.request.contextPath}/admin" method="POST" class="inline">
+                                            <input type="hidden" name="action" value="admin_return_item">
+                                            <input type="hidden" name="record_id" value="${br.recordId}">
+                                            <input type="hidden" name="item_id" value="${br.itemId}">
+                                            <button type="submit" class="bg-primary text-on-primary text-[10px] px-3 py-1 font-bold rounded hover:opacity-80">MARK RETURNED</button>
+                                        </form>
+                                    </c:when>
+                                    <c:otherwise>
+                                        <span class="text-[10px] font-bold text-outline uppercase tracking-widest">ARCHIVED</span>
+                                    </c:otherwise>
+                                </c:choose>
+                            </td>
+                        </tr>
+                    </c:forEach>
+                </c:when>
+                <c:otherwise>
+                    <tr><td colspan="7" class="px-6 py-8 text-center text-outline">No transaction records found in the ledger.</td></tr>
+                </c:otherwise>
+            </c:choose>
         </tbody>
     </table>
 </div>

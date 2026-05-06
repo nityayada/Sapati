@@ -1,11 +1,8 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%
-    String email = (String) request.getAttribute("resetEmail");
-    if (email == null) {
-        response.sendRedirect(request.getContextPath() + "/user?action=forgot_password");
-        return;
-    }
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<c:if test="${empty resetEmail}">
+    <c:redirect url="/user?action=forgot_password" />
+</c:if>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -36,15 +33,15 @@
                 </p>
             </div>
 
-            <% if (request.getAttribute("error") != null) { %>
+            <c:if test="${not empty error}">
                 <div class="auth-msg auth-msg-error" style="background: #fee2e2; color: #b91c1c; padding: 1rem; border-radius: 8px; margin-bottom: 1.5rem; font-size: 0.875rem; text-align: center;">
-                    <%= request.getAttribute("error") %>
+                    ${error}
                 </div>
-            <% } %>
+            </c:if>
 
             <form action="${pageContext.request.contextPath}/user" method="POST">
                 <input type="hidden" name="action" value="complete_reset">
-                <input type="hidden" name="email" value="<%= email %>">
+                <input type="hidden" name="email" value="${resetEmail}">
                 
                 <div class="form-group">
                     <label for="new_password" class="form-label">New Password</label>

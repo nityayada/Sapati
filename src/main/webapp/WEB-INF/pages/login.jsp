@@ -1,4 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,13 +29,18 @@
             </div>
 
             <!-- Global Messaging -->
-            <% if (request.getAttribute("error") != null) { %>
-                <div class="auth-msg auth-msg-error"><%= request.getAttribute("error") %></div>
-            <% } %>
+            <c:if test="${not empty error}">
+                <div class="auth-msg auth-msg-error">${error}</div>
+            </c:if>
 
-            <% if (request.getParameter("msg") != null && request.getParameter("msg").equals("registered")) { %>
-                <div class="auth-msg auth-msg-success">Registration successful! Please login.</div>
-            <% } %>
+            <c:choose>
+                <c:when test="${param.msg == 'registered' or msg == 'registered'}">
+                    <div class="auth-msg auth-msg-success">Registration successful! Please login.</div>
+                </c:when>
+                <c:when test="${param.msg == 'password_reset_success' or msg == 'password_reset_success'}">
+                    <div class="auth-msg auth-msg-success">Password reset successful! Please login with your new password.</div>
+                </c:when>
+            </c:choose>
 
             <!-- Form -->
             <form action="${pageContext.request.contextPath}/user" method="POST">

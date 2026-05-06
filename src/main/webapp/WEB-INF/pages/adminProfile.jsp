@@ -1,14 +1,10 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
-<%@ page import="com.sapati.model.User" %>
-<%
-    User user = (User) request.getAttribute("user");
-    if (user == null) {
-        response.sendRedirect(request.getContextPath() + "/user?action=login");
-        return;
-    }
-    String msg = request.getParameter("msg");
-    String error = (String) request.getAttribute("error");
-%>
+<%@ taglib prefix="c" uri="jakarta.tags.core" %>
+<%@ taglib prefix="fn" uri="jakarta.tags.functions" %>
+
+<c:if test="${empty user}">
+    <c:redirect url="/user?action=login" />
+</c:if>
 
 <jsp:include page="components/admin_layout_header.jsp">
     <jsp:param name="action" value="profile" />
@@ -70,35 +66,36 @@
     <!-- Profile Header -->
     <div class="mb-12 flex items-center gap-8 bg-surface-container-low p-8 border border-outline-variant/30">
         <div class="user-avatar" style="width: 100px; height: 100px;  border: 2px solid var(--primary); overflow: hidden; display: flex; align-items: center; justify-content: center;">
-            <% if (user.getProfileImage() != null && !user.getProfileImage().isEmpty()) { %>
-                <img src="${pageContext.request.contextPath}/<%= user.getProfileImage() %>" alt="Profile" class="w-full h-full object-cover">
-            <% } else { %>
-               <%--  <%= user.getFullName().substring(0,1).toUpperCase() %> --%>
-              <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary);">person</span>
-               
-            <% } %>
+            <c:choose>
+                <c:when test="${not empty user.profileImage}">
+                    <img src="${pageContext.request.contextPath}/${user.profileImage}" alt="Profile" class="w-full h-full object-cover">
+                </c:when>
+                <c:otherwise>
+                    <span class="material-symbols-outlined" style="font-size: 4rem; color: var(--primary);">person</span>
+                </c:otherwise>
+            </c:choose>
         </div>
         <div>
             <div class="text-[10px] font-black uppercase tracking-[0.2em] text-primary mb-2">System Administrator Node</div>
-            <h1 class="text-3xl font-black uppercase tracking-tight text-black"><%= user.getFullName() %></h1>
+            <h1 class="text-3xl font-black uppercase tracking-tight text-black">${user.fullName}</h1>
             <div class="flex gap-4 mt-2">
-                <span class="status-chip" style="background-color: var(--primary); color: white; border: none;">ID: USR_<%= user.getUserId() %></span>
-                <span style="font-size: 0.8125rem; color: var(--outline); font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em;">ROLE: <span style="color: var(--primary); font-weight: 800;"><%= user.getRole() %></span></span>
+                <span class="status-chip" style="background-color: var(--primary); color: white; border: none;">ID: USR_${user.userId}</span>
+                <span style="font-size: 0.8125rem; color: var(--outline); font-weight: 500; text-transform: uppercase; letter-spacing: 0.1em;">ROLE: <span style="color: var(--primary); font-weight: 800;">${user.role}</span></span>
             </div>
         </div>
     </div>
 
-    <% if ("profile_updated".equals(msg) || "security_updated".equals(msg) || "password_updated".equals(msg)) { %>
+    <c:if test="${param.msg == 'profile_updated' || param.msg == 'security_updated' || param.msg == 'password_updated'}">
         <div class="bg-[#E8F5E9] border-l-4 border-[#2E7D32] p-4 mb-8 text-[#1B5E20] text-[10px] font-black uppercase tracking-widest">
             Identity Records Successfully Updated
         </div>
-    <% } %>
+    </c:if>
 
-    <% if (error != null) { %>
+    <c:if test="${not empty error}">
         <div class="bg-[#FFEBEE] border-l-4 border-[#C62828] p-4 mb-8 text-[#B71C1C] text-[10px] font-black uppercase tracking-widest">
-            <%= error %>
+            ${error}
         </div>
-    <% } %>
+    </c:if>
 
     <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
         
@@ -112,22 +109,22 @@
                 
                 <div class="form-group">
                     <label class="text-[9px] font-black uppercase tracking-widest text-outline mb-2 block">Full Name</label>
-                    <input type="text" name="full_name" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none" value="<%= user.getFullName() %>" required>
+                    <input type="text" name="full_name" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none" value="${user.fullName}" required>
                 </div>
 
                 <div class="form-group">
                     <label class="text-[9px] font-black uppercase tracking-widest text-outline mb-2 block">Email Address (Read-Only)</label>
-                    <input type="email" class="w-full border border-outline-variant p-3 text-xs font-bold bg-surface-container-low opacity-50" value="<%= user.getEmail() %>" disabled>
+                    <input type="email" class="w-full border border-outline-variant p-3 text-xs font-bold bg-surface-container-low opacity-50" value="${user.email}" disabled>
                 </div>
 
                 <div class="form-group">
                     <label class="text-[9px] font-black uppercase tracking-widest text-outline mb-2 block">Contact Number</label>
-                    <input type="text" name="phone" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none" value="<%= user.getPhoneNumber() != null ? user.getPhoneNumber() : "" %>">
+                    <input type="text" name="phone" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none" value="${not empty user.phoneNumber ? user.phoneNumber : ''}">
                 </div>
 
                 <div class="form-group">
                     <label class="text-[9px] font-black uppercase tracking-widest text-outline mb-2 block">Physical Node (Address)</label>
-                    <input type="text" name="address" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none" value="<%= user.getAddress() != null ? user.getAddress() : "" %>" required>
+                    <input type="text" name="address" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none" value="${not empty user.address ? user.address : ''}" required>
                 </div>
 
                 <div class="form-group mb-8">
@@ -192,10 +189,10 @@
                     <div class="form-group">
                         <label class="text-[9px] font-black uppercase tracking-widest text-outline mb-2 block">Verification Question</label>
                         <select name="security_question" class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none bg-white" required>
-                            <option value="What was your first pet's name?" <%= "What was your first pet's name?".equals(user.getSecurityQuestion()) ? "selected" : "" %>>What was your first pet's name?</option>
-                            <option value="In what city were you born?" <%= "In what city were you born?".equals(user.getSecurityQuestion()) ? "selected" : "" %>>In what city were you born?</option>
-                            <option value="What was your childhood nickname?" <%= "What was your childhood nickname?".equals(user.getSecurityQuestion()) ? "selected" : "" %>>What was your childhood nickname?</option>
-                            <option value="What is the name of your first school?" <%= "What is the name of your first school?".equals(user.getSecurityQuestion()) ? "selected" : "" %>>What is the name of your first school?</option>
+                            <option value="What was your first pet's name?" ${user.securityQuestion == "What was your first pet's name?" ? 'selected' : ''}>What was your first pet's name?</option>
+                            <option value="In what city were you born?" ${user.securityQuestion == "In what city were you born?" ? 'selected' : ''}>In what city were you born?</option>
+                            <option value="What was your childhood nickname?" ${user.securityQuestion == "What was your childhood nickname?" ? 'selected' : ''}>What was your childhood nickname?</option>
+                            <option value="What is the name of your first school?" ${user.securityQuestion == "What is the name of your first school?" ? 'selected' : ''}>What is the name of your first school?</option>
                         </select>
                     </div>
 

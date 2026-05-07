@@ -6,6 +6,7 @@ import com.sapati.model.BorrowRequest;
 import com.sapati.model.BorrowRecord;
 import com.sapati.model.User;
 import com.sapati.model.Item;
+import com.sapati.dao.UserDAO;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.annotation.WebServlet;
 import jakarta.servlet.http.HttpServlet;
@@ -27,11 +28,13 @@ public class BorrowController extends HttpServlet {
     private BorrowDAO borrowDAO;
     private ItemDAO itemDAO;
     private FineDAO fineDAO;
+    private UserDAO userDAO;
 
     public void init() {
         borrowDAO = new BorrowDAO();
         itemDAO = new ItemDAO();
         fineDAO = new FineDAO();
+        userDAO = new UserDAO();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -183,6 +186,15 @@ public class BorrowController extends HttpServlet {
 
             if (borrowDAO.createBorrowRecord(record)) {
                 itemDAO.updateItemStatus(itemId, "Borrowed");
+                
+                // Send approval email async
+                User requester = userDAO.getUserById(requesterId);
+                if(requester != null) {
+                    new Thread(() -> {
+                        com.sapati.util.EmailUtil.sendApprovalEmail(requester.getEmail(), item.getName());
+                    }).start();
+                }
+
                 response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&msg=approved");
             } else {
                 response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=record_failed");
@@ -200,14 +212,16 @@ public class BorrowController extends HttpServlet {
 
         String requestIdStr = request.getParameter("request_id");
         String itemIdStr = request.getParameter("item_id");
+        String requesterIdStr = request.getParameter("requester_id");
 
-        if (requestIdStr == null || itemIdStr == null) {
+        if (requestIdStr == null || itemIdStr == null || requesterIdStr == null) {
             response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=missing_parameters");
             return;
         }
 
         int requestId = Integer.parseInt(requestIdStr);
         int itemId = Integer.parseInt(itemIdStr);
+        int requesterId = Integer.parseInt(requesterIdStr);
 
         // Security: Ensure current user is the owner of the item
         Item item = itemDAO.getItemById(itemId);
@@ -217,6 +231,14 @@ public class BorrowController extends HttpServlet {
         }
 
         if (borrowDAO.updateRequestStatus(requestId, "Rejected")) {
+            // Send rejection email async
+            User requester = userDAO.getUserById(requesterId);
+            if(requester != null) {
+                new Thread(() -> {
+                    com.sapati.util.EmailUtil.sendRejectionEmail(requester.getEmail(), item.getName());
+                }).start();
+            }
+
             response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&msg=rejected");
         } else {
             response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=update_failed");

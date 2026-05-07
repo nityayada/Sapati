@@ -38,6 +38,15 @@ public class UserController extends HttpServlet {
             request.getRequestDispatcher("/WEB-INF/pages/register.jsp").forward(request, response);
         } else if ("forgot_password".equals(action)) {
             request.getRequestDispatcher("/WEB-INF/pages/forgotPassword.jsp").forward(request, response);
+        } else if ("verify_reset_link".equals(action)) {
+            String token = request.getParameter("token");
+            if (token != null) {
+                String decodedEmail = new String(java.util.Base64.getDecoder().decode(token));
+                request.setAttribute("resetEmail", decodedEmail);
+                request.getRequestDispatcher("/WEB-INF/pages/resetPassword.jsp").forward(request, response);
+                return;
+            }
+            response.sendRedirect(request.getContextPath() + "/user?action=login");
         } else if ("profile".equals(action)) {
             showProfile(request, response);
         } else {
@@ -60,6 +69,8 @@ public class UserController extends HttpServlet {
             updateSecurityQuestion(request, response);
         } else if ("initiate_recovery".equals(action)) {
             initiateRecovery(request, response);
+        } else if ("verify_otp".equals(action)) {
+            verifyOtp(request, response);
         } else if ("verify_answer".equals(action)) {
             verifyRecoveryAnswer(request, response);
         } else if ("complete_reset".equals(action)) {
@@ -106,6 +117,11 @@ public class UserController extends HttpServlet {
         }
 
         if (userDAO.registerUser(user)) {
+            // Send Welcome Email asynchronously to avoid delaying the response
+            new Thread(() -> {
+                com.sapati.util.EmailUtil.sendWelcomeEmail(email, fullName);
+            }).start();
+            
             response.sendRedirect(request.getContextPath() + "/user?action=login&msg=registered");
         } else {
             request.setAttribute("error", "Registration failed. Try again.");
@@ -250,12 +266,37 @@ public class UserController extends HttpServlet {
         String email = request.getParameter("email");
         User user = userDAO.getUserByEmail(email);
 
-        if (user != null && user.getSecurityQuestion() != null) {
-            request.setAttribute("recoveryUser", user);
-            request.getRequestDispatcher("/WEB-INF/pages/verifyIdentity.jsp").forward(request, response);
+        if (user != null) {
+            String otp = String.format("%06d", new java.util.Random().nextInt(999999));
+            HttpSession session = request.getSession();
+            session.setAttribute("resetOtp", otp);
+            session.setAttribute("resetEmail", email);
+            
+            new Thread(() -> {
+                com.sapati.util.EmailUtil.sendPasswordResetOtp(email, otp);
+            }).start();
+            
+            request.getRequestDispatcher("/WEB-INF/pages/verifyOtp.jsp").forward(request, response);
         } else {
-            request.setAttribute("error", "Email not found or no recovery question set.");
+            request.setAttribute("error", "Email not found.");
             request.getRequestDispatcher("/WEB-INF/pages/forgotPassword.jsp").forward(request, response);
+        }
+    }
+
+    private void verifyOtp(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+        HttpSession session = request.getSession();
+        String savedOtp = (String) session.getAttribute("resetOtp");
+        String resetEmail = (String) session.getAttribute("resetEmail");
+        String enteredOtp = request.getParameter("otp");
+
+        if (savedOtp != null && resetEmail != null && savedOtp.equals(enteredOtp)) {
+            // OTP matches
+            request.setAttribute("resetEmail", resetEmail);
+            request.getRequestDispatcher("/WEB-INF/pages/resetPassword.jsp").forward(request, response);
+        } else {
+            // OTP doesn't match
+            request.setAttribute("error", "Invalid verification code.");
+            request.getRequestDispatcher("/WEB-INF/pages/verifyOtp.jsp").forward(request, response);
         }
     }
 
@@ -275,21 +316,29 @@ public class UserController extends HttpServlet {
     }
 
     private void completePasswordReset(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String email = request.getParameter("email");
+        HttpSession session = request.getSession();
+        String resetEmail = (String) session.getAttribute("resetEmail");
+
+        if (resetEmail == null) {
+            response.sendRedirect(request.getContextPath() + "/user?action=login");
+            return;
+        }
+
         String newPassword = request.getParameter("new_password");
         String confirmPassword = request.getParameter("confirm_password");
 
         if (newPassword != null && newPassword.equals(confirmPassword)) {
-            if (userDAO.updatePasswordByEmail(email, newPassword)) {
+            if (userDAO.updatePasswordByEmail(resetEmail, newPassword)) {
+                // Clear session variables after successful reset
+                session.removeAttribute("resetEmail");
+                session.removeAttribute("resetOtp");
                 response.sendRedirect(request.getContextPath() + "/user?action=login&msg=password_reset_success");
             } else {
                 request.setAttribute("error", "Failed to update password. Please try again.");
-                request.setAttribute("resetEmail", email);
                 request.getRequestDispatcher("/WEB-INF/pages/resetPassword.jsp").forward(request, response);
             }
         } else {
             request.setAttribute("error", "Passwords do not match.");
-            request.setAttribute("resetEmail", email);
             request.getRequestDispatcher("/WEB-INF/pages/resetPassword.jsp").forward(request, response);
         }
     }

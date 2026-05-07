@@ -12,7 +12,7 @@ import java.sql.*;
 public class UserDAO {
 
     public boolean registerUser(User user) {
-        String sql = "INSERT INTO users (full_name, email, phone_number, password_hash, address, profile_image, role, security_question, security_answer) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)";
+        String sql = "INSERT INTO users (full_name, email, phone_number, password_hash, address, profile_image, role) VALUES (?, ?, ?, ?, ?, ?, ?)";
         try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
@@ -23,8 +23,6 @@ public class UserDAO {
             pstmt.setString(5, user.getAddress());
             pstmt.setString(6, user.getProfileImage());
             pstmt.setString(7, user.getRole() == null ? "Member" : user.getRole());
-            pstmt.setString(8, user.getSecurityQuestion());
-            pstmt.setString(9, PasswordUtil.hashPassword(user.getSecurityAnswer().toLowerCase().trim()));
             
             int affectedRows = pstmt.executeUpdate();
             return affectedRows > 0;
@@ -94,8 +92,6 @@ public class UserDAO {
                 user.setAccountStatus(rs.getString("account_status"));
                 user.setAddress(rs.getString("address"));
                 user.setProfileImage(rs.getString("profile_image"));
-                user.setSecurityQuestion(rs.getString("security_question"));
-                user.setSecurityAnswer(rs.getString("security_answer"));
                 return user;
             }
         } catch (SQLException e) {
@@ -202,20 +198,6 @@ public class UserDAO {
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setString(1, PasswordUtil.hashPassword(newPassword));
             pstmt.setString(2, email);
-            return pstmt.executeUpdate() > 0;
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        return false;
-    }
-
-    public boolean updateSecurityQuestion(int userId, String question, String answer) {
-        String sql = "UPDATE users SET security_question = ?, security_answer = ? WHERE user_id = ?";
-        try (Connection conn = DBConfig.getConnection();
-             PreparedStatement pstmt = conn.prepareStatement(sql)) {
-            pstmt.setString(1, question);
-            pstmt.setString(2, PasswordUtil.hashPassword(answer.toLowerCase().trim()));
-            pstmt.setInt(3, userId);
             return pstmt.executeUpdate() > 0;
         } catch (SQLException e) {
             e.printStackTrace();

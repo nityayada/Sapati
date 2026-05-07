@@ -65,14 +65,10 @@ public class UserController extends HttpServlet {
             updateProfile(request, response);
         } else if ("update_password".equals(action)) {
             updatePassword(request, response);
-        } else if ("update_security_question".equals(action)) {
-            updateSecurityQuestion(request, response);
         } else if ("initiate_recovery".equals(action)) {
             initiateRecovery(request, response);
         } else if ("verify_otp".equals(action)) {
             verifyOtp(request, response);
-        } else if ("verify_answer".equals(action)) {
-            verifyRecoveryAnswer(request, response);
         } else if ("complete_reset".equals(action)) {
             completePasswordReset(request, response);
         }
@@ -84,8 +80,6 @@ public class UserController extends HttpServlet {
         String phone = request.getParameter("phone");
         String password = request.getParameter("password");
         String address = request.getParameter("address");
-        String securityQuestion = request.getParameter("security_question");
-        String securityAnswer = request.getParameter("security_answer");
 
         if (userDAO.isEmailTaken(email)) {
             request.setAttribute("error", "Email already registered!");
@@ -100,8 +94,6 @@ public class UserController extends HttpServlet {
         user.setPasswordHash(password); // Will be hashed in DAO
         user.setAddress(address);
         user.setRole("Member");
-        user.setSecurityQuestion(securityQuestion);
-        user.setSecurityAnswer(securityAnswer);
 
         // Handle Profile Image Upload
         Part filePart = request.getPart("profile_image");
@@ -300,21 +292,6 @@ public class UserController extends HttpServlet {
         }
     }
 
-    private void verifyRecoveryAnswer(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String email = request.getParameter("email");
-        String answer = request.getParameter("answer").toLowerCase().trim();
-        User user = userDAO.getUserByEmail(email);
-
-        if (user != null && com.sapati.util.PasswordUtil.checkPassword(answer, user.getSecurityAnswer())) {
-            request.setAttribute("resetEmail", email);
-            request.getRequestDispatcher("/WEB-INF/pages/resetPassword.jsp").forward(request, response);
-        } else {
-            request.setAttribute("error", "Incorrect answer. Identity verification failed.");
-            request.setAttribute("recoveryUser", user);
-            request.getRequestDispatcher("/WEB-INF/pages/verifyIdentity.jsp").forward(request, response);
-        }
-    }
-
     private void completePasswordReset(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         HttpSession session = request.getSession();
         String resetEmail = (String) session.getAttribute("resetEmail");
@@ -340,36 +317,6 @@ public class UserController extends HttpServlet {
         } else {
             request.setAttribute("error", "Passwords do not match.");
             request.getRequestDispatcher("/WEB-INF/pages/resetPassword.jsp").forward(request, response);
-        }
-    }
-    private void updateSecurityQuestion(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        HttpSession session = request.getSession();
-        User currentUser = (User) session.getAttribute("user");
-        
-        if (currentUser == null) {
-            response.sendRedirect(request.getContextPath() + "/user?action=login");
-            return;
-        }
-
-        String question = request.getParameter("security_question");
-        String answer = request.getParameter("security_answer");
-
-        String redirect = request.getParameter("redirect");
-        String redirectPath = (redirect != null && !redirect.isEmpty()) ? redirect : "user?action=profile";
-
-        if (userDAO.updateSecurityQuestion(currentUser.getUserId(), question, answer)) {
-            // Update session object
-            currentUser.setSecurityQuestion(question);
-            session.setAttribute("user", currentUser);
-            response.sendRedirect(request.getContextPath() + "/" + redirectPath + "&msg=security_updated");
-        } else {
-            request.setAttribute("error", "Failed to update security question.");
-            if (redirectPath.contains("admin")) {
-                request.setAttribute("user", userDAO.getUserById(currentUser.getUserId()));
-                request.getRequestDispatcher("/WEB-INF/pages/adminProfile.jsp").forward(request, response);
-            } else {
-                showProfile(request, response);
-            }
         }
     }
 }

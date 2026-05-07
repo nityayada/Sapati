@@ -26,10 +26,12 @@ public class BorrowController extends HttpServlet {
     private static final long serialVersionUID = 1L;
     private BorrowDAO borrowDAO;
     private ItemDAO itemDAO;
+    private FineDAO fineDAO;
 
     public void init() {
         borrowDAO = new BorrowDAO();
         itemDAO = new ItemDAO();
+        fineDAO = new FineDAO();
     }
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
@@ -71,6 +73,7 @@ public class BorrowController extends HttpServlet {
     }
 
     private void handleBorrowRequest(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
+    	
         HttpSession session = request.getSession();
         User user = (User) session.getAttribute("user");
 
@@ -79,7 +82,12 @@ public class BorrowController extends HttpServlet {
             return;
         }
 
-        int itemId = Integer.parseInt(request.getParameter("item_id"));
+        String itemIdStr = request.getParameter("item_id");
+        if (itemIdStr == null || itemIdStr.isEmpty()) {
+            response.sendRedirect(request.getContextPath() + "/item?action=list&error=missing_item_id");
+            return;
+        }
+        int itemId = Integer.parseInt(itemIdStr);
         String returnDateStr = request.getParameter("return_date");
         
         // Basic validation
@@ -89,16 +97,41 @@ public class BorrowController extends HttpServlet {
         }
 
         Item item = itemDAO.getItemById(itemId);
-        if (item != null && item.getOwnerId() == user.getUserId()) {
+        if (item == null) {
+            response.sendRedirect(request.getContextPath() + "/item?action=list&error=item_not_found");
+            return;
+        }
+
+        if (item.getOwnerId() == user.getUserId()) {
             response.sendRedirect(request.getContextPath() + "/item?action=view&id=" + itemId + "&error=own_item");
+            return;
+        }
+
+        LocalDate today = LocalDate.now();
+        LocalDate proposedDate;
+        try {
+            proposedDate = LocalDate.parse(returnDateStr);
+        } catch (java.time.format.DateTimeParseException e) {
+            response.sendRedirect(request.getContextPath() + "/item?action=view&id=" + itemId + "&error=invalid_date_format");
+            return;
+        }
+        long daysDiff = ChronoUnit.DAYS.between(today, proposedDate);
+
+        if (proposedDate.isBefore(today)) {
+            response.sendRedirect(request.getContextPath() + "/item?action=view&id=" + itemId + "&error=past_date");
+            return;
+        }
+
+        if (daysDiff > 7) {
+            response.sendRedirect(request.getContextPath() + "/item?action=view&id=" + itemId + "&error=duration_exceeded");
             return;
         }
 
         BorrowRequest req = new BorrowRequest();
         req.setItemId(itemId);
         req.setRequesterId(user.getUserId());
-        req.setRequestedDate(Date.valueOf(LocalDate.now()));
-        req.setProposedDueDate(Date.valueOf(returnDateStr));
+        req.setRequestedDate(Date.valueOf(today));
+        req.setProposedDueDate(Date.valueOf(proposedDate));
         req.setRequestStatus("Pending");
 
         if (borrowDAO.createBorrowRequest(req)) {
@@ -116,10 +149,20 @@ public class BorrowController extends HttpServlet {
             return;
         }
 
-        int requestId = Integer.parseInt(request.getParameter("request_id"));
-        int itemId = Integer.parseInt(request.getParameter("item_id"));
-        int requesterId = Integer.parseInt(request.getParameter("requester_id"));
-        Date dueDate = Date.valueOf(request.getParameter("due_date"));
+        String requestIdStr = request.getParameter("request_id");
+        String itemIdStr = request.getParameter("item_id");
+        String requesterIdStr = request.getParameter("requester_id");
+        String dueDateStr = request.getParameter("due_date");
+
+        if (requestIdStr == null || itemIdStr == null || requesterIdStr == null || dueDateStr == null) {
+            response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=missing_parameters");
+            return;
+        }
+
+        int requestId = Integer.parseInt(requestIdStr);
+        int itemId = Integer.parseInt(itemIdStr);
+        int requesterId = Integer.parseInt(requesterIdStr);
+        Date dueDate = Date.valueOf(dueDateStr);
 
         // Security: Ensure current user is the owner of the item
         Item item = itemDAO.getItemById(itemId);
@@ -155,8 +198,16 @@ public class BorrowController extends HttpServlet {
             return;
         }
 
-        int requestId = Integer.parseInt(request.getParameter("request_id"));
-        int itemId = Integer.parseInt(request.getParameter("item_id"));
+        String requestIdStr = request.getParameter("request_id");
+        String itemIdStr = request.getParameter("item_id");
+
+        if (requestIdStr == null || itemIdStr == null) {
+            response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=missing_parameters");
+            return;
+        }
+
+        int requestId = Integer.parseInt(requestIdStr);
+        int itemId = Integer.parseInt(itemIdStr);
 
         // Security: Ensure current user is the owner of the item
         Item item = itemDAO.getItemById(itemId);
@@ -180,8 +231,16 @@ public class BorrowController extends HttpServlet {
             return;
         }
 
-        int recordId = Integer.parseInt(request.getParameter("record_id"));
-        int itemId = Integer.parseInt(request.getParameter("item_id"));
+        String recordIdStr = request.getParameter("record_id");
+        String itemIdStr = request.getParameter("item_id");
+
+        if (recordIdStr == null || itemIdStr == null) {
+            response.sendRedirect(request.getContextPath() + "/item?action=myBorrowings&error=missing_parameters");
+            return;
+        }
+
+        int recordId = Integer.parseInt(recordIdStr);
+        int itemId = Integer.parseInt(itemIdStr);
         
         // Security: Ensure current user is either the borrower or an admin
         BorrowRecord record = borrowDAO.getBorrowRecordById(recordId);
@@ -219,7 +278,13 @@ public class BorrowController extends HttpServlet {
             return;
         }
 
-        int itemId = Integer.parseInt(request.getParameter("item_id"));
+        String itemIdStr = request.getParameter("item_id");
+        if (itemIdStr == null) {
+            response.sendRedirect(request.getContextPath() + "/borrow?action=view_requests&error=missing_item_id");
+            return;
+        }
+
+        int itemId = Integer.parseInt(itemIdStr);
         
         // Security: Ensure current user is the owner
         Item item = itemDAO.getItemById(itemId);

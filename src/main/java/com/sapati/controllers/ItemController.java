@@ -77,16 +77,21 @@ public class ItemController extends HttpServlet {
             HttpSession session = request.getSession();
             User user = (User) session.getAttribute("user");
             if (user != null) {
+                System.out.println("[DEBUG] MyBorrowings for User ID: " + user.getUserId());
                 List<BorrowRecord> records = borrowDAO.getBorrowRecordsByUser(user.getUserId());
-                Map<String, Integer> stats = borrowDAO.getBorrowStats(user.getUserId());
+                System.out.println("[DEBUG] Borrow Records Count: " + (records != null ? records.size() : "NULL"));
                 
-                // [NEW] Fetch pending requests
-                List<com.sapati.model.BorrowRequest> pendingRequests = borrowDAO.getRequestsByRequester(user.getUserId());
+                Map<String, Integer> stats = borrowDAO.getBorrowStats(user.getUserId());
+                System.out.println("[DEBUG] Borrow Stats: " + stats);
                 
                 List<Fine> fines = fineDAO.getFinesByUser(user.getUserId());
                 double totalFine = fines.stream().filter(f -> "Unpaid".equalsIgnoreCase(f.getPaymentStatus())).mapToDouble(Fine::getAmount).sum();
                 
-                request.setAttribute("borrowRequests", pendingRequests);
+                // [NEW] Set pendingActionCount for header badge (Incoming requests for owner)
+                int pendingActionCount = borrowDAO.getRequestsForOwner(user.getUserId()).size();
+                request.setAttribute("pendingActionCount", pendingActionCount);
+                request.setAttribute("debugUserId", user.getUserId());
+                
                 request.setAttribute("borrowRecords", records);
                 request.setAttribute("borrowStats", stats);
                 request.setAttribute("totalFine", totalFine);
@@ -180,6 +185,7 @@ public class ItemController extends HttpServlet {
                 // Fetch Pending Requests (Incoming)
                 List<com.sapati.model.BorrowRequest> incomingRequests = borrowDAO.getRequestsForOwner(user.getUserId());
                 request.setAttribute("pendingCount", incomingRequests.size());
+                request.setAttribute("pendingActionCount", incomingRequests.size());
                 
                 // Fetch Fines
                 List<Fine> fines = fineDAO.getFinesByUser(user.getUserId());

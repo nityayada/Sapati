@@ -19,7 +19,7 @@ public class HomeController extends HttpServlet {
 
     protected void doGet(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
         String path = request.getServletPath();
-       
+    
         if ("/about".equals(path)) {
             request.getRequestDispatcher("/WEB-INF/pages/about.jsp").forward(request, response);
         } else if ("/contact".equals(path)) {

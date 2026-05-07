@@ -60,12 +60,12 @@ public class BorrowDAO {
     }
 
     public List<BorrowRequest> getRequestsByRequester(int requesterId) {
-
+        System.out.println("[DEBUG] DAO: getRequestsByRequester for UserID: " + requesterId);
         List<BorrowRequest> requests = new ArrayList<>();
         String sql = "SELECT br.*, i.name as item_name, u.full_name as owner_name " +
                      "FROM borrow_requests br " +
-                     "JOIN items i ON br.item_id = i.item_id " +
-                     "JOIN users u ON i.owner_id = u.user_id " +
+                     "LEFT JOIN items i ON br.item_id = i.item_id " +
+                     "LEFT JOIN users u ON i.owner_id = u.user_id " +
                      "WHERE br.requester_id = ? " +
                      "ORDER BY br.requested_date DESC";
         try (Connection conn = DBConfig.getConnection();
@@ -74,7 +74,9 @@ public class BorrowDAO {
             pstmt.setInt(1, requesterId);
             ResultSet rs = pstmt.executeQuery();
             
+            int count = 0;
             while (rs.next()) {
+                count++;
                 BorrowRequest req = new BorrowRequest();
                 req.setRequestId(rs.getInt("request_id"));
                 req.setItemId(rs.getInt("item_id"));
@@ -82,10 +84,11 @@ public class BorrowDAO {
                 req.setRequestedDate(rs.getDate("requested_date"));
                 req.setProposedDueDate(rs.getDate("proposed_due_date"));
                 req.setRequestStatus(rs.getString("request_status"));
-                req.setItemName(rs.getString("item_name"));
-                req.setRequesterName(rs.getString("owner_name")); // Reusing this field to store owner name for display
+                req.setItemName(rs.getString("item_name") != null ? rs.getString("item_name") : "Unknown Item");
+                req.setRequesterName(rs.getString("owner_name") != null ? rs.getString("owner_name") : "Unknown Owner");
                 requests.add(req);
             }
+            System.out.println("[DEBUG] DAO: Total pending requests found for User " + requesterId + ": " + count);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -128,11 +131,12 @@ public class BorrowDAO {
     }
 
     public List<BorrowRecord> getBorrowRecordsByUser(int userId) {
+        System.out.println("[DEBUG] DAO: Fetching borrow records for User ID: " + userId);
         List<BorrowRecord> records = new ArrayList<>();
         String sql = "SELECT br.*, i.name as item_name, u.full_name as owner_name " +
                      "FROM borrow_records br " +
-                     "JOIN items i ON br.item_id = i.item_id " +
-                     "JOIN users u ON i.owner_id = u.user_id " +
+                     "LEFT JOIN items i ON br.item_id = i.item_id " +
+                     "LEFT JOIN users u ON i.owner_id = u.user_id " +
                      "WHERE br.borrower_id = ? " +
                      "ORDER BY br.borrow_date DESC";
         try (Connection conn = DBConfig.getConnection();
@@ -141,7 +145,9 @@ public class BorrowDAO {
             pstmt.setInt(1, userId);
             ResultSet rs = pstmt.executeQuery();
             
+            int foundCount = 0;
             while (rs.next()) {
+                foundCount++;
                 BorrowRecord record = new BorrowRecord();
                 record.setRecordId(rs.getInt("record_id"));
                 record.setItemId(rs.getInt("item_id"));
@@ -151,10 +157,11 @@ public class BorrowDAO {
                 record.setDueDate(rs.getDate("due_date"));
                 record.setReturnDate(rs.getDate("return_date"));
                 record.setStatus(rs.getString("status"));
-                record.setItemName(rs.getString("item_name"));
-                record.setOwnerName(rs.getString("owner_name"));
+                record.setItemName(rs.getString("item_name") != null ? rs.getString("item_name") : "Unknown Resource");
+                record.setOwnerName(rs.getString("owner_name") != null ? rs.getString("owner_name") : "Unknown Owner");
                 records.add(record);
             }
+            System.out.println("[DEBUG] DAO: Total records found for User " + userId + ": " + foundCount);
         } catch (SQLException e) {
             e.printStackTrace();
         }
@@ -163,20 +170,26 @@ public class BorrowDAO {
 
     public java.util.Map<String, Integer> getBorrowStats(int userId) {
         java.util.Map<String, Integer> stats = new java.util.HashMap<>();
+        // Initialize with 0 to prevent EL null errors in JSP
+        stats.put("total", 0);
+        stats.put("active", 0);
+        stats.put("overdue", 0);
+        
         String sql = "SELECT " +
                      "COUNT(*) as total, " +
-                     "SUM(CASE WHEN status = 'Active' THEN 1 ELSE 0 END) as active, " +
-                     "SUM(CASE WHEN status = 'Overdue' THEN 1 ELSE 0 END) as overdue " +
+                     "COALESCE(SUM(CASE WHEN status = 'Active' THEN 1 ELSE 0 END), 0) as active, " +
+                     "COALESCE(SUM(CASE WHEN status = 'Overdue' THEN 1 ELSE 0 END), 0) as overdue " +
                      "FROM borrow_records WHERE borrower_id = ?";
         try (Connection conn = DBConfig.getConnection();
              PreparedStatement pstmt = conn.prepareStatement(sql)) {
             
             pstmt.setInt(1, userId);
-            ResultSet rs = pstmt.executeQuery();
-            if (rs.next()) {
-                stats.put("total", rs.getInt("total"));
-                stats.put("active", rs.getInt("active"));
-                stats.put("overdue", rs.getInt("overdue"));
+            try (ResultSet rs = pstmt.executeQuery()) {
+                if (rs.next()) {
+                    stats.put("total", rs.getInt("total"));
+                    stats.put("active", rs.getInt("active"));
+                    stats.put("overdue", rs.getInt("overdue"));
+                }
             }
         } catch (SQLException e) {
             e.printStackTrace();

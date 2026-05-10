@@ -427,7 +427,7 @@
                                                 <input type="hidden" name="action" value="delete_item">
                                                 <input type="hidden" name="item_id" value="${item.itemId}">
                                                 <button type="button" 
-                                                        onclick="document.getElementById('deleteConfirmModal').classList.remove('hidden');"
+                                                        onclick="document.getElementById('deleteConfirmModal').style.display='flex';"
                                                         style="width: 100%; padding: 1.25rem; background: transparent; border: 1px solid var(--error); color: var(--error); font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; cursor: pointer; font-size: 0.75rem;">
                                                     DELETE RESOURCE
                                                 </button>
@@ -439,25 +439,25 @@
 
                             <!-- Custom Brutalist Delete Modal -->
                             <div id="deleteConfirmModal"
-                                class="hidden fixed inset-0 z-[100] flex items-center justify-center bg-black/60 backdrop-blur-sm">
+                                style="display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 10000; align-items: center; justify-content: center; background-color: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);">
                                 <div
-                                    class="bg-white border-4 border-black p-8 max-w-md w-full mx-4 shadow-[12px_12px_0px_0px_rgba(0,0,0,1)]">
-                                    <div class="flex items-center gap-3 mb-6 text-red-600">
-                                        <span class="material-symbols-outlined text-4xl">warning</span>
-                                        <h3 class="text-xl font-black uppercase tracking-tighter m-0">Critical Warning</h3>
+                                    style="background-color: white; border: 4px solid black; padding: 2rem; max-width: 28rem; width: 100%; margin: 0 1rem; box-shadow: 12px 12px 0px 0px rgba(0,0,0,1);">
+                                    <div style="display: flex; align-items: center; gap: 0.75rem; margin-bottom: 1.5rem; color: #dc2626;">
+                                        <span class="material-symbols-outlined" style="font-size: 2.25rem;">warning</span>
+                                        <h3 style="font-size: 1.25rem; font-weight: 900; text-transform: uppercase; letter-spacing: -0.05em; margin: 0;">Critical Warning</h3>
                                     </div>
-                                    <p class="font-sans text-sm font-bold text-gray-700 mb-8 border-l-4 border-red-600 pl-4">
+                                    <p style="font-family: var(--font-main, sans-serif); font-size: 0.875rem; font-weight: 700; color: #374151; margin-bottom: 2rem; border-left: 4px solid #dc2626; padding-left: 1rem; line-height: 1.5;">
                                         Are you sure you want to delete this resource completely? This systemic action cannot be reversed.
                                     </p>
-                                    <div class="flex gap-4">
+                                    <div style="display: flex; gap: 1rem;">
                                         <button type="button"
-                                            onclick="document.getElementById('deleteConfirmModal').classList.add('hidden');"
-                                            class="flex-1 bg-gray-200 hover:bg-gray-300 text-black font-black uppercase tracking-widest text-xs py-4 transition-colors">
+                                            onclick="document.getElementById('deleteConfirmModal').style.display='none';"
+                                            style="flex: 1; background-color: #e5e7eb; color: black; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.75rem; padding: 1rem; border: none; cursor: pointer;">
                                             CANCEL
                                         </button>
                                         <button type="button"
                                             onclick="document.getElementById('deleteResourceForm').submit();"
-                                            class="flex-1 bg-red-600 hover:bg-red-700 text-white font-black uppercase tracking-widest text-xs py-4 transition-colors">
+                                            style="flex: 1; background-color: #dc2626; color: white; font-weight: 900; text-transform: uppercase; letter-spacing: 0.1em; font-size: 0.75rem; padding: 1rem; border: none; cursor: pointer;">
                                             CONFIRM DELETE
                                         </button>
                                     </div>

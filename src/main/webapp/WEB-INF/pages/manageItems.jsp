@@ -38,12 +38,25 @@
 </c:if>
 
 <c:if test="${param.msg == 'item_deleted'}">
-    <div class="admin-banner banner-error">
+    <div class="admin-banner banner-success">
         <div class="flex items-center gap-4">
             <span class="material-symbols-outlined">delete_sweep</span>
             <div>
                 <div class="font-bold text-xs uppercase tracking-wider">Resource Purged</div>
-                <div class="text-[10px] opacity-80">THE REJECTED LISTING HAS BEEN PERMANENTLY REMOVED FROM ALL RECORDS.</div>
+                <div class="text-[10px] opacity-80">THE LISTING HAS BEEN PERMANENTLY REMOVED FROM ALL RECORDS.</div>
+            </div>
+        </div>
+        <span class="material-symbols-outlined cursor-pointer opacity-50 hover:opacity-100" onclick="this.parentElement.remove()">close</span>
+    </div>
+</c:if>
+
+<c:if test="${param.error == 'active_borrow'}">
+    <div class="admin-banner banner-error">
+        <div class="flex items-center gap-4">
+            <span class="material-symbols-outlined">warning</span>
+            <div>
+                <div class="font-bold text-xs uppercase tracking-wider">Deletion Blocked</div>
+                <div class="text-[10px] opacity-80">THIS ITEM CANNOT BE DELETED BECAUSE IT IS CURRENTLY BORROWED.</div>
             </div>
         </div>
         <span class="material-symbols-outlined cursor-pointer opacity-50 hover:opacity-100" onclick="this.parentElement.remove()">close</span>

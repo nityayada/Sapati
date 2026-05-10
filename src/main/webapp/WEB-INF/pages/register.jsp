@@ -130,7 +130,8 @@
                                 <div class="form-group">
                                     <label for="phone" class="form-label">Phone Number</label>
                                     <input type="text" id="phone" name="phone" class="form-input"
-                                        placeholder="98XXXXXXXX" required>
+                                        placeholder="98XXXXXXXX" pattern="\d{10}"
+                                        title="Phone number must be exactly 10 digits" maxlength="10" required>
                                 </div>
                                 <div class="form-group">
                                     <label for="password" class="form-label">Account Password</label>

@@ -143,6 +143,15 @@ public class AdminController extends HttpServlet {
             response.sendRedirect(request.getContextPath() + "/admin?action=manage_items&msg=item_approved");
         } else if ("reject_item".equals(action)) {
             int itemId = Integer.parseInt(request.getParameter("item_id"));
+            itemDAO.updateItemStatus(itemId, "Rejected");
+            response.sendRedirect(request.getContextPath() + "/admin?action=manage_items&msg=item_rejected");
+        } else if ("delete_item".equals(action)) {
+            int itemId = Integer.parseInt(request.getParameter("item_id"));
+            Item item = itemDAO.getItemById(itemId);
+            if (item != null && "Borrowed".equalsIgnoreCase(item.getStatus())) {
+                response.sendRedirect(request.getContextPath() + "/admin?action=manage_items&error=active_borrow");
+                return;
+            }
             itemDAO.deleteItem(itemId);
             response.sendRedirect(request.getContextPath() + "/admin?action=manage_items&msg=item_deleted");
         } else if ("update_user_status".equals(action)) {

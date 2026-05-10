@@ -155,7 +155,8 @@
                                     Number</label>
                                 <input type="text" name="phone"
                                     class="w-full border border-outline-variant p-3 text-xs font-bold focus:border-black outline-none"
-                                    value="${not empty user.phoneNumber ? user.phoneNumber : ''}">
+                                    value="${not empty user.phoneNumber ? user.phoneNumber : ''}" pattern="\d{10}"
+                                    title="Phone number must be exactly 10 digits" maxlength="10" required>
                             </div>
 
                             <div class="form-group">

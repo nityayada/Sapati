@@ -81,6 +81,12 @@ public class UserController extends HttpServlet {
         String password = request.getParameter("password");
         String address = request.getParameter("address");
 
+        if (phone == null || !phone.matches("\\d{10}")) {
+            request.setAttribute("error", "Phone number must be exactly 10 digits.");
+            request.getRequestDispatcher("/WEB-INF/pages/register.jsp").forward(request, response);
+            return;
+        }
+
         if (userDAO.isEmailTaken(email)) {
             request.setAttribute("error", "Email already registered!");
             request.getRequestDispatcher("/WEB-INF/pages/register.jsp").forward(request, response);
@@ -105,7 +111,7 @@ public class UserController extends HttpServlet {
             filePart.write(uploadPath + File.separator + fileName);
             user.setProfileImage("images/" + fileName);
         } else {
-            user.setProfileImage("Images/default_profile.png"); // Set a default if not provided
+            user.setProfileImage(""); // Set a default if not provided
         }
 
         if (userDAO.registerUser(user)) {
@@ -175,6 +181,20 @@ public class UserController extends HttpServlet {
         String phone = request.getParameter("phone");
         String address = request.getParameter("address");
 
+        String redirect = request.getParameter("redirect");
+        String redirectPath = (redirect != null && !redirect.isEmpty()) ? redirect : "user?action=profile";
+
+        if (phone == null || !phone.matches("\\d{10}")) {
+            request.setAttribute("error", "Phone number must be exactly 10 digits.");
+            if (redirectPath.contains("admin")) {
+                request.setAttribute("user", userDAO.getUserById(currentUser.getUserId()));
+                request.getRequestDispatcher("/WEB-INF/pages/adminProfile.jsp").forward(request, response);
+            } else {
+                showProfile(request, response);
+            }
+            return;
+        }
+
         User user = new User();
         user.setUserId(currentUser.getUserId());
         user.setFullName(fullName);
@@ -199,9 +219,6 @@ public class UserController extends HttpServlet {
             // Keep existing image if no new one uploaded
             user.setProfileImage(currentUser.getProfileImage());
         }
-
-        String redirect = request.getParameter("redirect");
-        String redirectPath = (redirect != null && !redirect.isEmpty()) ? redirect : "user?action=profile";
 
         if (userDAO.updateUser(user)) {
             // Update session object too

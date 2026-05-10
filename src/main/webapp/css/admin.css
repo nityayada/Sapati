@@ -83,8 +83,12 @@ button:focus {
 .justify-end { justify-content: flex-end; }
 
 .grid { display: grid; }
-.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1 x)); }
+.grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+
 @media (min-width: 768px) {
+    .md\:grid-cols-1 { grid-template-columns: repeat(1, minmax(0, 1fr)); }
+    .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .md\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)); }
     .md\:grid-cols-4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
     .md\:flex { display: flex; }
 }
@@ -133,6 +137,15 @@ button:focus {
 .h-2 { height: 0.5rem; }
 .flex-shrink-0 { flex-shrink: 0; }
 .ml-64 { margin-left: 16rem; }
+.max-h-\[600px\] { max-height: 600px; }
+.object-contain { object-fit: contain; }
+.overflow-hidden { overflow: hidden; }
+.aspect-square { aspect-ratio: 1 / 1; }
+.col-span-8 { grid-column: span 8 / span 8; }
+.col-span-4 { grid-column: span 4 / span 4; }
+.lg\:col-span-8 { grid-column: span 8 / span 8; }
+.lg\:col-span-4 { grid-column: span 4 / span 4; }
+.lg\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)); }
 
 /* Padding & Margin */
 .p-1 { padding: 0.25rem; }
@@ -173,6 +186,8 @@ button:focus {
 .text-3xl { font-size: 1.875rem; line-height: 2.25rem; }
 .text-4xl { font-size: 2.25rem; line-height: 2.5rem; }
 .text-\[10px\] { font-size: 10px; }
+.text-\[9px\] { font-size: 9px; }
+.text-\[8px\] { font-size: 8px; }
 .text-\[1rem\] { font-size: 1rem; }
 
 .font-normal { font-weight: 400; }
@@ -330,3 +345,100 @@ button:focus {
 
 .banner-success { background: #f0fdf4; border: 1px solid #bbf7d0; color: #166534; }
 .banner-error { background: #fef2f2; border: 1px solid #fecaca; color: #991b1b; }
+
+/* Item Detail Shared Design Tokens */
+.editorial-grid {
+    display: grid;
+    grid-template-columns: 1.2fr 0.8fr;
+    gap: 5rem;
+    margin-top: 3rem;
+}
+
+.detail-canvas {
+    background-color: var(--surface-container-low);
+    border: 1px dashed var(--outline-variant);
+    aspect-ratio: 1/1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    position: relative;
+}
+
+.detail-canvas img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    filter: grayscale(1);
+    mix-blend-mode: multiply;
+    transition: all 0.5s ease;
+}
+
+.detail-canvas:hover img {
+    filter: grayscale(0);
+    mix-blend-mode: normal;
+}
+
+.item-meta-badge {
+    display: inline-block;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--outline-variant);
+    font-size: 0.625rem;
+    font-weight: 800;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    margin-bottom: 2rem;
+}
+
+.description-quote {
+    background-color: var(--surface-container-low);
+    padding: 2.5rem;
+    border-left: 4px solid var(--primary);
+    font-style: italic;
+    font-size: 1.125rem;
+    line-height: 1.6;
+    margin: 3rem 0;
+}
+
+.rules-list {
+    list-style: none;
+    padding: 0;
+    margin: 2rem 0;
+}
+
+.rules-list li {
+    display: flex;
+    align-items: flex-start;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+    padding-bottom: 1.5rem;
+    border-bottom: 1px dashed var(--outline-variant);
+}
+
+.lender-profile-card {
+    background-color: var(--surface-container-lowest);
+    border: 1px solid var(--outline-variant);
+    padding: 1.5rem;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 2rem;
+}
+
+.lender-avatar {
+    width: 48px;
+    height: 48px;
+    background-color: var(--surface-container-high);
+    border: 1px solid var(--outline-variant);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+@media (max-width: 1024px) {
+    .editorial-grid {
+        grid-template-columns: 1fr;
+        gap: 3rem;
+    }
+}

@@ -162,7 +162,8 @@
                                 <div class="form-group">
                                     <label class="filter-label">Contact Number</label>
                                     <input type="text" name="phone" class="filter-input"
-                                        value="${not empty user.phoneNumber ? user.phoneNumber : ''}"
+                                        value="${not empty user.phoneNumber ? user.phoneNumber : ''}" pattern="\d{10}"
+                                        title="Phone number must be exactly 10 digits" maxlength="10" required
                                         style="width: 100%; border-color: var(--outline-variant);">
                                 </div>
                                 <div class="form-group">

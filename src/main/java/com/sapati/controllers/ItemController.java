@@ -105,19 +105,25 @@ public class ItemController extends HttpServlet {
         } else if ("view".equals(action)) {
             String idStr = request.getParameter("id");
             if (idStr != null) {
-                int itemId = Integer.parseInt(idStr);
-                Item item = itemDAO.getItemById(itemId);
-                if (item != null) {
-                    User owner = userDAO.getUserById(item.getOwnerId());
-                    request.setAttribute("item", item);
-                    request.setAttribute("owner", owner);
-                    request.getRequestDispatcher("/WEB-INF/pages/itemDetail.jsp").forward(request, response);
-                } else {
-                    response.sendRedirect("item?action=list");
+                try {
+                    int itemId = Integer.parseInt(idStr);
+                    Item item = itemDAO.getItemById(itemId);
+                    if (item != null) {
+                        User owner = userDAO.getUserById(item.getOwnerId());
+                        request.setAttribute("item", item);
+                        request.setAttribute("owner", owner);
+                        request.getRequestDispatcher("/WEB-INF/pages/itemDetail.jsp").forward(request, response);
+                    } else {
+                        response.sendRedirect("item?action=list");
+                    }
+                } catch (NumberFormatException e) {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    request.getRequestDispatcher("/WEB-INF/pages/error404.jsp").forward(request, response);
                 }
             } else {
                 response.sendRedirect("item?action=list");
             }
+            
         } else if ("search".equals(action)) {
             String query = request.getParameter("query");
             String categoryStr = request.getParameter("category");
@@ -142,16 +148,21 @@ public class ItemController extends HttpServlet {
             String idStr = request.getParameter("id");
             
             if (user != null && idStr != null) {
-                int itemId = Integer.parseInt(idStr);
-                Item item = itemDAO.getItemById(itemId);
-                
-                // Security check: Only owner can edit
-                if (item != null && item.getOwnerId() == user.getUserId()) {
-                    request.setAttribute("item", item);
-                    request.setAttribute("categories", categoryDAO.getAllCategories());
-                    request.getRequestDispatcher("/WEB-INF/pages/editItem.jsp").forward(request, response);
-                } else {
-                    response.sendRedirect(request.getContextPath() + "/item?action=myListings&error=unauthorized_access");
+                try {
+                    int itemId = Integer.parseInt(idStr);
+                    Item item = itemDAO.getItemById(itemId);
+                    
+                    // Security check: Only owner can edit
+                    if (item != null && item.getOwnerId() == user.getUserId()) {
+                        request.setAttribute("item", item);
+                        request.setAttribute("categories", categoryDAO.getAllCategories());
+                        request.getRequestDispatcher("/WEB-INF/pages/editItem.jsp").forward(request, response);
+                    } else {
+                        response.sendRedirect(request.getContextPath() + "/item?action=myListings&error=unauthorized_access");
+                    }
+                } catch (NumberFormatException e) {
+                    response.setStatus(HttpServletResponse.SC_NOT_FOUND);
+                    request.getRequestDispatcher("/WEB-INF/pages/error404.jsp").forward(request, response);
                 }
             } else {
                 response.sendRedirect(request.getContextPath() + (user == null ? "/user?action=login" : "/item?action=myListings"));

@@ -102,6 +102,7 @@ public class UserController extends HttpServlet {
         user.setRole("Member");
 
         // Handle Profile Image Upload
+
         Part filePart = request.getPart("profile_image");
         if (filePart != null && filePart.getSize() > 0) {
             String fileName = UUID.randomUUID().toString() + "_" + Paths.get(filePart.getSubmittedFileName()).getFileName().toString();
@@ -113,7 +114,6 @@ public class UserController extends HttpServlet {
         } else {
             user.setProfileImage(""); // Set a default if not provided
         }
-
         if (userDAO.registerUser(user)) {
             // Send Welcome Email asynchronously to avoid delaying the response
             new Thread(() -> {
